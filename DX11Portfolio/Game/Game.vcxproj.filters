@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="Pch.h" />
+    <ClInclude Include="ObjectCollection.h" />
+    <ClInclude Include="TestObject\TestObjectPlane.h">
+      <Filter>TestObject</Filter>
+    </ClInclude>
+    <ClInclude Include="TestObject\TestObjectCube.h">
+      <Filter>TestObject</Filter>
+    </ClInclude>
+    <ClInclude Include="TestObject\TestObjectGrid.h">
+      <Filter>TestObject</Filter>
+    </ClInclude>
+    <ClInclude Include="TestObject\TestObjectCylinder.h">
+      <Filter>TestObject</Filter>
+    </ClInclude>
+    <ClInclude Include="TestObject\TestObjectSphere.h">
+      <Filter>TestObject</Filter>
+    </ClInclude>
+    <ClInclude Include="TestObject\TestObjectModel.h">
+      <Filter>TestObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Environment\CubeMapSkyRenderer.h">
+      <Filter>Environment</Filter>
+    </ClInclude>
+    <ClInclude Include="Filters\ImageFilter.h">
+      <Filter>Filters</Filter>
+    </ClInclude>
+    <ClInclude Include="Environment\BillboardSystem.h">
+      <Filter>Environment</Filter>
+    </ClInclude>
+    <ClInclude Include="TestObject\TestObjectQuad.h">
+      <Filter>TestObject</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Pch.cpp" />
+    <ClCompile Include="ObjectCollection.cpp" />
+    <ClCompile Include="TestObject\TestObjectPlane.cpp">
+      <Filter>TestObject</Filter>
+    </ClCompile>
+    <ClCompile Include="TestObject\TestObjectCube.cpp">
+      <Filter>TestObject</Filter>
+    </ClCompile>
+    <ClCompile Include="TestObject\TestObjectGrid.cpp">
+      <Filter>TestObject</Filter>
+    </ClCompile>
+    <ClCompile Include="TestObject\TestObjectCylinder.cpp">
+      <Filter>TestObject</Filter>
+    </ClCompile>
+    <ClCompile Include="TestObject\TestObjectSphere.cpp">
+      <Filter>TestObject</Filter>
+    </ClCompile>
+    <ClCompile Include="TestObject\TestObjectModel.cpp">
+      <Filter>TestObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Environment\CubeMapSkyRenderer.cpp">
+      <Filter>Environment</Filter>
+    </ClCompile>
+    <ClCompile Include="Filters\ImageFilter.cpp">
+      <Filter>Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="Environment\BillboardSystem.cpp">
+      <Filter>Environment</Filter>
+    </ClCompile>
+    <ClCompile Include="TestObject\TestObjectQuad.cpp">
+      <Filter>TestObject</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="TestObject">
+      <UniqueIdentifier>{1a46472a-ae4b-4efc-8b88-4c5d71ada3be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Environment">
+      <UniqueIdentifier>{91c95479-9aa9-4058-8a91-61e56f82c2e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object">
+      <UniqueIdentifier>{d333e23d-d8d3-48dd-9e29-0addd90c9f0b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Filters">
+      <UniqueIdentifier>{5b4e276a-4eba-4ed5-8a3d-20fa1714d0b1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

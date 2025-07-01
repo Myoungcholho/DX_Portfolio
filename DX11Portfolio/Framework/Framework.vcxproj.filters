@@ -1,0 +1,294 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="Framework.h" />
+    <ClInclude Include="Systems\D3D.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\IExecutable.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Window.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Color.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\ImGuiManager.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="Viewer\Camera.h">
+      <Filter>Viewer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renders\Context.h">
+      <Filter>Renders</Filter>
+    </ClInclude>
+    <ClInclude Include="MathHelper.h" />
+    <ClInclude Include="Systems\Timer.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Mouse.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Keyboard.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="Definitions.h" />
+    <ClInclude Include="Core\Math.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Renders\Texture.h">
+      <Filter>Renders</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\String.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\Path.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Renders\VertexLayout.h">
+      <Filter>Renders</Filter>
+    </ClInclude>
+    <ClInclude Include="Renders\CBuffers.h">
+      <Filter>Renders</Filter>
+    </ClInclude>
+    <ClInclude Include="Renders\Mesh.h">
+      <Filter>Renders</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\GraphicsDevice.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="Renders\Material.h">
+      <Filter>Renders</Filter>
+    </ClInclude>
+    <ClInclude Include="Renders\MeshData.h">
+      <Filter>Renders</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelTools\GeometryFactory.h">
+      <Filter>ModelTools</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelTools\ModelLoader.h">
+      <Filter>ModelTools</Filter>
+    </ClInclude>
+    <ClInclude Include="Renders\CubeMapping.h">
+      <Filter>Renders</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\Engine.h">
+      <Filter>Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\TextureManager.h">
+      <Filter>Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\ShaderManager.h">
+      <Filter>Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\DynamicMulticastDelegate.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\Transform.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Billboards\BillboardPoint.h">
+      <Filter>Billboards</Filter>
+    </ClInclude>
+    <ClInclude Include="Billboards\BillboardData.h">
+      <Filter>Billboards</Filter>
+    </ClInclude>
+    <ClInclude Include="Billboards\IBillboardRenderer.h">
+      <Filter>Billboards</Filter>
+    </ClInclude>
+    <ClInclude Include="Billboards\BillboardRenderer_GS.h">
+      <Filter>Billboards</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Framework.cpp" />
+    <ClCompile Include="Systems\D3D.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Window.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Color.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\ImGuiManager.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Viewer\Camera.cpp">
+      <Filter>Viewer</Filter>
+    </ClCompile>
+    <ClCompile Include="Renders\Context.cpp">
+      <Filter>Renders</Filter>
+    </ClCompile>
+    <ClCompile Include="MathHelper.cpp" />
+    <ClCompile Include="Systems\Timer.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Mouse.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Keyboard.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Math.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Renders\Texture.cpp">
+      <Filter>Renders</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\String.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\Path.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\GraphicsDevice.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelTools\GeometryFactory.cpp">
+      <Filter>ModelTools</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelTools\ModelLoader.cpp">
+      <Filter>ModelTools</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager\Engine.cpp">
+      <Filter>Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager\TextureManager.cpp">
+      <Filter>Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager\ShaderManager.cpp">
+      <Filter>Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\DynamicMulticastDelegate.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\Transform.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Billboards\BillboardData.cpp">
+      <Filter>Billboards</Filter>
+    </ClCompile>
+    <ClCompile Include="Billboards\BillboardRenderer_GS.cpp">
+      <Filter>Billboards</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="System">
+      <UniqueIdentifier>{8262e727-55b7-40aa-9d81-f8e76e6daa5c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{fa0473ea-682c-49bf-b9cc-b16a7ca4d9e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Viewer">
+      <UniqueIdentifier>{d5bfacbd-0c28-411f-953f-f7e7a518813b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renders">
+      <UniqueIdentifier>{7200435c-c23a-4f35-8071-b2f94b9c9da1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utilities">
+      <UniqueIdentifier>{37a94cf9-7d08-4121-8d83-e148d9061a0c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{c178a544-cbea-4590-82e7-98b8f6585634}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ModelTools">
+      <UniqueIdentifier>{1ce62b9e-82f2-48b7-80ed-176c2c7ce3cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager">
+      <UniqueIdentifier>{db5943e3-58fb-4303-bec0-03ba5299513d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components">
+      <UniqueIdentifier>{13ed64e5-1f52-4489-89db-0988daf57be8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Billboards">
+      <UniqueIdentifier>{00d10ce1-fb27-4697-bb30-7c76cafac197}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Billboards">
+      <UniqueIdentifier>{bc8933c8-005b-41d7-9a75-1eef4994d147}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\TessellatedQuad">
+      <UniqueIdentifier>{f67c1f1e-863a-475f-80aa-b6e8e3af43de}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\PlaneVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PlanePixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\CombinePixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\FloorVS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\FloorPS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PS_Basic.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\VS_Basic.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\NormalVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\NormalPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\VS_CubeMapping.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PS_CubeMapping.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\SamplingPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\SamplingVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\BlurXPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\BlurYPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Billboards\BillboardPointsVertexShader.hlsl">
+      <Filter>Shaders\Billboards</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Billboards\BillboardPointsGeometryShader.hlsl">
+      <Filter>Shaders\Billboards</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Billboards\BillboardPointsPixelShader.hlsl">
+      <Filter>Shaders\Billboards</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\NormalGeometryShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\TessellatedQuad\TessellatedQuadVS.hlsl">
+      <Filter>Shaders\TessellatedQuad</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\TessellatedQuad\TessellatedQuadHS.hlsl">
+      <Filter>Shaders\TessellatedQuad</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\TessellatedQuad\TessellatedQuadDS.hlsl">
+      <Filter>Shaders\TessellatedQuad</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\TessellatedQuad\TessellatedQuadPS.hlsl">
+      <Filter>Shaders\TessellatedQuad</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\VertexStructures.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\Common.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+  </ItemGroup>
+</Project>
