@@ -26,11 +26,11 @@ void BillboardRenderer_GS::Initialize()
     // Textures
     vector<string> filenames =
     {
-        "../../_Textures/TreeBillboards/1.png",
-        "../../_Textures/TreeBillboards/2.png",
-        "../../_Textures/TreeBillboards/3.png",
-        "../../_Textures/TreeBillboards/4.png",
-        "../../_Textures/TreeBillboards/5.png"
+        "../../../_Textures/TreeBillboards/1.png",
+        "../../../_Textures/TreeBillboards/2.png",
+        "../../../_Textures/TreeBillboards/3.png",
+        "../../../_Textures/TreeBillboards/4.png",
+        "../../../_Textures/TreeBillboards/5.png"
     };
     
     D3D::Get()->CreateTextureArray(filenames, m_texArray, m_texArraySRV);

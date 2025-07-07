@@ -4,7 +4,7 @@
 void TestObjectQuad::Initialize()
 {
     transform = make_shared<Transform>();
-    transform->SetPosition(Vector3(0, -5.f, 10.f));
+    transform->SetPosition(Vector3(2.5f, -2.5f, 10.f));
     transform->SetScale(Vector3(1, 1, 1));
 
     std::vector<Vector4> controlPoints = { {-1.0f, 1.0f, 0.0 ,1.0f},

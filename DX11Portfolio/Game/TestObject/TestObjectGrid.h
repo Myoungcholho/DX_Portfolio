@@ -30,7 +30,7 @@ private:
 	FMesh Mesh;
 
 
-	ModelCBuffer ConstantBufferData;
+	WorldInvConstantBuffer ConstantBufferData;
 
 	CTexture* texture;
 };

@@ -29,6 +29,11 @@ ID3D11SamplerState*const* GraphicsDevice::GetLinearWrapSampler() const
 	return LinearWrap.GetAddressOf();
 }
 
+ID3D11SamplerState* const* GraphicsDevice::GetLinearMipPointWrapSampler() const
+{
+	return LinearMipPointWrap.GetAddressOf();
+}
+
 ID3D11SamplerState* const* GraphicsDevice::GetLinearClampSampler() const
 {
 	return LinearClamp.GetAddressOf();
@@ -56,6 +61,7 @@ GraphicsDevice::GraphicsDevice()
 	CreateNoCullNoClipRasterizerState();
 
 	CreateLinearWrapSamplerState();
+	CreateLinearWrapMipPointSamplerState();
 	CreateLinearClampSamplerState();
 }
 
@@ -117,6 +123,21 @@ void GraphicsDevice::CreateLinearWrapSamplerState()
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
 	D3D::Get()->GetDevice()->CreateSamplerState(&sampDesc, LinearWrap.GetAddressOf());
+}
+
+void GraphicsDevice::CreateLinearWrapMipPointSamplerState()
+{
+	D3D11_SAMPLER_DESC sampDesc;
+	ZeroMemory(&sampDesc, sizeof(sampDesc));
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	sampDesc.MinLOD = 0;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	D3D::Get()->GetDevice()->CreateSamplerState(&sampDesc, LinearMipPointWrap.GetAddressOf());
 }
 
 void GraphicsDevice::CreateLinearClampSamplerState()

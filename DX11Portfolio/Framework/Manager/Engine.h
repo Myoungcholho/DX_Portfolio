@@ -12,6 +12,7 @@ public:
 
 public:
 	TextureManager* GetTextureManager() const;
+	LightManager* GetLightManager() const;
 
 private:
 	Engine();
@@ -25,6 +26,7 @@ private:
 
 private:
 	unique_ptr<TextureManager> textureManager;
+	unique_ptr<LightManager> lightManager;
 
 	static Engine* instance;
 };

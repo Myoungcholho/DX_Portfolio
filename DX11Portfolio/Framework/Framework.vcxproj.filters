@@ -100,6 +100,9 @@
     <ClInclude Include="Billboards\BillboardRenderer_GS.h">
       <Filter>Billboards</Filter>
     </ClInclude>
+    <ClInclude Include="Manager\LightManager.h">
+      <Filter>Manager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Framework.cpp" />
@@ -173,6 +176,9 @@
     <ClCompile Include="Billboards\BillboardRenderer_GS.cpp">
       <Filter>Billboards</Filter>
     </ClCompile>
+    <ClCompile Include="Manager\LightManager.cpp">
+      <Filter>Manager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="System">
@@ -210,6 +216,9 @@
     </Filter>
     <Filter Include="Shaders\TessellatedQuad">
       <UniqueIdentifier>{f67c1f1e-863a-475f-80aa-b6e8e3af43de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\BasicShader">
+      <UniqueIdentifier>{e9ff52e4-8823-46d3-b397-ef628c4f36f8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -281,6 +290,12 @@
     </FxCompile>
     <FxCompile Include="Shaders\TessellatedQuad\TessellatedQuadPS.hlsl">
       <Filter>Shaders\TessellatedQuad</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\BasicShader\BasicVertexShader.hlsl">
+      <Filter>Shaders\BasicShader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\BasicShader\BasicPixelShader.hlsl">
+      <Filter>Shaders\BasicShader</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

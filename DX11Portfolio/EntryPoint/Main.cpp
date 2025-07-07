@@ -11,8 +11,8 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 	WindowDesc winDesc;
 	winDesc.AppName = L"DirectXPortfolio";
 	winDesc.Instance = InInstance;
-	winDesc.Width = 1280;
-	winDesc.Height = 720;
+	winDesc.Width = 1920; // 1280 -> 1920
+	winDesc.Height = 1080; // 720 -> 1080
 	winDesc.Background = Color(0.2f, 0.2f, 0.2f, 1.0f);
 
 	// 윈도우 생성

@@ -18,7 +18,7 @@ CTexture::CTexture(string InParamName, wstring InFileName, bool bDefaultPath)
 	FileName = InFileName;
 
 	if (bDefaultPath)
-		FileName = L"../../_Textures/" + InFileName;
+		FileName = L"../../../_Textures/" + InFileName;
 	else
 		FileName = InFileName;
 

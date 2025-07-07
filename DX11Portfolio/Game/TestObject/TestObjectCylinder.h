@@ -27,6 +27,6 @@ private:
 	ComPtr<ID3D11InputLayout> InputLayout;
 
 	FMesh Mesh;
-	ModelCBuffer ConstantBufferData;
+	WorldInvConstantBuffer ConstantBufferData;
 	CTexture* texture;
 };

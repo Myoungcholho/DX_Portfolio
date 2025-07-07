@@ -17,7 +17,7 @@ void CubeMapSkyRenderer::Initialize()
 	m_cubeMapping.CubeMesh = std::make_shared<FMesh>();
 
 	// VS ConstantBufferData
-	WorldMatrixData.Model = Matrix();
+	WorldMatrixData.World = Matrix();
 	WorldMatrixData.InvTranspose = Matrix();
 	ViewProjectionData.view = Matrix();
 	ViewProjectionData.projection = Matrix();
@@ -75,7 +75,7 @@ void CubeMapSkyRenderer::Tick()
 
 	D3D::Get()->UpdateBuffer(ViewProjectionData, ViewProjectionBuffer);
 
-	WorldMatrixData.InvTranspose = WorldMatrixData.Model;
+	WorldMatrixData.InvTranspose = WorldMatrixData.World;
 	WorldMatrixData.InvTranspose.Translation(Vector3(0.0f));
 	WorldMatrixData.InvTranspose = WorldMatrixData.InvTranspose.Transpose().Invert();
 

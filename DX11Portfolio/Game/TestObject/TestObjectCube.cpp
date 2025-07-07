@@ -111,7 +111,7 @@ void TestObjectCube::Initialize()
     D3D::Get()->CreateIndexBuffer(indices, m_indexBuffer);
 
     // ConstantBuffer 만들기
-    m_constantBufferData.Model = Matrix();
+    m_constantBufferData.World = Matrix();
     m_constantBufferData.InvTranspose = Matrix();
 
     D3D::Get()->CreateConstantBuffer(m_constantBufferData, m_constantBuffer);
@@ -141,12 +141,12 @@ void TestObjectCube::UpdateGUI()
 void TestObjectCube::Tick()
 {
     // 1. 모델 행렬 (자기 자신이 관리)
-    m_constantBufferData.Model =
+    m_constantBufferData.World =
         Matrix::CreateScale(1.0f) * Matrix::CreateRotationY(0.0f) *
         Matrix::CreateTranslation(Vector3(-6.0f, -4.0f, 15.0f));
-    m_constantBufferData.Model = m_constantBufferData.Model.Transpose();
+    m_constantBufferData.World = m_constantBufferData.World.Transpose();
 
-    m_constantBufferData.InvTranspose = m_constantBufferData.Model;
+    m_constantBufferData.InvTranspose = m_constantBufferData.World;
     m_constantBufferData.InvTranspose.Translation(Vector3(0.0f));
     m_constantBufferData.InvTranspose = m_constantBufferData.InvTranspose.Transpose().Invert();
 

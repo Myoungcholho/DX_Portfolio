@@ -31,6 +31,6 @@ private:
     ComPtr<ID3D11Buffer> m_constantBuffer;
     UINT m_indexCount;
 
-    ModelCBuffer m_constantBufferData;
+    WorldInvConstantBuffer m_constantBufferData;
 };
 

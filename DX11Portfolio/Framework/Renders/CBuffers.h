@@ -3,17 +3,27 @@
 
 #define MAX_LIGHTS 3
 
-struct Light
+enum class LightType : int
 {
-    Vector3 strength = Vector3(1.0f);
-    float fallOffStart = 0.0f;
-    Vector3 direction = Vector3(0.0f, 0.0f, 1.0f);
-    float fallOffEnd = 10.0f;
-    Vector3 position = Vector3(0.0f, 0.0f, -2.0f);
-    float spotPower = 1.0f;
+    Directional = 0,
+    Point = 1,
+    Spot = 2
 };
 
-struct WorldCBuffer
+struct Light
+{
+    Vector3 strength = Vector3(1.0f);                   // 빛의 세기
+    float fallOffStart = 0.0f;                          // 감쇠 시작 거리
+    Vector3 direction = Vector3(0.0f, 0.0f, 1.0f);      // 방향
+    float fallOffEnd = 10.0f;                           // 감쇠 끝 거리
+    Vector3 position = Vector3(0.0f, 0.0f, -2.0f);      // 위치
+    float spotPower = 100.0f;                           // spot 라이트용
+    int type = 0;
+    int id = -1;
+    float dummy[2];
+};
+
+struct WorldConstantBuffer
 {
     Matrix World;
 };
@@ -24,9 +34,9 @@ struct TreeConstants
     int dummy[3];
 };
 
-struct ModelCBuffer
+struct WorldInvConstantBuffer
 {
-    Matrix Model;
+    Matrix World;
     Matrix InvTranspose;
 };
 
@@ -36,13 +46,11 @@ struct NormalVertexCBuffer
     float dummy[3];
 };
 
-
-struct BasicPixelConstantBuffer
+struct HeightMapConstantBuffer
 {
-    Vector3 EyeWorld;
-    bool UseTexture;
-    Material material;
-    Light lights[MAX_LIGHTS];
+    int useHeightMap = 1;
+    float heightScale = 0.0f;
+    Vector2 dummy;
 };
 
 struct RimParamsCBuffer
@@ -53,6 +61,42 @@ struct RimParamsCBuffer
     bool useSmoothstep;
     float dummy[2];
 };
+
+struct CameraConstantBuffer
+{
+    Vector3 eyeWorld;         // 카메라 위치 (View space 계산용)
+    float mipmapLevel = 0.0f; // 수동 LOD 선택 시
+};
+
+struct MaterialConstantBuffer
+{
+    Material material;
+};
+
+struct LightConstantBuffer
+{
+    Light lights[MAX_LIGHTS];
+    int lightCount;
+    Vector3 padding;
+};
+
+struct RenderOptionsConstantBuffer
+{
+    int useTexture = 1;
+    int useNormalMap = 1;
+    int useAOMap = 1;
+    int reverseNormalMapY = 0;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+struct BasicPixelConstantBuffer
+{
+    Vector3 EyeWorld;
+    bool UseTexture;
+    Material material;
+    Light lights[MAX_LIGHTS];
+};
+
 
 struct BillboardPointCBuffer
 {

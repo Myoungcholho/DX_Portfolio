@@ -37,9 +37,15 @@ TextureManager* Engine::GetTextureManager() const
 	return textureManager.get();
 }
 
+LightManager* Engine::GetLightManager() const
+{
+	return lightManager.get();
+}
+
 Engine::Engine()
 {
 	textureManager = std::make_unique<TextureManager>();
+	lightManager = std::make_unique<LightManager>();
 }
 
 Engine::~Engine()

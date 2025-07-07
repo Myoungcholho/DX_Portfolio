@@ -11,4 +11,6 @@ struct Material
 	float dummy1;
 	Vector3 specular = Vector3(0.5f);
 	float dummy2;
+	Vector3 fresnelR0 = Vector3(0.1f, 0.1f, 0.1f);
+	float dummy3;
 };

@@ -23,7 +23,7 @@ private:
 	{
 		Vector3 eyeWorld;
 		float padding;
-		Matrix model; // Vertex shader
+		Matrix model;
 	};
 
 	static_assert((sizeof(TessellatedQuadConstantData) % 16) == 0,

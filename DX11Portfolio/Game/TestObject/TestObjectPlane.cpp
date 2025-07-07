@@ -59,7 +59,7 @@ void TestObjectPlane::Initialize()
 	IndexCount = UINT(indices.size());
 	D3D::Get()->CreateIndexBuffer(indices, IndexBuffer);
 
-	ConstantBufferData.Model = Matrix();
+	ConstantBufferData.World = Matrix();
 	ConstantBufferData.InvTranspose = Matrix();
 
 	D3D::Get()->CreateConstantBuffer(ConstantBufferData, ConstantBuffer);
@@ -93,12 +93,12 @@ void TestObjectPlane::Tick()
 {
 	constexpr float angleRad = DirectX::XMConvertToRadians(-90.0f);
 
-	ConstantBufferData.Model =
+	ConstantBufferData.World =
 		Matrix::CreateScale(1.0f) * Matrix::CreateRotationX(angleRad) *
 		Matrix::CreateTranslation(Vector3(0.0f, -3.0f, 20.0f));
-	ConstantBufferData.Model = ConstantBufferData.Model.Transpose();
+	ConstantBufferData.World = ConstantBufferData.World.Transpose();
 	
-	ConstantBufferData.InvTranspose = ConstantBufferData.Model;
+	ConstantBufferData.InvTranspose = ConstantBufferData.World;
 	ConstantBufferData.InvTranspose.Translation(Vector3(0.0f));
 	ConstantBufferData.InvTranspose = ConstantBufferData.InvTranspose.Transpose().Invert();
 

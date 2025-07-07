@@ -8,9 +8,11 @@ struct Material
     float3 ambient;
     float shininess;
     float3 diffuse;
-    float dummy1; // 16 bytes 맞춰주기 위해 추가
+    float dummy1;
     float3 specular;
     float dummy2;
+    float3 fresnelR0;
+    float dummy3;
 };
 
 struct Light
@@ -21,6 +23,9 @@ struct Light
     float fallOffEnd;
     float3 position;
     float spotPower;
+    int type;
+    int id;
+    float2 dummy;
 };
 
 float3 BlinnPhong(float3 lightStrength, float3 lightVec, float3 normal,

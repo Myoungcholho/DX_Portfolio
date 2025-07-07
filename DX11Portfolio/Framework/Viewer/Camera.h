@@ -50,7 +50,7 @@ private:
 	Vector3 Right = Vector3(1, 0, 0);
 
 private:
-	float MoveSpeed = 2.5f;
+	float MoveSpeed = 10.0f;
 	float RotationSpeed = 20.f;
 
 private:

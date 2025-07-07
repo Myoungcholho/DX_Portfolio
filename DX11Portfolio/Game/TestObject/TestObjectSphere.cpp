@@ -57,7 +57,7 @@ void TestObjectSphere::Initialize()
 	Mesh.IndexCount = UINT(indices.size());
 	D3D::Get()->CreateIndexBuffer(indices, Mesh.IndexBuffer);
 
-	ConstantBufferData.Model = Matrix();
+	ConstantBufferData.World = Matrix();
 	ConstantBufferData.InvTranspose = Matrix();
 
 	D3D::Get()->CreateConstantBuffer(ConstantBufferData, Mesh.VSCBuffer);
@@ -87,12 +87,12 @@ void TestObjectSphere::UpdateGUI()
 
 void TestObjectSphere::Tick()
 {
-	ConstantBufferData.Model =
+	ConstantBufferData.World =
 		Matrix::CreateScale(1.0f) * Matrix::CreateRotationY(0.0f) *
 		Matrix::CreateTranslation(Vector3(0.0f, -4.0f, 10.0f));
-	ConstantBufferData.Model = ConstantBufferData.Model.Transpose();
+	ConstantBufferData.World = ConstantBufferData.World.Transpose();
 
-	ConstantBufferData.InvTranspose = ConstantBufferData.Model;
+	ConstantBufferData.InvTranspose = ConstantBufferData.World;
 	ConstantBufferData.InvTranspose.Translation(Vector3(0.0f));
 	ConstantBufferData.InvTranspose = ConstantBufferData.InvTranspose.Transpose().Invert();
 

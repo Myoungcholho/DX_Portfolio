@@ -17,6 +17,7 @@ public:
 
 	// SamplerState
 	ID3D11SamplerState* const* GetLinearWrapSampler() const;
+	ID3D11SamplerState* const* GetLinearMipPointWrapSampler() const;
 	ID3D11SamplerState* const* GetLinearClampSampler() const;
 
 public:
@@ -34,8 +35,12 @@ private:
 	void CreateWireRasterizerState();
 	void CreateNoCullNoClipRasterizerState();
 
+	// Sampler
 	void CreateLinearWrapSamplerState();
+	void CreateLinearWrapMipPointSamplerState();
+
 	void CreateLinearClampSamplerState();
+
 
 private:
 	static GraphicsDevice* Instance;
@@ -46,6 +51,7 @@ private:
 	ComPtr<ID3D11RasterizerState> NoCullNoClipRS;
 
 	ComPtr<ID3D11SamplerState> LinearWrap;
+	ComPtr<ID3D11SamplerState> LinearMipPointWrap;
 	ComPtr<ID3D11SamplerState> LinearClamp;
 
 };

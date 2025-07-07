@@ -23,7 +23,7 @@ private:
 
 private:
 	CubeMapping m_cubeMapping;
-	ModelCBuffer WorldMatrixData;
+	WorldInvConstantBuffer WorldMatrixData;
 
 	ViewProjectionConstantBuffer ViewProjectionData;
 	ComPtr<ID3D11Buffer> ViewProjectionBuffer;
@@ -33,7 +33,11 @@ private:
 	Vector3 ModelScaling = Vector3(1.8f);
 
 private:
-	wstring SkyBoxFilename = L"../../_CubeMapTexture/BackGround.dds";
-	wstring SkyBoxDiffuseFilename = L"../../_CubeMapTexture/BackGroundBGRA_Diffuse.dds";
-	wstring SkyBoxSpecularFilename = L"../../_CubeMapTexture/BackGroundBGRA_Specular.dds";
+	wstring SkyBoxFilename = L"../../../_CubeMapTexture/BackGround.dds";
+	wstring SkyBoxDiffuseFilename = L"../../../_CubeMapTexture/BackGroundBGRA_Diffuse.dds";
+	wstring SkyBoxSpecularFilename = L"../../../_CubeMapTexture/BackGroundBGRA_Specular.dds";
+	
+	//wstring SkyBoxFilename = L"C:/DirectX/Portfolio/_CubeMapTexture/BackGround.dds";
+	//wstring SkyBoxDiffuseFilename = L"C:/DirectX/Portfolio/_CubeMapTexture/BackGroundBGRA_Diffuse.dds";
+	//wstring SkyBoxSpecularFilename = L"C:/DirectX/Portfolio/_CubeMapTexture/BackGroundBGRA_Specular.dds";
 };

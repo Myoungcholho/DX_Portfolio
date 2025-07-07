@@ -32,7 +32,7 @@ private:
 	ComPtr<ID3D11Buffer> ConstantBuffer;
 	UINT IndexCount = 0;
 
-	ModelCBuffer ConstantBufferData;
+	WorldInvConstantBuffer ConstantBufferData;
 
 	CTexture* texture;
 };

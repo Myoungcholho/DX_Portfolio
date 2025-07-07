@@ -136,6 +136,7 @@
   <ItemGroup>
     <ClInclude Include="Environment\BillboardSystem.h" />
     <ClInclude Include="Environment\CubeMapSkyRenderer.h" />
+    <ClInclude Include="Environment\TexturedGround.h" />
     <ClInclude Include="Filters\ImageFilter.h" />
     <ClInclude Include="ObjectCollection.h" />
     <ClInclude Include="Pch.h" />
@@ -150,6 +151,7 @@
   <ItemGroup>
     <ClCompile Include="Environment\BillboardSystem.cpp" />
     <ClCompile Include="Environment\CubeMapSkyRenderer.cpp" />
+    <ClCompile Include="Environment\TexturedGround.cpp" />
     <ClCompile Include="Filters\ImageFilter.cpp" />
     <ClCompile Include="ObjectCollection.cpp" />
     <ClCompile Include="Pch.cpp">

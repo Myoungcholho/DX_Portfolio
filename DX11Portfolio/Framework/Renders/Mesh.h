@@ -6,6 +6,7 @@ struct FMesh
 {
 	ComPtr<ID3D11Buffer> VertexBuffer;
 	ComPtr<ID3D11Buffer> IndexBuffer;
+
 	ComPtr<ID3D11Buffer> VSCBuffer;
 	ComPtr<ID3D11Buffer> PSCBuffer;
 

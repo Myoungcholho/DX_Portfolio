@@ -19,6 +19,9 @@ private:
 	void CreateFilters();
 
 private:
+	void LightCreate();
+
+private:
 	vector<IExecutable*> executes;
 	vector<shared_ptr<ImageFilter>> filters;
 };

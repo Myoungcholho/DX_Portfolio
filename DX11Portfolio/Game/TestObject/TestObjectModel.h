@@ -34,7 +34,7 @@ private:
 
     vector<shared_ptr<FMesh>> Meshs;
 
-    ModelCBuffer WorldMatrixData;
+    WorldInvConstantBuffer WorldMatrixData;
 	BasicPixelConstantBuffer BasicPixelConstantBufferData;
 
 	// 오브젝트 별로 들고 있을 RimLight 정보

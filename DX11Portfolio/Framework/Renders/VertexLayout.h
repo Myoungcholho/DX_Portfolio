@@ -23,3 +23,11 @@ struct FVertex
     Vector3 normal;
     Vector2 uv;
 };
+
+struct FVertexPNTT
+{
+    Vector3 position;
+    Vector3 normalModel;
+    Vector2 texcoord;
+    Vector3 tangentModel;
+};

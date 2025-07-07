@@ -5,8 +5,8 @@ void ExecutionManager::CreateExecutables()
 {
 	executes.push_back(new BillboardSystem());
 	executes.push_back(new CubeMapSkyRenderer());
-	//
-	//// 물체
+	
+	// 물체
 	executes.push_back(new TestObjectCube());
 	executes.push_back(new TestObjectQuad());
 	executes.push_back(new TestObjectPlane());
@@ -14,6 +14,11 @@ void ExecutionManager::CreateExecutables()
 	executes.push_back(new TestObjectCylinder());
 	executes.push_back(new TestObjectSphere());
 	executes.push_back(new TestObjectModel());
+
+	executes.push_back(new TextureGround());
+
+	// Light
+	LightCreate();
 }
 
 void ExecutionManager::CreateFilters()
@@ -71,6 +76,18 @@ void ExecutionManager::CreateFilters()
 	//finalFilter->Tick();
 
 	//filters.push_back(finalFilter);
+}
+
+void ExecutionManager::LightCreate()
+{
+	Light pointLight;
+	pointLight.position = Vector3(0.0f, -19.5f, 20.0f);
+	pointLight.strength = Vector3(2.0f);
+	pointLight.fallOffEnd = 20.0f;
+	pointLight.id = 1;
+	pointLight.type = int(LightType::Point);
+
+	Engine::Get()->GetLightManager()->AddLight(pointLight);
 }
 
 void ExecutionManager::Initialize()

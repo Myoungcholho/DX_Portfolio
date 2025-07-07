@@ -12,6 +12,7 @@
 // 환경
 #include "Environment/CubeMapSkyRenderer.h"
 #include "Environment/BillboardSystem.h"
+#include "Environment/TexturedGround.h"
 
 // 필터
 #include "Filters/ImageFilter.h"

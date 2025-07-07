@@ -8,13 +8,13 @@ void TestObjectModel::Initialize()
     transform->SetRotation(Vector3(0.0f));
     transform->SetPosition(Vector3(4.0f, -3.0f, 10.0f));
 
-	auto meshes = GeomtryGenerator::ReadFromFile("Zelda/", "zeldaPosed001.fbx");
-    //vector<MeshData> meshes = GeomtryGenerator::ReadFromFile("Fallen/", "SK_Fallen_Samurai.fbx");
+	//auto meshes = GeomtryGenerator::ReadFromFile("Zelda/", "zeldaPosed001.fbx");
+    vector<MeshData> meshes = GeomtryGenerator::ReadFromFile("Fallen/", "SK_Fallen_Samurai.fbx");
 
     ComPtr<ID3D11Buffer> VertexConstantBuffer;
     ComPtr<ID3D11Buffer> PixelConstantBuffer;
 
-    WorldMatrixData.Model = Matrix();
+    WorldMatrixData.World = Matrix();
     WorldMatrixData.InvTranspose = Matrix();
     D3D::Get()->CreateConstantBuffer(WorldMatrixData, VertexConstantBuffer);
     D3D::Get()->CreateConstantBuffer(BasicPixelConstantBufferData, PixelConstantBuffer);
@@ -96,9 +96,9 @@ void TestObjectModel::UpdateGUI()
 void TestObjectModel::Tick()
 {
     // 1. 값 업데이트
-    WorldMatrixData.Model = transform->GetWorldMatrix().Transpose();
+    WorldMatrixData.World = transform->GetWorldMatrix().Transpose();
 
-    WorldMatrixData.InvTranspose = WorldMatrixData.Model;
+    WorldMatrixData.InvTranspose = WorldMatrixData.World;
     WorldMatrixData.InvTranspose.Translation(Vector3(0.0f));
     WorldMatrixData.InvTranspose = WorldMatrixData.InvTranspose.Transpose().Invert();
 

@@ -82,6 +82,7 @@ using Microsoft::WRL::ComPtr;
 #include "ModelTools/GeometryFactory.h"
 
 // Manager
+#include "Manager/LightManager.h"
 #include "Manager/TextureManager.h"
 #include "Manager/Engine.h"
 

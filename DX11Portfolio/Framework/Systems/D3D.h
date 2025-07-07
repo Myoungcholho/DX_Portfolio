@@ -122,8 +122,10 @@ public:
 	void CreateGeometryShader(const wstring& filename, ComPtr<ID3D11GeometryShader>& geometeyShader);
 
 public:
+	void CreateTexture(const string filename, ComPtr<ID3D11Texture2D>& texture, ComPtr<ID3D11ShaderResourceView>& textureResourceView);
 	void CreateTextureArray(vector<string> filenames, ComPtr<ID3D11Texture2D>& texture, ComPtr<ID3D11ShaderResourceView>& textureResourceView);
 	
+
 
 public:
 	FDynamicMulticastDelegate OnReSizeDelegate;

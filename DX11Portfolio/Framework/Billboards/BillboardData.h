@@ -24,7 +24,7 @@ public:
 
 private:
     // VS , GS ¿ë
-    WorldCBuffer WorldMatrixData;
+    WorldConstantBuffer WorldMatrixData;
     ComPtr<ID3D11Buffer> WorldConstantBuffer;
 
     TreeConstants TreeIndexData;
