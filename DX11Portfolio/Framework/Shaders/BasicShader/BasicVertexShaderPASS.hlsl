@@ -20,7 +20,7 @@ HullShaderInput main(VertexShaderInput input)
     output.posModel = input.posModel;
     output.normalModel = input.normalModel;
     output.texcoord = input.texcoord;
-    output.tangentModel = input.texcoord;
+    output.tangentModel = input.tangentModel;
     
     return output;
 }

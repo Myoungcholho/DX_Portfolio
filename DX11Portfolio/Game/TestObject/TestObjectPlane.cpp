@@ -78,7 +78,9 @@ void TestObjectPlane::Initialize()
 
 	// 텍스처
 	//texture = new CTexture(L"wall.jpg");
-	texture = new CTexture(L"cat.png");
+	//texture = new CTexture(L"cat.png");
+
+	D3D::Get()->CreateTexture("../../../_Textures/cat.png", true, texture, textureSRV);
 }
 
 void TestObjectPlane::Destroy()
@@ -112,7 +114,8 @@ void TestObjectPlane::Render()
 	D3D::Get()->GetDeviceContext()->PSSetShader(PixelShader.Get(), 0, 0);
 
 	// 텍스처 정보
-	ID3D11ShaderResourceView* pixelResources[1] = { texture->GetSRV() };
+	//ID3D11ShaderResourceView* pixelResources[1] = { texture->GetSRV() };
+	ID3D11ShaderResourceView* pixelResources[1] = { textureSRV.Get()};
 	D3D::Get()->GetDeviceContext()->PSSetShaderResources(0, 1, pixelResources);
 	D3D::Get()->GetDeviceContext()->PSSetSamplers(0, 1, GraphicsDevice::Get()->GetLinearWrapSampler());
 

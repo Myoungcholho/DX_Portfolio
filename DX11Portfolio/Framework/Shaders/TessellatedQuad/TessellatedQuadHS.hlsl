@@ -55,11 +55,11 @@ PatchConstOutput MyPatchConstantFunc(InputPatch<VertexOut, 4> patch,
 }
 
 [domain("quad")]
-[partitioning("integer")]
+[partitioning("fractional_even")]
 [outputtopology("triangle_cw")]
 [outputcontrolpoints(4)]
 [patchconstantfunc("MyPatchConstantFunc")]
-[maxtessfactor(64.0f)]
+[maxtessfactor(32.0f)]
 HullOut main(InputPatch<VertexOut, 4> p,
            uint i : SV_OutputControlPointID,
            uint patchId : SV_PrimitiveID)

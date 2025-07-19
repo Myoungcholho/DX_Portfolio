@@ -3,7 +3,7 @@
 #include <DirectXMath.h>           // 또는 Vector3가 정의된 최소 헤더
 using namespace DirectX;
 
-struct Material
+struct LegacyMaterial
 {
 	Vector3 ambient = Vector3(0.1f);
 	float shininess = 8.0f;
@@ -13,4 +13,12 @@ struct Material
 	float dummy2;
 	Vector3 fresnelR0 = Vector3(0.1f, 0.1f, 0.1f);
 	float dummy3;
+};
+
+struct Material
+{
+	Vector3 albedo = Vector3(1.0f);
+	float roughness = 0.0f;
+	float metallic = 0.0f;
+	Vector3 dummy;
 };

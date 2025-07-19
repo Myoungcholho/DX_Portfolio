@@ -92,10 +92,7 @@ ID3D11ShaderResourceView* CTexture::CreateSRV(wstring InFilePath, DirectX::TexMe
 
 
 	ID3D11ShaderResourceView* srv = nullptr;
-
-	// ID3D11의 CreateShaderResourceView와 다르다.
-	// DirecXTex의 유틸리티 함수
-	hr = DirectX::CreateShaderResourceView(D3D::Get()->GetDevice(), image.GetImages(), image.GetImageCount(), InMetadata, &srv);
+	hr = DirectX::CreateShaderResourceView(D3D::Get()->GetDevice(), image.GetImages(), image.GetImageCount(), InMetadata ,&srv);
 	assert((hr) >= 0);
 
 	return srv;

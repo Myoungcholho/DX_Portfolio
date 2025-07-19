@@ -11,17 +11,12 @@ public:
 	virtual void Tick();
 	virtual void Render();
 
-public:
-	void ResizeCall();
-
 private:
 	void CreateExecutables();
-	void CreateFilters();
 
 private:
 	void LightCreate();
 
 private:
 	vector<IExecutable*> executes;
-	vector<shared_ptr<ImageFilter>> filters;
 };

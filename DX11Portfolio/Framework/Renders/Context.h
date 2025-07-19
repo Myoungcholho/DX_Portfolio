@@ -32,8 +32,6 @@ public:
 public:
 	class CCamera* GetCamera() { return View.get(); }
 	bool GetWireRender() { return bWireRender; }
-	float GetThreshold() { return SamplingData.threshold; }
-	float GetStrength() { return SamplingData.strength; }
 
 public:
 	SimpleMath::Matrix GetViewMatrix();
@@ -48,17 +46,6 @@ private:
 private:
 	bool bHideSetting = false;
 	bool bWireRender = false;
-
-	// 사실 필터 GUI설정을 여기서 하는게 맞나 싶다.
-	struct SamplingPixelConstantData
-	{
-		float dx;
-		float dy;
-		float threshold;
-		float strength;
-		Vector4 options;
-	};
-	SamplingPixelConstantData SamplingData;
 
 private:
 	std::unique_ptr<CCamera> View;

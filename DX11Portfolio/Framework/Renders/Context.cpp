@@ -42,9 +42,6 @@ CContext::CContext()
 	m_constantBufferData.view = Matrix();
 	m_constantBufferData.projection = Matrix();
 	D3D::Get()->CreateConstantBuffer(m_constantBufferData, m_constantBuffer);
-
-	SamplingData.threshold = 0.0f;
-	SamplingData.strength = 0.0f;
 }
 
 CContext::~CContext()
@@ -114,10 +111,6 @@ void CContext::Tick_WorldTime()
 	{
 		ImGui::Text("-GlobalRenderOption-");
 		ImGui::Checkbox("WireRendering", &bWireRender);
-
-		ImGui::Text("-Sampling-");
-		ImGui::SliderFloat("threshold", &SamplingData.threshold, 0.0f, 1.0f);
-		ImGui::SliderFloat("strength", &SamplingData.strength, 0.0f, 3.0f);
 	}
 	ImGui::End();
 }

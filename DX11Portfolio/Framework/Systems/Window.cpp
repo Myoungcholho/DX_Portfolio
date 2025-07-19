@@ -18,6 +18,8 @@ WPARAM Window::Run(IExecutable* InExecutor)
 	CContext::Create();
 	Engine::Create();
 
+	D3D::Get()->Init();
+
 	Executor = InExecutor;
 	Executor->Initialize();
 
@@ -141,25 +143,18 @@ void Window::MainRender()
 {
 	ImGuiManager::BeginFrame();
 
+	D3D::Get()->UpdateGUI();
 	Executor->UpdateGUI();
 
 	CTimer::Get()->Tick();
 	CMouse::Get()->Tick();
 	CContext::Get()->Tick();
-
-
 	Executor->Tick();
 
 
 	//Rendering
 	{
-		// RS 변경
-		// RS viewport 변경
-		D3D::Get()->ClearRenderTargetView(Color(0.2f, 0.2f, 0.2f, 1.0f));
-		D3D::Get()->ClearDepthStencilView();
-
-		D3D::Get()->SetRenderTarget();
-		D3D::Get()->SetDepthStencilState();
+		D3D::Get()->StartRenderPass();
 
 		if (CContext::Get()->GetWireRender() == true)
 			GraphicsDevice::Get()->ApplyWireframeRasterizer();
@@ -169,8 +164,9 @@ void Window::MainRender()
 
 		CContext::Get()->Render();
 		
-
 		Executor->Render();
+
+		D3D::Get()->Render();
 	}
 
 	ImGuiManager::Get()->Render();

@@ -33,7 +33,7 @@ void BillboardRenderer_GS::Initialize()
         "../../../_Textures/TreeBillboards/5.png"
     };
     
-    D3D::Get()->CreateTextureArray(filenames, m_texArray, m_texArraySRV);
+    D3D::Get()->CreateTextureArray(filenames, true, m_texArray, m_texArraySRV);
 }
 
 void BillboardRenderer_GS::Tick()

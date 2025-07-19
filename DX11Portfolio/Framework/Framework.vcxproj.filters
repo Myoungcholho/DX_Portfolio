@@ -103,6 +103,12 @@
     <ClInclude Include="Manager\LightManager.h">
       <Filter>Manager</Filter>
     </ClInclude>
+    <ClInclude Include="PostProcess\ImageFilter.h">
+      <Filter>PostProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="PostProcess\PostProcess.h">
+      <Filter>PostProcess</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Framework.cpp" />
@@ -179,6 +185,12 @@
     <ClCompile Include="Manager\LightManager.cpp">
       <Filter>Manager</Filter>
     </ClCompile>
+    <ClCompile Include="PostProcess\ImageFilter.cpp">
+      <Filter>PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcess\PostProcess.cpp">
+      <Filter>PostProcess</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="System">
@@ -220,15 +232,24 @@
     <Filter Include="Shaders\BasicShader">
       <UniqueIdentifier>{e9ff52e4-8823-46d3-b397-ef628c4f36f8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="PostProcess">
+      <UniqueIdentifier>{63156691-941e-4f6f-8649-c322af5b528e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\PostProcess">
+      <UniqueIdentifier>{ec07a421-db42-42e1-b993-f48ef6596988}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\CubeMapping">
+      <UniqueIdentifier>{2f84181f-9a79-469a-aab3-7c8b8ddbb2b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\ObjectShader">
+      <UniqueIdentifier>{1f908029-1ab8-44e5-b2f3-287533c2d6a3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\PlaneVertexShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\PlanePixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\CombinePixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\FloorVS.hlsl">
@@ -247,24 +268,6 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\NormalPixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\VS_CubeMapping.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\PS_CubeMapping.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\SamplingPixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\SamplingVertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\BlurXPixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\BlurYPixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Billboards\BillboardPointsVertexShader.hlsl">
@@ -296,6 +299,39 @@
     </FxCompile>
     <FxCompile Include="Shaders\BasicShader\BasicPixelShader.hlsl">
       <Filter>Shaders\BasicShader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\BasicShader\BasicHullShader.hlsl">
+      <Filter>Shaders\BasicShader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\BasicShader\BasicDomainShader.hlsl">
+      <Filter>Shaders\BasicShader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\BasicShader\BasicVertexShaderPASS.hlsl">
+      <Filter>Shaders\BasicShader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\BloomDownPS.hlsl">
+      <Filter>Shaders\PostProcess</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\BloomUpPS.hlsl">
+      <Filter>Shaders\PostProcess</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\CombinePixelShader.hlsl">
+      <Filter>Shaders\PostProcess</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\CubeMapping\CubeMappingVS.hlsl">
+      <Filter>Shaders\CubeMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\CubeMapping\CubeMappingPS.hlsl">
+      <Filter>Shaders\CubeMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\SamplingVS.hlsl">
+      <Filter>Shaders\PostProcess</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\ObjectShader\ObjectVertexShader.hlsl">
+      <Filter>Shaders\ObjectShader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\ObjectShader\ObjectPixelShader.hlsl">
+      <Filter>Shaders\ObjectShader</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

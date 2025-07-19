@@ -37,7 +37,7 @@ void main(point GeometryShaderInput input[1], inout LineStream<PixelShaderInput>
     output.color = float3(1.0, 1.0, 0.0);
     outputStream.Append(output);
     
-    output.pos = mul(posWorld + 0.1f * normalWorld, view);
+    output.pos = mul(posWorld + 0.05f * normalWorld, view);
     output.pos = mul(output.pos, projection);
     output.color = float3(1.0, 0.0, 0.0);
     outputStream.Append(output);

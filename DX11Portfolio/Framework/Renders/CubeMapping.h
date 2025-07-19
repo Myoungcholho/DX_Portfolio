@@ -4,10 +4,10 @@ struct CubeMapping
 {
 	std::shared_ptr<FMesh> CubeMesh;
 
-	ComPtr<ID3D11ShaderResourceView> CubemapResourceView;
-
-	ComPtr<ID3D11ShaderResourceView> diffuseResView;
-	ComPtr<ID3D11ShaderResourceView> specularResView;
+	ComPtr<ID3D11ShaderResourceView> envSRV;
+	ComPtr<ID3D11ShaderResourceView> irradianceSRV;
+	ComPtr<ID3D11ShaderResourceView> specularSRV;
+	ComPtr<ID3D11ShaderResourceView> brdfSRV;
 
 	ComPtr<ID3D11VertexShader> VertexShader;
 	ComPtr<ID3D11PixelShader> PixelShader;

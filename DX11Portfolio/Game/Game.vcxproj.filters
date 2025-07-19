@@ -24,9 +24,6 @@
     <ClInclude Include="Environment\CubeMapSkyRenderer.h">
       <Filter>Environment</Filter>
     </ClInclude>
-    <ClInclude Include="Filters\ImageFilter.h">
-      <Filter>Filters</Filter>
-    </ClInclude>
     <ClInclude Include="Environment\BillboardSystem.h">
       <Filter>Environment</Filter>
     </ClInclude>
@@ -35,6 +32,9 @@
     </ClInclude>
     <ClInclude Include="Environment\TexturedGround.h">
       <Filter>Environment</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\MeshGroup.h">
+      <Filter>Object</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -61,9 +61,6 @@
     <ClCompile Include="Environment\CubeMapSkyRenderer.cpp">
       <Filter>Environment</Filter>
     </ClCompile>
-    <ClCompile Include="Filters\ImageFilter.cpp">
-      <Filter>Filters</Filter>
-    </ClCompile>
     <ClCompile Include="Environment\BillboardSystem.cpp">
       <Filter>Environment</Filter>
     </ClCompile>
@@ -72,6 +69,9 @@
     </ClCompile>
     <ClCompile Include="Environment\TexturedGround.cpp">
       <Filter>Environment</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\MeshGroup.cpp">
+      <Filter>Object</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

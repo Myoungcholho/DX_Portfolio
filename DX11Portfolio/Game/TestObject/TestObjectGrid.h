@@ -29,8 +29,9 @@ private:
 	// 정점/인덱스/상수버퍼
 	FMesh Mesh;
 
-
 	WorldInvConstantBuffer ConstantBufferData;
 
-	CTexture* texture;
+	//CTexture* texture;
+	ComPtr<ID3D11Texture2D> texture;
+	ComPtr<ID3D11ShaderResourceView> textureSRV;
 };

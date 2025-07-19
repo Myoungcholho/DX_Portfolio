@@ -34,6 +34,7 @@ void LightManager::ClearLights()
 	lights.clear();
 }
 
+// 위치를 전달받으면, 근처에 있는 라이트들을 전부 반환해 줌
 void LightManager::UpdateCBuffer(LightConstantBuffer& outData, const Vector3& receiverPosition ,size_t maxCount)
 {
 	size_t count = 0;

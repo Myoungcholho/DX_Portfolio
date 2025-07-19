@@ -12,7 +12,7 @@ enum class LightType : int
 
 struct Light
 {
-    Vector3 strength = Vector3(1.0f);                   // 빛의 세기
+    Vector3 radiance = Vector3(1.0f);                   // 빛의 세기
     float fallOffStart = 0.0f;                          // 감쇠 시작 거리
     Vector3 direction = Vector3(0.0f, 0.0f, 1.0f);      // 방향
     float fallOffEnd = 10.0f;                           // 감쇠 끝 거리
@@ -53,7 +53,7 @@ struct HeightMapConstantBuffer
     Vector2 dummy;
 };
 
-struct RimParamsCBuffer
+struct RimParamsConstantBuffer
 {
     Vector3 RimColor;
     float RimPower;
@@ -68,9 +68,9 @@ struct CameraConstantBuffer
     float mipmapLevel = 0.0f; // 수동 LOD 선택 시
 };
 
-struct MaterialConstantBuffer
+struct LegacyMaterialConstantBuffer
 {
-    Material material;
+    LegacyMaterial material;
 };
 
 struct LightConstantBuffer
@@ -88,13 +88,55 @@ struct RenderOptionsConstantBuffer
     int reverseNormalMapY = 0;
 };
 
+struct ObjectCenterConstantBuffer
+{
+    Vector3 objectCenter;
+    float dummy;
+};
+
+struct CubeMappingConstantBuffer
+{
+    int textureToDraw;
+    float mipLevel;
+    float dummy[2];
+};
+
 ///////////////////////////////////////////////////////////////////////////////
+struct BasicVertexConstantBuffer
+{
+    Matrix modelWorld;
+    Matrix invTranspose;
+    Matrix view;
+    Matrix projection;
+    int useHeightMap = 0;
+    float heightScale = 0.0f;
+    Vector2 dummy;
+};
+
 struct BasicPixelConstantBuffer
 {
     Vector3 EyeWorld;
     bool UseTexture;
+
     Material material;
     Light lights[MAX_LIGHTS];
+
+    int useAlbedoMap = 0;
+    int useNormalMap = 0;
+    int useAOMap = 0;         // Ambient Occlusion
+    int invertNormalMapY = 0; // 16
+    int useMetallicMap = 0;
+    int useRoughnessMap = 0;
+    int useEmissiveMap = 0;
+    float expose = 1.0f; // 16
+    float gamma = 1.0f;
+    Vector3 dummy; // 16
+};
+///////////////////////////////////////////////////////////////////////////////
+struct NormalVertexConstantBuffer
+{
+    float scale = 0.1f;
+    float dummy[3];
 };
 
 

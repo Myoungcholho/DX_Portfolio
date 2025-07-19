@@ -9,10 +9,10 @@
 #include "TestObject/TestObjectModel.h"
 #include "TestObject/TestObjectQuad.h"
 
+// 오브젝트
+#include "Object/MeshGroup.h"
+
 // 환경
 #include "Environment/CubeMapSkyRenderer.h"
 #include "Environment/BillboardSystem.h"
 #include "Environment/TexturedGround.h"
-
-// 필터
-#include "Filters/ImageFilter.h"

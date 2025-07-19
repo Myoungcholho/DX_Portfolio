@@ -72,8 +72,9 @@ void TestObjectGrid::Initialize()
 		VertexShader, InputLayout);
 	D3D::Get()->CreatePixelShader(L"FloorPS.hlsl", PixelShader);
 
-	texture = new CTexture(L"cat2.png");
-
+	// Texture
+	//texture = new CTexture(L"cat2.png");
+	D3D::Get()->CreateTexture("../../../_Textures/cat2.png",true,texture,textureSRV);
 }
 
 void TestObjectGrid::Destroy()
@@ -107,7 +108,8 @@ void TestObjectGrid::Render()
 	D3D::Get()->GetDeviceContext()->PSSetShader(PixelShader.Get(), 0, 0);
 
 	// 텍스처 정보
-	ID3D11ShaderResourceView* pixelResources[1] = { texture->GetSRV()};
+	//ID3D11ShaderResourceView* pixelResources[1] = { texture->GetSRV()};
+	ID3D11ShaderResourceView* pixelResources[1] = { textureSRV.Get() };
 	D3D::Get()->GetDeviceContext()->PSSetShaderResources(0, 1, pixelResources);
 	D3D::Get()->GetDeviceContext()->PSSetSamplers(0, 1, GraphicsDevice::Get()->GetLinearWrapSampler());
 

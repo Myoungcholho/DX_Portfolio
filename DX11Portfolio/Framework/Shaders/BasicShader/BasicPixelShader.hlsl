@@ -17,7 +17,7 @@ cbuffer CameraConstantData : register(b0)
 
 cbuffer MaterialConstantData : register(b2)
 {
-    Material material;
+    LegacyMaterial material;
 };
 
 cbuffer LightConstantData : register(b3)
@@ -117,7 +117,12 @@ PixelShaderOutput main(PixelShaderInput input)
     specular.xyz *= f;
     
     if(useAlbedoTexture)
+    {
         diffuse *= g_albedoTexture.SampleLevel(g_sampler, input.texcoord, lod);
+        
+        // float3 albedo = g_albedoTexture.SampleLevel(g_sampler, input.texcoord, lod).rgb;
+        // diffuse.xyz = LinearToneMapping(albedo);
+    }
     
     if(useAOMap)
         diffuse *= g_aoTexture.SampleLevel(g_sampler, input.texcoord, lod);

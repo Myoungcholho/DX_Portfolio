@@ -12,6 +12,14 @@ struct D3DDesc
 	bool VSync;
 };
 
+inline void ThrowIfFailed(HRESULT hr) 
+{
+	if (FAILED(hr)) 
+	{
+		throw std::exception();
+	}
+}
+
 class D3D
 {
 public:
@@ -27,10 +35,10 @@ public:
 
 private:
 	void CreateDevice();
-	void CreateRTV();
+	void CreateBuffers();
 	
 	void CreateRasterizerState();
-	void CreateDSV();
+	void CreateDepthBuffer();
 	void CreateDepthStencilState();
 	//void CreateNoDepthStencilState();
 
@@ -96,14 +104,11 @@ public:
 	ComPtr<ID3D11Device> GetDeviceCom() const { return Device; }
 	ComPtr<ID3D11DeviceContext> GetDeviceContextCom() const { return DeviceContext; }
 
-	void SetRenderTarget();
-	void SetDepthStencilState();
-
 	ComPtr<ID3D11RenderTargetView> GetMainRenderTargetView();
 	ComPtr<ID3D11ShaderResourceView> GetMainShaderResourceView();
 
-	void ClearRenderTargetView(Color InColor);
-	void ClearDepthStencilView();
+	void StartRenderPass();
+
 	void Present();
 
 	void ResizeScreen(float InWidth, float InHeight);
@@ -122,10 +127,10 @@ public:
 	void CreateGeometryShader(const wstring& filename, ComPtr<ID3D11GeometryShader>& geometeyShader);
 
 public:
-	void CreateTexture(const string filename, ComPtr<ID3D11Texture2D>& texture, ComPtr<ID3D11ShaderResourceView>& textureResourceView);
-	void CreateTextureArray(vector<string> filenames, ComPtr<ID3D11Texture2D>& texture, ComPtr<ID3D11ShaderResourceView>& textureResourceView);
-	
-
+	void CreateTexture(const string filename, const bool useSRGB, ComPtr<ID3D11Texture2D>& texture, ComPtr<ID3D11ShaderResourceView>& textureResourceView);
+	void CreateTextureArray(vector<string> filenames, const bool useSRGB, ComPtr<ID3D11Texture2D>& texture, ComPtr<ID3D11ShaderResourceView>& textureResourceView);
+	void CreateDDSTexture(const wchar_t* filename, bool isCubeMap, ComPtr<ID3D11ShaderResourceView>& textureResourceView);
+	void CreateMetallicRoughnessTexture(string metallicFilename, const string roughnessFilename, ComPtr<ID3D11Texture2D>& texture, ComPtr<ID3D11ShaderResourceView>& srv);
 
 public:
 	FDynamicMulticastDelegate OnReSizeDelegate;
@@ -134,6 +139,11 @@ private:
 	D3D();
 	~D3D();
 
+public:
+	void Init();
+	void UpdateGUI();
+	void Render();
+
 private:
 	static D3D* Instance;
 
@@ -141,16 +151,35 @@ private:
 	static D3DDesc D3dDesc;
 
 private:
+	UINT m_numQualityLevels = 0;
+	bool m_useMSAA = true;
+
+private:
 	ComPtr<IDXGISwapChain> SwapChain;
 
 	ComPtr<ID3D11Device> Device;
 	ComPtr<ID3D11DeviceContext> DeviceContext;
 
-	ComPtr<ID3D11RenderTargetView> RenderTargetView;
+	ComPtr<ID3D11RenderTargetView> m_backBufferRTV;
 	ComPtr<ID3D11ShaderResourceView> ShaderResourceView;
 
 	ComPtr<ID3D11RasterizerState> RasterizerState;
+
 	ComPtr<ID3D11Texture2D> DSV_Texture;
 	ComPtr<ID3D11DepthStencilView> DepthStencilView;
 	ComPtr<ID3D11DepthStencilState> DepthStencilState;
+
+private:
+	ComPtr<ID3D11Texture2D> m_floatBuffer;
+	ComPtr<ID3D11ShaderResourceView> m_floatSRV;
+	ComPtr<ID3D11RenderTargetView> m_floatRTV;
+
+private:
+	ComPtr<ID3D11Texture2D> m_resolvedBuffer;
+	ComPtr<ID3D11RenderTargetView> m_resolvedRTV;
+	ComPtr<ID3D11ShaderResourceView> m_resolvedSRV;
+
+private:
+	PostProcess m_postProcess;
+
 };

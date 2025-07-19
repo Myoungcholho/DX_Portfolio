@@ -137,8 +137,8 @@
     <ClInclude Include="Environment\BillboardSystem.h" />
     <ClInclude Include="Environment\CubeMapSkyRenderer.h" />
     <ClInclude Include="Environment\TexturedGround.h" />
-    <ClInclude Include="Filters\ImageFilter.h" />
     <ClInclude Include="ObjectCollection.h" />
+    <ClInclude Include="Object\MeshGroup.h" />
     <ClInclude Include="Pch.h" />
     <ClInclude Include="TestObject\TestObjectCube.h" />
     <ClInclude Include="TestObject\TestObjectCylinder.h" />
@@ -152,8 +152,8 @@
     <ClCompile Include="Environment\BillboardSystem.cpp" />
     <ClCompile Include="Environment\CubeMapSkyRenderer.cpp" />
     <ClCompile Include="Environment\TexturedGround.cpp" />
-    <ClCompile Include="Filters\ImageFilter.cpp" />
     <ClCompile Include="ObjectCollection.cpp" />
+    <ClCompile Include="Object\MeshGroup.cpp" />
     <ClCompile Include="Pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>

@@ -9,10 +9,14 @@ class ModelLoader
 public:
 	void Load(string basePath, string filename);
 	void ProcessNode(aiNode* node, const aiScene* scene, Matrix matrix);
-	MeshData ProcessMesh(aiMesh* mesh, const aiScene* scene);
+	PBRMeshData ProcessMesh(aiMesh* mesh, const aiScene* scene);
+	string ReadFilename(aiMaterial* material, aiTextureType type);
+
+public:
+	void UpdateTangents(); // ≈∫¡®∆Æ ∫§≈Õ ∞ËªÍ
 
 public:
 	string basePath;
-	vector<MeshData> meshes;
-	
+	vector<PBRMeshData> meshes;
+	bool isGLTF = false;
 };

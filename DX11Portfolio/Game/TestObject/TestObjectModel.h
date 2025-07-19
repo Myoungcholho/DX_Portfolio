@@ -38,12 +38,8 @@ private:
 	BasicPixelConstantBuffer BasicPixelConstantBufferData;
 
 	// 오브젝트 별로 들고 있을 RimLight 정보
-	RimParamsCBuffer RimParamsData;
+	RimParamsConstantBuffer RimParamsData;
 	ComPtr<ID3D11Buffer> RimParamsCBuffer;
-
-	/*Vector3 ModelScaling = Vector3(1.8f);
-	Vector3 ModelRotation = Vector3(0.0f,0.0f, 0.0f);
-	Vector3 ModelTranslation = Vector3(4.0f,-3.f,10.0f);*/
 
 	shared_ptr<Transform> transform;
 

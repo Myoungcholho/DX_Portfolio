@@ -1,11 +1,26 @@
 #include "Framework.h"
 #include "D3D.h"
+#include "DirectXTK/DDSTextureLoader.h"
 
 D3D* D3D::Instance = nullptr;
 D3DDesc D3D::D3dDesc = D3DDesc();
 
 void ReadImage(const std::string filename, std::vector<uint8_t>& image,int& width, int& height);
-ComPtr<ID3D11Texture2D> CreateStagingTexture(const int width, const int height, const std::vector<uint8_t>& image, const int mipLevels = 1, const int arraySize = 2);
+void ReadEXRImage(const std::string filename, std::vector<uint8_t>& image, int& width, int& height, DXGI_FORMAT& pixelFormat);
+void CreateTextureHelper
+(
+	ComPtr<ID3D11Device>& device,
+	ComPtr<ID3D11DeviceContext>& context,
+	const int width, const int height,
+	const vector<uint8_t>& image,
+	const DXGI_FORMAT pixelFormat,
+	ComPtr<ID3D11Texture2D>& texture,
+	ComPtr<ID3D11ShaderResourceView>& srv
+);
+
+ComPtr<ID3D11Texture2D> CreateStagingTexture(const int width, const int height, const std::vector<uint8_t>& image, 
+	const DXGI_FORMAT pixelFormat = DXGI_FORMAT_R8G8B8A8_UNORM,
+	const int mipLevels = 1, const int arraySize = 1);
 
 D3D* D3D::Get()
 {
@@ -44,21 +59,20 @@ void D3D::CreateDevice()
 	desc.Width = (UINT)D3dDesc.Width;
 	desc.Height = (UINT)D3dDesc.Height;
 	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	desc.RefreshRate.Numerator = 0;
-	desc.RefreshRate.Denominator = 1;
+	desc.RefreshRate.Numerator = 0;			// 0은 자동으로 현재 모니터 주사율 사용
+	desc.RefreshRate.Denominator = 1;		// 주사율 분모 현재 0(자동->75)/1 = 75hz
 
 	DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
 	swapChainDesc.BufferDesc = desc;
-	swapChainDesc.BufferCount = 1;
-	// 필터로도 사용할꺼라 추가
-	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_SHADER_INPUT;
+	swapChainDesc.BufferCount = 2;			// 백버퍼 사용 개수
+	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapChainDesc.OutputWindow = D3dDesc.Handle;
 	swapChainDesc.Windowed = TRUE;
 	swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-	// MSAA 설정 시 수정
+	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 	swapChainDesc.SampleDesc.Count = 1;
 	swapChainDesc.SampleDesc.Quality = 0;
-	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+
 
 	HRESULT hr = D3D11CreateDeviceAndSwapChain
 	(
@@ -78,19 +92,48 @@ void D3D::CreateDevice()
 	assert(SUCCEEDED(hr) && "Device creation failed");
 }
 
-void D3D::CreateRTV()
+void D3D::CreateBuffers()
 {
 	ComPtr<ID3D11Texture2D> backBuffer;
-	HRESULT hr = SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer.GetAddressOf()));
-	assert(SUCCEEDED(hr) && "Failed to get back buffer");
+	// 1. 스왑체인으로부터 백버퍼를 얻고 텍스처에 저장
+	ThrowIfFailed(SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer.GetAddressOf())));
+	// 2. 백버퍼로 RTV를 만듬
+	ThrowIfFailed(Device->CreateRenderTargetView(backBuffer.Get(), nullptr, m_backBufferRTV.GetAddressOf()));
+	// 3. 내 GPU 드라이버가 제공하는 품질 수준 가능 범위 반환 및 float텍스처 생성
+	ThrowIfFailed(Device->CheckMultisampleQualityLevels(DXGI_FORMAT_R16G16B16A16_FLOAT, 4, &m_numQualityLevels));
+	D3D11_TEXTURE2D_DESC desc;
+	backBuffer->GetDesc(&desc);
+	desc.MipLevels = desc.ArraySize = 1;
+	desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.MiscFlags = 0;
+	desc.CPUAccessFlags = 0;
+	if (m_useMSAA && m_numQualityLevels)
+	{
+		desc.SampleDesc.Count = 4;
+		desc.SampleDesc.Quality = m_numQualityLevels - 1;
+	}
+	else
+	{
+		desc.SampleDesc.Count = 1;
+		desc.SampleDesc.Quality = 0;
+	}
 
-	// 렌더링 대상 뷰 생성
-	hr = Device->CreateRenderTargetView(backBuffer.Get(), nullptr, RenderTargetView.GetAddressOf());
-	assert(SUCCEEDED(hr) && "Failed to create RTV");
-
-	// 렌더링 끝난 이미지를 가져다 후처리할 SRV 생성
-	hr = Device->CreateShaderResourceView(backBuffer.Get(), nullptr, ShaderResourceView.GetAddressOf());
-	assert(SUCCEEDED(hr) && "Failed to create SRV");
+	ThrowIfFailed(Device->CreateTexture2D(&desc, NULL, m_floatBuffer.GetAddressOf()));
+	// 4. float Texture로 SRV 생성
+	Device->CreateShaderResourceView(m_floatBuffer.Get(), NULL, m_floatSRV.GetAddressOf());
+	// 5. float Texture로 RTV 생성
+	Device->CreateRenderTargetView(m_floatBuffer.Get(), NULL, m_floatRTV.GetAddressOf());
+	// 6. DepthBuffer 생성
+	CreateDepthBuffer();
+	
+	// 7. PostProcess를 위한 MSAA 제거 SRV/RTV
+	desc.SampleDesc.Count = 1;
+	desc.SampleDesc.Quality = 0;
+	ThrowIfFailed(Device->CreateTexture2D(&desc, NULL, m_resolvedBuffer.GetAddressOf()));
+	ThrowIfFailed(Device->CreateShaderResourceView(m_resolvedBuffer.Get(), NULL, m_resolvedSRV.GetAddressOf()));
+	ThrowIfFailed(Device->CreateRenderTargetView(m_resolvedBuffer.Get(), NULL, m_resolvedRTV.GetAddressOf()));
 }
 
 void D3D::CreateRasterizerState()
@@ -107,32 +150,31 @@ void D3D::CreateRasterizerState()
 	DeviceContext->RSSetState(RasterizerState.Get());
 }
 
-void D3D::CreateDSV()
+void D3D::CreateDepthBuffer()
 {
-	DXGI_FORMAT format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	D3D11_TEXTURE2D_DESC depthStencilBufferDesc;
+	depthStencilBufferDesc.Width = (UINT)D3dDesc.Width;
+	depthStencilBufferDesc.Height = (UINT)D3dDesc.Height;
+	depthStencilBufferDesc.MipLevels = 1;
+	depthStencilBufferDesc.ArraySize = 1;
+	depthStencilBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	if (m_numQualityLevels > 0)
+	{
+		depthStencilBufferDesc.SampleDesc.Count = 4;
+		depthStencilBufferDesc.SampleDesc.Quality = m_numQualityLevels - 1;
+	}
+	else
+	{
+		depthStencilBufferDesc.SampleDesc.Count = 1;
+		depthStencilBufferDesc.SampleDesc.Quality = 0;
+	}
+	depthStencilBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthStencilBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthStencilBufferDesc.CPUAccessFlags = 0;
+	depthStencilBufferDesc.MiscFlags = 0;
 
-	D3D11_TEXTURE2D_DESC texDesc = {};
-	texDesc.Width = (UINT)D3dDesc.Width;
-	texDesc.Height = (UINT)D3dDesc.Height;
-	texDesc.MipLevels = 1;
-	texDesc.ArraySize = 1;
-	texDesc.Format = format;
-	// MSAA 설정 시 변경
-	texDesc.SampleDesc.Count = 1;
-	texDesc.SampleDesc.Quality = 0;
-	texDesc.Usage = D3D11_USAGE_DEFAULT;
-	texDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-
-	// GPU의 메모리 할당이기 때문에, Device인 인터페이스를 통해 메모리를 생성
-	if (Device->CreateTexture2D(&texDesc, nullptr, DSV_Texture.GetAddressOf()))
-		return;
-
-	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
-	dsvDesc.Format = format;
-	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-
-	if (Device->CreateDepthStencilView(DSV_Texture.Get(), &dsvDesc, DepthStencilView.GetAddressOf()))
-		return;
+	ThrowIfFailed(Device->CreateTexture2D(&depthStencilBufferDesc, 0, DSV_Texture.GetAddressOf()));
+	ThrowIfFailed(Device->CreateDepthStencilView(DSV_Texture.Get(), 0, DepthStencilView.GetAddressOf()));
 }
 
 void D3D::CreateDepthStencilState()
@@ -150,22 +192,6 @@ void D3D::CreateDepthStencilState()
 
 	DeviceContext->OMSetDepthStencilState(DepthStencilState.Get(), 0);
 }
-
-//void D3D::CreateNoDepthStencilState()
-//{
-//	D3D11_DEPTH_STENCIL_DESC dsDesc = {};
-//	ZeroMemory(&dsDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
-//	dsDesc.DepthEnable = true;
-//	dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-//	dsDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-//
-//	dsDesc.StencilEnable = false; // true면 Stencil 연산도 정의 필요
-//
-//	HRESULT hr = Device->CreateDepthStencilState(&dsDesc, DepthStencilState.GetAddressOf());
-//	assert(SUCCEEDED(hr));
-//
-//	DeviceContext->OMSetDepthStencilState(DepthStencilState.Get(), 0);
-//}
 
 void D3D::CreateIndexBuffer(const std::vector<uint16_t>& indices, ComPtr<ID3D11Buffer>& m_indexBuffer)
 {
@@ -197,19 +223,9 @@ void D3D::CreateIndexBuffer(const std::vector<uint32_t>& indices, ComPtr<ID3D11B
 	Device->CreateBuffer(&desc, &data, m_indexBuffer.GetAddressOf());
 }
 
-void D3D::SetRenderTarget()
-{
-	DeviceContext->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), DepthStencilView.Get());
-}
-
-void D3D::SetDepthStencilState()
-{
-	DeviceContext->OMSetDepthStencilState(DepthStencilState.Get(), 0);
-}
-
 ComPtr<ID3D11RenderTargetView> D3D::GetMainRenderTargetView()
 {
-	return RenderTargetView;
+	return m_backBufferRTV;
 }
 
 ComPtr<ID3D11ShaderResourceView> D3D::GetMainShaderResourceView()
@@ -217,14 +233,15 @@ ComPtr<ID3D11ShaderResourceView> D3D::GetMainShaderResourceView()
 	return ShaderResourceView;
 }
 
-void D3D::ClearRenderTargetView(Color InColor)
+void D3D::StartRenderPass()
 {
-	DeviceContext->ClearRenderTargetView(RenderTargetView.Get(), InColor);
-}
+	const float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	DeviceContext->ClearRenderTargetView(m_floatRTV.Get(), clearColor);
+	DeviceContext->ClearDepthStencilView(DepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0);
 
-void D3D::ClearDepthStencilView()
-{
-	DeviceContext->ClearDepthStencilView(DepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+	vector<ID3D11RenderTargetView*> renderTargetViews = { m_floatRTV.Get() };
+	DeviceContext->OMSetRenderTargets(UINT(renderTargetViews.size()), renderTargetViews.data(), DepthStencilView.Get());
+	DeviceContext->OMSetDepthStencilState(DepthStencilState.Get(), 0);
 }
 
 void D3D::Present()
@@ -240,15 +257,15 @@ void D3D::ResizeScreen(float InWidth, float InHeight)
 	D3dDesc.Width = InWidth;
 	D3dDesc.Height = InHeight;
 
-	RenderTargetView.Reset();
+	m_backBufferRTV.Reset();
 	DSV_Texture.Reset();
 	DepthStencilView.Reset();
 
 	SwapChain->ResizeBuffers(0, (UINT)InWidth, (UINT)InHeight, DXGI_FORMAT_UNKNOWN, 0);
 
-	CreateRTV();
-	CreateDSV();
-	
+	CreateBuffers();
+	m_postProcess.Initialize({ m_resolvedSRV }, { m_backBufferRTV }, D3dDesc.Width, D3dDesc.Height, 4);
+
 	if (OnReSizeDelegate.IsBound())
 		OnReSizeDelegate.Broadcast();
 }
@@ -256,7 +273,7 @@ void D3D::ResizeScreen(float InWidth, float InHeight)
 ID3D11Texture2D* D3D::GetRTVTexture()
 {
 	ComPtr<ID3D11Texture2D> texture;
-	RenderTargetView->GetResource(reinterpret_cast<ID3D11Resource**>(texture.GetAddressOf()));
+	m_backBufferRTV->GetResource(reinterpret_cast<ID3D11Resource**>(texture.GetAddressOf()));
 	return texture.Detach();
 }
 
@@ -366,44 +383,30 @@ void D3D::CreateGeometryShader(const wstring& filename, ComPtr<ID3D11GeometrySha
 		&geometeyShader);
 }
 
-void D3D::CreateTexture(const string filename, ComPtr<ID3D11Texture2D>& texture, ComPtr<ID3D11ShaderResourceView>& textureResourceView)
+void D3D::CreateTexture(const string filename, const bool useSRGB,
+	ComPtr<ID3D11Texture2D>& texture, 
+	ComPtr<ID3D11ShaderResourceView>& textureResourceView)
 {
 	int width, height;
 	std::vector<uint8_t> image;
+	DXGI_FORMAT pixelFormat = useSRGB ? DXGI_FORMAT_R8G8B8A8_UNORM_SRGB : DXGI_FORMAT_R8G8B8A8_UNORM;
 
-	ReadImage(filename, image, width, height);
+	string ext(filename.end() - 3, filename.end());
+	std::transform(ext.begin(), ext.end(), ext.begin(),[](unsigned char c) { return std::tolower(c); });
 
-	// 스테이징 텍스춰 만들고 CPU에서 이미지를 복사합니다.
-	ComPtr<ID3D11Texture2D> stagingTexture = CreateStagingTexture(width, height, image);
+	if (ext == "exr")
+	{
+		ReadEXRImage(filename, image, width, height, pixelFormat);
+	}
+	else
+	{
+		ReadImage(filename, image, width, height);
+	}
 
-	// 실제로 사용할 텍스춰 설정
-	D3D11_TEXTURE2D_DESC txtDesc;
-	ZeroMemory(&txtDesc, sizeof(txtDesc));
-	txtDesc.Width = width;
-	txtDesc.Height = height;
-	txtDesc.MipLevels = 0; // 밉맵 레벨 최대
-	txtDesc.ArraySize = 1;
-	txtDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	txtDesc.SampleDesc.Count = 1;
-	txtDesc.Usage = D3D11_USAGE_DEFAULT; // 스테이징 텍스춰로부터 복사 가능
-	txtDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
-	txtDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS; // 밉맵 사용
-	txtDesc.CPUAccessFlags = 0;
-
-	// 초기 데이터 없이 텍스춰 생성 (전부 검은색)
-	D3D::Get()->GetDevice()->CreateTexture2D(&txtDesc, nullptr, texture.GetAddressOf());
-
-	// 스테이징 텍스춰로부터 가장 해상도가 높은 이미지 복사
-	D3D::Get()->GetDeviceContext()->CopySubresourceRegion(texture.Get(), 0, 0, 0, 0, stagingTexture.Get(), 0, nullptr);
-
-	// ResourceView 만들기
-	D3D::Get()->GetDevice()->CreateShaderResourceView(texture.Get(), 0, textureResourceView.GetAddressOf());
-
-	// 해상도를 낮춰가며 밉맵 생성
-	D3D::Get()->GetDeviceContext()->GenerateMips(textureResourceView.Get());
+	CreateTextureHelper(Device, DeviceContext, width, height, image, pixelFormat, texture, textureResourceView);
 }
 
-void D3D::CreateTextureArray(vector<string> filenames, ComPtr<ID3D11Texture2D>& texture, ComPtr<ID3D11ShaderResourceView>& textureResourceView)
+void D3D::CreateTextureArray(vector<string> filenames, const bool useSRGB, ComPtr<ID3D11Texture2D>& texture, ComPtr<ID3D11ShaderResourceView>& textureResourceView)
 {
 	if (filenames.empty())
 		return;
@@ -426,7 +429,12 @@ void D3D::CreateTextureArray(vector<string> filenames, ComPtr<ID3D11Texture2D>& 
 	txtDesc.Height = UINT(height);
 	txtDesc.MipLevels = 0;			// 밉맵 최대(수정)
 	txtDesc.ArraySize = UINT(filenames.size());
-	txtDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+
+	if(useSRGB == true)
+		txtDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	else
+		txtDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+
 	txtDesc.SampleDesc.Count = 1;
 	txtDesc.SampleDesc.Quality = 0;
 	txtDesc.Usage = D3D11_USAGE_DEFAULT; // stating texutre로부터 복사 (수정)
@@ -441,12 +449,13 @@ void D3D::CreateTextureArray(vector<string> filenames, ComPtr<ID3D11Texture2D>& 
 	// cout << txtDesc.MipLevels << endl;
 
 	// StagingTexture를 만들어서 하나씩 복사합니다.
-	for (size_t i = 0; i < imageArray.size(); i++) {
+	for (size_t i = 0; i < imageArray.size(); i++) 
+	{
 
 		auto& image = imageArray[i];
 
 		// StagingTexture는 Texture2DArray가 아니라 Texture2D
-		ComPtr<ID3D11Texture2D> stagingTexture = CreateStagingTexture(width, height, image, 1, 1);
+		ComPtr<ID3D11Texture2D> stagingTexture = CreateStagingTexture(width, height, image, txtDesc.Format, 1, 1);
 
 		// 스테이징 텍스춰를 텍스춰 배열의 해당 위치에 복사합니다.
 		UINT subresourceIndex = D3D11CalcSubresource(0, UINT(i), txtDesc.MipLevels);
@@ -459,12 +468,86 @@ void D3D::CreateTextureArray(vector<string> filenames, ComPtr<ID3D11Texture2D>& 
 	D3D::Get()->GetDeviceContext()->GenerateMips(textureResourceView.Get());
 }
 
+void D3D::CreateDDSTexture(const wchar_t* filename, bool isCubeMap, ComPtr<ID3D11ShaderResourceView>& textureResourceView)
+{
+	ComPtr<ID3D11Texture2D> texture;
+
+	UINT miscFlags = 0;
+	if (isCubeMap)
+		miscFlags |= D3D11_RESOURCE_MISC_TEXTURECUBE;
+	
+	ThrowIfFailed(CreateDDSTextureFromFileEx
+	(
+		Device.Get(), 
+		filename, 
+		0, 
+		D3D11_USAGE_DEFAULT,
+		D3D11_BIND_SHADER_RESOURCE, 
+		0, 
+		miscFlags, 
+		DDS_LOADER_FLAGS(false),
+		(ID3D11Resource**)texture.GetAddressOf(),
+		textureResourceView.GetAddressOf(), NULL)
+	);
+}
+
+void D3D::CreateMetallicRoughnessTexture(const string metallicFilename, const string roughnessFilename, ComPtr<ID3D11Texture2D>& texture, ComPtr<ID3D11ShaderResourceView>& srv)
+{
+	// 메탈릭파일이 있는데 그게 메탈릭과 러프니스가 이름이 같다면 합쳐져 있는 것
+	if (!metallicFilename.empty() && (metallicFilename == roughnessFilename)) 
+	{
+		CreateTexture(metallicFilename, false, texture, srv);
+	}
+	else // 아니라면
+	{
+		
+		int mWidth = 0, mHeight = 0;
+		int rWidth = 0, rHeight = 0;
+		std::vector<uint8_t> mImage;	
+		std::vector<uint8_t> rImage;
+
+		// 메탈릭 이미지 읽음
+		if (!metallicFilename.empty()) 
+		{
+			ReadImage(metallicFilename, mImage, mWidth, mHeight);
+		}
+
+		// 러프니스 이미지 읽음
+		if (!roughnessFilename.empty()) 
+		{
+			ReadImage(roughnessFilename, rImage, rWidth, rHeight);
+		}
+
+		// 만약 둘다 읽었다면 크기가 같은지 확인
+		if (!metallicFilename.empty() && !roughnessFilename.empty()) 
+		{
+			assert(mWidth == rWidth);
+			assert(mHeight == rHeight);
+		}
+
+		// RGBA사용하는 이미지 데이터 만듬
+		// [0] : R , [1] : G, [2] : B, [3] : A
+		// 따라서 [1]과 [2]만 사용함 그렇게 만든 데이터(이미지)로 텍스처를 생성
+		vector<uint8_t> combinedImage(size_t(mWidth * mHeight) * 4);
+		fill(combinedImage.begin(), combinedImage.end(), 0);
+
+		for (size_t i = 0; i < size_t(mWidth * mHeight); i++) 
+		{
+			if (rImage.size())
+				combinedImage[4 * i + 1] = rImage[4 * i];
+			if (mImage.size())
+				combinedImage[4 * i + 2] = mImage[4 * i];
+		}
+
+		// 합쳐진 이미지 데이터로 2D 텍스처 및 SRV 생성
+		CreateTextureHelper(Device, DeviceContext, mWidth, mHeight, combinedImage, DXGI_FORMAT_R8G8B8A8_UNORM, texture, srv);
+	}
+}
 
 D3D::D3D()
 {
-	CreateDevice();
-	CreateRTV();
-	CreateDSV();
+	CreateDevice();				// SwapChain, Device, Context 생성
+	CreateBuffers();			// RTV들 생성
 	
 	CreateRasterizerState();
 	CreateDepthStencilState();
@@ -474,7 +557,7 @@ D3D::~D3D()
 {
 	DepthStencilView.Reset();
 	DSV_Texture.Reset();
-	RenderTargetView.Reset();
+	m_backBufferRTV.Reset();
 	DeviceContext.Reset();
 	Device.Reset();
 	SwapChain.Reset();
@@ -482,29 +565,44 @@ D3D::~D3D()
 	DepthStencilState.Reset();
 }
 
+void D3D::Init()
+{
+	m_postProcess.Initialize({ m_resolvedSRV }, { m_backBufferRTV }, D3dDesc.Width, D3dDesc.Height, 4);
+}
+
+void D3D::UpdateGUI()
+{
+	m_postProcess.UpdateGUI();
+}
+
+void D3D::Render()
+{
+	DeviceContext->ResolveSubresource(m_resolvedBuffer.Get(), 0, m_floatBuffer.Get(), 0, DXGI_FORMAT_R16G16B16A16_FLOAT);
+	m_postProcess.Render();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image.h"
 #include "stb_image_write.h"
+#include <DirectXTexEXR.h>
+#include <fp16.h>
 
 void ReadImage(const std::string filename, std::vector<uint8_t>& image,
 	int& width, int& height) {
 
 	int channels;
 
-	unsigned char* img =
-		stbi_load(filename.c_str(), &width, &height, &channels, 0);
+	unsigned char* img = stbi_load(filename.c_str(), &width, &height, &channels, 0);
 
-	// assert(channels == 4);
-
-	cout << filename << " " << width << " " << height << " " << channels
-		<< endl;
+	/*cout << filename << " " << width << " " << height << " " << channels
+		<< endl;*/
 
 	// 4채널로 만들어서 복사
 	image.resize(width * height * 4);
 
-	if (channels == 1) 
+	if (channels == 1) // [흑백 유무]
 	{
 		for (size_t i = 0; i < width * height; i++) 
 		{
@@ -515,7 +613,20 @@ void ReadImage(const std::string filename, std::vector<uint8_t>& image,
 			}
 		}
 	}
-	else if (channels == 3) 
+	else if (channels == 2) // 2채널은 RGB 값/A 값 으로 2개로 나눈것 [밝기/알파]
+	{
+		for (size_t i = 0; i < width * height; ++i)
+		{
+			uint8_t gray = img[i * channels];
+			uint8_t alpha = img[i * channels + 1];
+
+			image[4 * i + 0] = gray;   // R
+			image[4 * i + 1] = gray;   // G
+			image[4 * i + 2] = gray;   // B
+			image[4 * i + 3] = alpha;  // A
+		}
+	}
+	else if (channels == 3)  // [RGB]
 	{
 		for (size_t i = 0; i < width * height; i++) 
 		{
@@ -526,7 +637,7 @@ void ReadImage(const std::string filename, std::vector<uint8_t>& image,
 			image[4 * i + 3] = 255;
 		}
 	}
-	else if (channels == 4) 
+	else if (channels == 4) // [RGBA]
 	{
 		for (size_t i = 0; i < width * height; i++) 
 		{
@@ -535,12 +646,49 @@ void ReadImage(const std::string filename, std::vector<uint8_t>& image,
 			}
 		}
 	}
-	else {
+	else 
+	{
 		std::cout << "Cannot read " << channels << " channels" << endl;
 	}
 }
 
-ComPtr<ID3D11Texture2D> CreateStagingTexture(const int width,const int height, const std::vector<uint8_t>& image,const int mipLevels, const int arraySize)
+void ReadEXRImage(const std::string filename, std::vector<uint8_t>& image,
+	int& width, int& height, DXGI_FORMAT& pixelFormat)
+{
+	const std::wstring wFilename(filename.begin(), filename.end());
+
+	TexMetadata metadata;
+	ThrowIfFailed(GetMetadataFromEXRFile(wFilename.c_str(), metadata));
+
+	ScratchImage scratchImage;
+	ThrowIfFailed(LoadFromEXRFile(wFilename.c_str(), NULL, scratchImage));
+
+	width = static_cast<int>(metadata.width);
+	height = static_cast<int>(metadata.height);
+	pixelFormat = metadata.format;
+
+	//cout << filename << " " << metadata.width << " " << metadata.height		<< metadata.format << endl;
+
+	image.resize(scratchImage.GetPixelsSize());
+	memcpy(image.data(), scratchImage.GetPixels(), image.size());
+
+	// 데이터 범위 확인해보기
+	vector<float> f32(image.size() / 2);
+	uint16_t* f16 = (uint16_t*)image.data();
+	for (int i = 0; i < image.size() / 2; i++) 
+	{
+		f32[i] = fp16_ieee_to_fp32_value(f16[i]);
+	}
+
+	const float minValue = *std::min_element(f32.begin(), f32.end());
+	const float maxValue = *std::max_element(f32.begin(), f32.end());
+
+	// cout << minValue << " " << maxValue << endl;
+}
+
+ComPtr<ID3D11Texture2D> CreateStagingTexture(const int width,const int height, const std::vector<uint8_t>& image,
+	const DXGI_FORMAT pixelFormat,
+	const int mipLevels, const int arraySize)
 {
 	D3D11_TEXTURE2D_DESC txtDesc;
 	ZeroMemory(&txtDesc, sizeof(txtDesc));
@@ -548,7 +696,7 @@ ComPtr<ID3D11Texture2D> CreateStagingTexture(const int width,const int height, c
 	txtDesc.Height = height;
 	txtDesc.MipLevels = mipLevels;
 	txtDesc.ArraySize = arraySize;
-	txtDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	txtDesc.Format = pixelFormat;
 	txtDesc.SampleDesc.Count = 1;
 	txtDesc.Usage = D3D11_USAGE_STAGING;
 	txtDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE | D3D11_CPU_ACCESS_READ;
@@ -571,4 +719,50 @@ ComPtr<ID3D11Texture2D> CreateStagingTexture(const int width,const int height, c
 	D3D::Get()->GetDeviceContext()->Unmap(stagingTexture.Get(), NULL);
 
 	return stagingTexture;
+}
+
+void CreateTextureHelper
+(
+	ComPtr<ID3D11Device>& device,
+	ComPtr<ID3D11DeviceContext>& context, 
+	const int width, const int height,
+	const vector<uint8_t>& image,
+	const DXGI_FORMAT pixelFormat,
+	ComPtr<ID3D11Texture2D>& texture,
+	ComPtr<ID3D11ShaderResourceView>& srv
+) 
+{
+
+	// CPU 접근용으로 이미지 복사
+	ComPtr<ID3D11Texture2D> stagingTexture = CreateStagingTexture(width, height, image, pixelFormat);
+
+	// 실제로 사용할 텍스춰 설정
+	D3D11_TEXTURE2D_DESC txtDesc;
+	ZeroMemory(&txtDesc, sizeof(txtDesc));
+	txtDesc.Width = width;
+	txtDesc.Height = height;
+	txtDesc.MipLevels = 0; // 밉맵 레벨 최대
+	txtDesc.ArraySize = 1;
+	txtDesc.Format = pixelFormat;
+	txtDesc.SampleDesc.Count = 1;
+	txtDesc.Usage = D3D11_USAGE_DEFAULT; // 스테이징 텍스춰로부터 복사 가능
+	txtDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+	txtDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS; // 밉맵 사용
+	txtDesc.CPUAccessFlags = 0;
+
+	// 초기 데이터 없이 텍스춰 생성 (전부 검은색)
+	device->CreateTexture2D(&txtDesc, NULL, texture.GetAddressOf());
+
+	// 실제로 생성된 MipLevels를 확인해보고 싶을 경우
+	// texture->GetDesc(&txtDesc);
+	// cout << txtDesc.MipLevels << endl;
+
+	// 스테이징 텍스춰로부터 가장 해상도가 높은 이미지 복사
+	context->CopySubresourceRegion(texture.Get(), 0, 0, 0, 0,stagingTexture.Get(), 0, NULL);
+
+	// 쉐이더에서 사용할 SRV 생성
+	device->CreateShaderResourceView(texture.Get(), 0, srv.GetAddressOf());
+
+	// 텍스처에 밉맵 레벨을 생성
+	context->GenerateMips(srv.Get());
 }

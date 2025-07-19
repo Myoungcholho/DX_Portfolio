@@ -19,25 +19,25 @@ public:
 	virtual void Render();
 
 private:
-	void CreateCubemapTexture(const wchar_t* filename, ComPtr<ID3D11ShaderResourceView>& textureResourceView);
-
-private:
 	CubeMapping m_cubeMapping;
-	WorldInvConstantBuffer WorldMatrixData;
-
-	ViewProjectionConstantBuffer ViewProjectionData;
-	ComPtr<ID3D11Buffer> ViewProjectionBuffer;
-
-	Vector3 ModelTranslation = Vector3(0.0f);
-	Vector3 ModelRotation = Vector3(0.0f, 0.0f, 0.0f);
-	Vector3 ModelScaling = Vector3(1.8f);
 
 private:
-	wstring SkyBoxFilename = L"../../../_CubeMapTexture/BackGround.dds";
-	wstring SkyBoxDiffuseFilename = L"../../../_CubeMapTexture/BackGroundBGRA_Diffuse.dds";
-	wstring SkyBoxSpecularFilename = L"../../../_CubeMapTexture/BackGroundBGRA_Specular.dds";
-	
-	//wstring SkyBoxFilename = L"C:/DirectX/Portfolio/_CubeMapTexture/BackGround.dds";
-	//wstring SkyBoxDiffuseFilename = L"C:/DirectX/Portfolio/_CubeMapTexture/BackGroundBGRA_Diffuse.dds";
-	//wstring SkyBoxSpecularFilename = L"C:/DirectX/Portfolio/_CubeMapTexture/BackGroundBGRA_Specular.dds";
+	WorldInvConstantBuffer worldInvConstantBufferData;
+	ViewProjectionConstantBuffer ViewProjectionData;
+	CubeMappingConstantBuffer cubeMappingConstantBufferData;
+
+private:
+	ComPtr<ID3D11Buffer> ViewProjectionBuffer;
+	ComPtr<ID3D11Buffer> cubeMappingConstantBuffer;
+
+
+private:
+	shared_ptr<Transform> transform;
+
+private:
+	wstring path = L"../../../_CubeMapTexture/HDRI/MorningSkyHalf/";
+	wstring EnvHDR_Name= path + L"MorningSkyHalfCubeEnvHDR.dds";
+	wstring Specular_Name = path + L"MorningSkyHalfCubeSpecularHDR.dds";
+	wstring DiffuseHDR_Name = path + L"MorningSkyHalfCubeDiffuseHDR.dds";
+	wstring Brdf_Name = path + L"MorningSkyHalfCubeBrdf.dds";
 };

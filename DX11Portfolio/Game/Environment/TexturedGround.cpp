@@ -7,7 +7,7 @@ void TextureGround::Initialize()
 	transform->SetPosition(Vector3(0.f, -20.f, 20.f));
 	transform->SetRotation(Vector3(90.f, 0.f, 0.f));
 
-	PBRMeshData ground = GeomtryGenerator::MakeSquareGrid(4096, 4096, 20.f, { 40.0f,40.0f });
+	PBRMeshData ground = GeomtryGenerator::MakeSquareGrid(64, 64, 20.f, { 40.0f,40.0f });
 	ground.albedoTextureFilename = "../../../_Textures/PBR/Bricks034_1K-PNG/""Bricks034_1K-PNG_Color.png";
 	ground.normalTextureFilename = "../../../_Textures/PBR/Bricks034_1K-PNG/""Bricks034_1K-PNG_NormalDX.png";
 	ground.heightTextureFilename = "../../../_Textures/PBR/Bricks034_1K-PNG/""Bricks034_1K-PNG_Displacement.png";
@@ -23,6 +23,7 @@ void TextureGround::Initialize()
 	D3D::Get()->CreateConstantBuffer(materialConstantBufferData, materialConstantBuffer);
 	D3D::Get()->CreateConstantBuffer(lightConstantBufferData, lightConstantBuffer);
 	D3D::Get()->CreateConstantBuffer(renderOptionsConstantBufferData, renderOptionsConstantBuffer);
+	D3D::Get()->CreateConstantBuffer(objectCenterConstantBufferData, objectCenterConstantBuffer);
 
 	// Vertex & Index Buffer
 	D3D::Get()->CreateVertexBuffer(ground.vertices, vertexBuffer);
@@ -33,22 +34,22 @@ void TextureGround::Initialize()
 	// Texture Read
 	if (ground.albedoTextureFilename.empty() == false)
 	{
-		D3D::Get()->CreateTexture(ground.albedoTextureFilename, albedoTexture, albedoTextureResourceView);
+		D3D::Get()->CreateTexture(ground.albedoTextureFilename, true, albedoTexture, albedoTextureResourceView);
 	}
 
 	if (ground.normalTextureFilename.empty() == false)
 	{
-		D3D::Get()->CreateTexture(ground.normalTextureFilename, normalTexture, normalTextureResourceView);
+		D3D::Get()->CreateTexture(ground.normalTextureFilename, false, normalTexture, normalTextureResourceView);
 	}
 
 	if (ground.heightTextureFilename.empty() == false)
 	{
-		D3D::Get()->CreateTexture(ground.heightTextureFilename, heightTexture, heightTextureResourceView);
+		D3D::Get()->CreateTexture(ground.heightTextureFilename, false, heightTexture, heightTextureResourceView);
 	}
 
 	if (ground.aoTextureFilename.empty() == false)
 	{
-		D3D::Get()->CreateTexture(ground.aoTextureFilename, aoTexture, aoTextureResourceView);
+		D3D::Get()->CreateTexture(ground.aoTextureFilename, false, aoTexture, aoTextureResourceView);
 	}
 
 	// InputLayout
@@ -65,6 +66,9 @@ void TextureGround::Initialize()
 	};
 	
 	D3D::Get()->CreateVertexShaderAndInputLayout(L"BasicShader/BasicVertexShader.hlsl", basicInputElements,m_vertexShader, m_inputLayout);
+	D3D::Get()->CreateVertexShaderAndInputLayout(L"BasicShader/BasicVertexShaderPASS.hlsl", basicInputElements, m_vertexShaderPASS, m_inputLayout);
+	D3D::Get()->CreateHullShader(L"BasicShader/BasicHullShader.hlsl", m_hullShader);
+	D3D::Get()->CreateDomainShader(L"BasicShader/BasicDomainShader.hlsl", m_domainShader);
 	D3D::Get()->CreatePixelShader(L"BasicShader/BasicPixelShader.hlsl", m_pixelShader);
 }
 
@@ -86,6 +90,9 @@ void TextureGround::Tick()
 	// material
 	// GUI로 제어
 
+	// ObjectCenter
+	objectCenterConstantBufferData.objectCenter = transform->GetPosition();
+
 	// Light
 	Vector3 curPos = transform->GetPosition();
 	Engine::Get()->GetLightManager()->UpdateCBuffer(lightConstantBufferData, curPos, MAX_LIGHTS);
@@ -96,6 +103,7 @@ void TextureGround::Tick()
 	D3D::Get()->UpdateBuffer(materialConstantBufferData, materialConstantBuffer);
 	D3D::Get()->UpdateBuffer(lightConstantBufferData, lightConstantBuffer);
 	D3D::Get()->UpdateBuffer(renderOptionsConstantBufferData, renderOptionsConstantBuffer);
+	D3D::Get()->UpdateBuffer(objectCenterConstantBufferData, objectCenterConstantBuffer);
 }
 
 void TextureGround::UpdateGUI()
@@ -142,6 +150,12 @@ void TextureGround::UpdateGUI()
 
 void TextureGround::Render()
 {
+	//OldRender();
+	TSRender();
+}
+
+void TextureGround::OldRender()
+{
 	ID3D11DeviceContext* context = D3D::Get()->GetDeviceContext();
 
 	UINT stride = sizeof(FVertexPNTT);
@@ -153,7 +167,7 @@ void TextureGround::Render()
 	context->VSSetSamplers(0, 1, GraphicsDevice::Get()->GetLinearWrapSampler());
 	context->VSSetConstantBuffers(0, 1, worldInvConstantBuffer.GetAddressOf());
 	context->VSSetConstantBuffers(2, 1, heightMapConstantBuffer.GetAddressOf());
-	
+
 	// PS
 	context->PSSetShader(m_pixelShader.Get(), 0, 0);
 	vector<ID3D11ShaderResourceView*> resViews =
@@ -180,4 +194,63 @@ void TextureGround::Render()
 
 	// Draw
 	context->DrawIndexed(m_indexCount, 0, 0);
+}
+
+void TextureGround::TSRender()
+{
+	ID3D11DeviceContext* context = D3D::Get()->GetDeviceContext();
+
+	UINT stride = sizeof(FVertexPNTT);
+	UINT offset = 0;
+
+	// VS
+	context->VSSetShader(m_vertexShaderPASS.Get(), 0, 0);
+
+	// HS
+	context->HSSetShader(m_hullShader.Get(), 0, 0);
+	context->HSSetConstantBuffers(0, 1, cameraConstantBuffer.GetAddressOf());
+	context->HSSetConstantBuffers(2, 1, worldInvConstantBuffer.GetAddressOf());
+	context->HSSetConstantBuffers(3, 1, objectCenterConstantBuffer.GetAddressOf());
+
+	// DS
+	context->DSSetShader(m_domainShader.Get(), 0, 0);
+	vector<ID3D11ShaderResourceView*> dsResViews =
+	{
+		heightTextureResourceView.Get(),
+	};
+	context->DSSetShaderResources(0, UINT(dsResViews.size()), dsResViews.data());
+	context->DSSetSamplers(0, 1, GraphicsDevice::Get()->GetLinearWrapSampler());
+	context->DSSetConstantBuffers(0, 1, worldInvConstantBuffer.GetAddressOf());
+	context->DSSetConstantBuffers(2, 1, heightMapConstantBuffer.GetAddressOf());
+
+	// PS
+	context->PSSetShader(m_pixelShader.Get(), 0, 0);
+	vector<ID3D11ShaderResourceView*> resViews =
+	{
+		Engine::Get()->GetTextureManager()->Get(L"SkyBox_Diffuse"),
+		Engine::Get()->GetTextureManager()->Get(L"SkyBox_Specular"),
+		albedoTextureResourceView.Get(),
+		normalTextureResourceView.Get(),
+		aoTextureResourceView.Get()
+	};
+	context->PSSetShaderResources(0, UINT(resViews.size()), resViews.data());
+
+	context->PSSetSamplers(0, 1, GraphicsDevice::Get()->GetLinearWrapSampler());
+	context->PSSetConstantBuffers(0, 1, cameraConstantBuffer.GetAddressOf());
+	context->PSSetConstantBuffers(2, 1, materialConstantBuffer.GetAddressOf());
+	context->PSSetConstantBuffers(3, 1, lightConstantBuffer.GetAddressOf());
+	context->PSSetConstantBuffers(4, 1, renderOptionsConstantBuffer.GetAddressOf());
+
+	// IA
+	context->IASetInputLayout(m_inputLayout.Get());
+	context->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
+	context->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
+
+	// Draw
+	context->DrawIndexed(m_indexCount, 0, 0);
+
+	// HS/DS 해제
+	context->HSSetShader(nullptr, 0, 0);
+	context->DSSetShader(nullptr, 0, 0);
 }

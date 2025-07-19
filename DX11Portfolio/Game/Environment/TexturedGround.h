@@ -19,8 +19,14 @@ public:
 	virtual void Render();
 
 private:
+	void OldRender();
+	void TSRender();
+
+private:
 	// Shader
 	ComPtr<ID3D11VertexShader> m_vertexShader;
+	ComPtr<ID3D11VertexShader> m_vertexShaderPASS;
+
 	ComPtr<ID3D11HullShader> m_hullShader;
 	ComPtr<ID3D11DomainShader> m_domainShader;
 	ComPtr<ID3D11GeometryShader> m_geometryShader;
@@ -31,9 +37,10 @@ private:
 	WorldInvConstantBuffer worldInvConstantBufferData;
 	HeightMapConstantBuffer heightMapConstantBufferData;
 	CameraConstantBuffer cameraConstantBufferData;
-	MaterialConstantBuffer materialConstantBufferData;
+	LegacyMaterialConstantBuffer materialConstantBufferData;
 	LightConstantBuffer lightConstantBufferData;
 	RenderOptionsConstantBuffer renderOptionsConstantBufferData;
+	ObjectCenterConstantBuffer objectCenterConstantBufferData;
 
 	// 추가로 보내고 있는 것
 	// 1. View Proj
@@ -47,6 +54,7 @@ private:
 	ComPtr<ID3D11Buffer> materialConstantBuffer;
 	ComPtr<ID3D11Buffer> lightConstantBuffer;
 	ComPtr<ID3D11Buffer> renderOptionsConstantBuffer;
+	ComPtr<ID3D11Buffer> objectCenterConstantBuffer;
 
 private:
 	// (Vertex & Index) Buffer

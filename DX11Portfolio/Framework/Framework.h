@@ -11,6 +11,7 @@ using namespace DirectX;
 #include <chrono>
 #include <bitset>
 #include <cstdlib>
+#include <memory>
 
 using namespace std;
 using namespace chrono;
@@ -61,6 +62,10 @@ using Microsoft::WRL::ComPtr;
 #include "Renders/Texture.h"
 #include "Renders/Mesh.h"
 #include "Renders/CubeMapping.h"
+
+// PostProcess
+#include "PostProcess/ImageFilter.h"
+#include "PostProcess/PostProcess.h"
 
 // System
 #include "Systems/D3D.h"

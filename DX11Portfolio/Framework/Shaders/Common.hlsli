@@ -3,7 +3,7 @@
 #define NUM_POINT_LIGHTS 1
 #define NUM_SPOT_LIGHTS 1
 
-struct Material
+struct LegacyMaterial
 {
     float3 ambient;
     float shininess;
@@ -15,21 +15,29 @@ struct Material
     float dummy3;
 };
 
+struct Material
+{
+    float3 albedo; // baseColor
+    float roughness;
+    float metallic;
+    float3 dummy;
+};
+
 struct Light
 {
-    float3 strength;
+    float3 radiance; // Strength
     float fallOffStart;
     float3 direction;
     float fallOffEnd;
     float3 position;
-    float spotPower;
+    float spotPower; // 기본은 여기까지
     int type;
     int id;
     float2 dummy;
 };
 
-float3 BlinnPhong(float3 lightStrength, float3 lightVec, float3 normal,
-                   float3 toEye, Material mat)
+
+float3 BlinnPhong(float3 lightStrength, float3 lightVec, float3 normal, float3 toEye, LegacyMaterial mat)
 {
     float3 halfway = normalize(toEye + lightVec);
     float hdotn = dot(halfway, normal);
@@ -38,18 +46,21 @@ float3 BlinnPhong(float3 lightStrength, float3 lightVec, float3 normal,
     return mat.ambient + (mat.diffuse + specular) * lightStrength;
 }
 
-float3 ComputeDirectionalLight(Light L, Material mat, float3 normal,
-                                float3 toEye)
+
+
+float3 ComputeDirectionalLight(Light L, LegacyMaterial mat, float3 normal, float3 toEye)
 {
     float3 lightVec = -L.direction;
 
     float ndotl = max(dot(lightVec, normal), 0.0f);
-    float3 lightStrength = L.strength * ndotl;
+    float3 lightStrength = L.radiance * ndotl;
 
     // Luna DX12 책에서는 Specular 계산에도
     // Lambert's law가 적용된 lightStrength를 사용합니다.
     return BlinnPhong(lightStrength, lightVec, normal, toEye, mat);
 }
+
+
 
 float CalcAttenuation(float d, float falloffStart, float falloffEnd)
 {
@@ -57,8 +68,7 @@ float CalcAttenuation(float d, float falloffStart, float falloffEnd)
     return saturate((falloffEnd - d) / (falloffEnd - falloffStart));
 }
 
-float3 ComputePointLight(Light L, Material mat, float3 pos, float3 normal,
-                          float3 toEye)
+float3 ComputePointLight(Light L, LegacyMaterial mat, float3 pos, float3 normal, float3 toEye)
 {
     float3 lightVec = L.position - pos;
 
@@ -75,7 +85,7 @@ float3 ComputePointLight(Light L, Material mat, float3 pos, float3 normal,
         lightVec /= d;
 
         float ndotl = max(dot(lightVec, normal), 0.0f);
-        float3 lightStrength = L.strength * ndotl;
+        float3 lightStrength = L.radiance * ndotl;
 
         float att = CalcAttenuation(d, L.fallOffStart, L.fallOffEnd);
         lightStrength *= att;
@@ -84,8 +94,7 @@ float3 ComputePointLight(Light L, Material mat, float3 pos, float3 normal,
     }
 }
 
-float3 ComputeSpotLight(Light L, Material mat, float3 pos, float3 normal,
-                         float3 toEye)
+float3 ComputeSpotLight(Light L, LegacyMaterial mat, float3 pos, float3 normal, float3 toEye)
 {
     float3 lightVec = L.position - pos;
 
@@ -102,7 +111,7 @@ float3 ComputeSpotLight(Light L, Material mat, float3 pos, float3 normal,
         lightVec /= d;
 
         float ndotl = max(dot(lightVec, normal), 0.0f);
-        float3 lightStrength = L.strength * ndotl;
+        float3 lightStrength = L.radiance * ndotl;
 
         float att = CalcAttenuation(d, L.fallOffStart, L.fallOffEnd);
         lightStrength *= att;

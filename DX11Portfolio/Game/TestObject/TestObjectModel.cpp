@@ -9,7 +9,7 @@ void TestObjectModel::Initialize()
     transform->SetPosition(Vector3(4.0f, -3.0f, 10.0f));
 
 	//auto meshes = GeomtryGenerator::ReadFromFile("Zelda/", "zeldaPosed001.fbx");
-    vector<MeshData> meshes = GeomtryGenerator::ReadFromFile("Fallen/", "SK_Fallen_Samurai.fbx");
+    vector<MeshData> meshes; // = GeomtryGenerator::ReadFromFileModel("Fallen/", "SK_Fallen_Samurai.fbx");
 
     ComPtr<ID3D11Buffer> VertexConstantBuffer;
     ComPtr<ID3D11Buffer> PixelConstantBuffer;
@@ -67,9 +67,9 @@ void TestObjectModel::UpdateGUI()
 {
     ImGui::Begin(Name.c_str());
     {
-        ImGui::Checkbox("Use Texture", &BasicPixelConstantBufferData.UseTexture);
-        ImGui::SliderFloat3("MaterialDiffuse", &BasicPixelConstantBufferData.material.diffuse.x ,0.0f,1.0f);
-        ImGui::SliderFloat3("MaterialSpecular", &BasicPixelConstantBufferData.material.specular.x, 0.0f, 1.0f);
+        //ImGui::Checkbox("Use Texture", &BasicPixelConstantBufferData.UseTexture);
+        //ImGui::SliderFloat3("MaterialDiffuse", &BasicPixelConstantBufferData.material.diffuse.x ,0.0f,1.0f);
+        //ImGui::SliderFloat3("MaterialSpecular", &BasicPixelConstantBufferData.material.specular.x, 0.0f, 1.0f);
         
         ImGui::SliderFloat3("Rim Color", &RimParamsData.RimColor.x,0.0f,1.0f);
         ImGui::SliderFloat("Rim Power", &RimParamsData.RimPower,0.01f,10.0f);
