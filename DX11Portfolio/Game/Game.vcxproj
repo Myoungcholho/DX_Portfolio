@@ -139,6 +139,7 @@
     <ClInclude Include="Environment\TexturedGround.h" />
     <ClInclude Include="ObjectCollection.h" />
     <ClInclude Include="Object\MeshGroup.h" />
+    <ClInclude Include="Object\Mirror.h" />
     <ClInclude Include="Pch.h" />
     <ClInclude Include="TestObject\TestObjectCube.h" />
     <ClInclude Include="TestObject\TestObjectCylinder.h" />
@@ -154,6 +155,7 @@
     <ClCompile Include="Environment\TexturedGround.cpp" />
     <ClCompile Include="ObjectCollection.cpp" />
     <ClCompile Include="Object\MeshGroup.cpp" />
+    <ClCompile Include="Object\Mirror.cpp" />
     <ClCompile Include="Pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>

@@ -9,8 +9,7 @@ cbuffer WorldMatrixConstantBuffer : register(b0)
 
 cbuffer ViewProjConstantBuffer : register(b1)
 {
-    matrix view;
-    matrix projection;
+    matrix viewProj;
 };
 
 cbuffer HeightMapConstantBuffer : register(b2)
@@ -92,9 +91,7 @@ PixelShaderInput main(
     }
 
     output.posWorld = posWorld.xyz;
-
-    float4 viewPos = mul(posWorld, view);
-    output.posProj = mul(viewPos, projection);
+    output.posProj = mul(posWorld, viewProj);
 
     output.texcoord = texcoord;
     output.color = float3(0, 0, 0);

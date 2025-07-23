@@ -9,8 +9,7 @@ cbuffer WorldMatrixConstantBuffer : register(b0)
 
 cbuffer ViewProjConstantBuffer : register(b1)
 {
-    Matrix view;
-    Matrix projection;
+    Matrix viewProj;
 };
 
 cbuffer HeightMapConstantBuffer : register(b2)
@@ -63,8 +62,7 @@ PixelShaderInput main(VertexShaderInput input)
     
     output.posWorld = pos.xyz;
     
-    pos = mul(pos, view);
-    pos = mul(pos, projection);
+    pos = mul(pos, viewProj);
     
     output.posProj = pos;
     output.texcoord = input.texcoord;

@@ -154,18 +154,15 @@ void Window::MainRender()
 
 	//Rendering
 	{
-		D3D::Get()->StartRenderPass();
+		//D3D::Get()->StartRenderPass();
 
-		if (CContext::Get()->GetWireRender() == true)
-			GraphicsDevice::Get()->ApplyWireframeRasterizer();
-		else
-			GraphicsDevice::Get()->ApplySolidRasterizer();
-
-
+		// 카메라 포함
 		CContext::Get()->Render();
 		
+		// 물체 렌더링
 		Executor->Render();
 
+		// 포스트 프로세스
 		D3D::Get()->Render();
 	}
 

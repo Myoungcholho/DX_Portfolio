@@ -9,14 +9,12 @@ cbuffer ModelBuffer : register(b0)
 // »ç¿ë X
 cbuffer CameraBufferOrigin : register(b1)
 {
-    float4x4 view;
-    float4x4 projection;
+    float4x4 viewProj;
 }
 
 cbuffer CameraBuffer : register(b2)
 {
-    float4x4 TranslationView;
-    float4x4 Translationprojection;
+    float4x4 TranslationViewProj;
 };
 
 struct CubeMappingPixelShaderInput
@@ -31,8 +29,7 @@ CubeMappingPixelShaderInput main(VertexShaderInput input)
     float4 pos = float4(input.posModel, 1.0f);
 
     pos = mul(pos, model);
-    pos = mul(pos, TranslationView);
-    pos = mul(pos, Translationprojection);
+    pos = mul(pos, TranslationViewProj);
     output.posProj = pos;
 
     output.posModel = input.posModel;

@@ -15,7 +15,7 @@ cbuffer BasicPixelConstantBuffer : register(b0)
     Light light[MAX_LIGHTS];
 };
 
-cbuffer RimParams : register(b1)
+cbuffer RimParams : register(b2)
 {
     float3 rimColor;
     float rimPower;

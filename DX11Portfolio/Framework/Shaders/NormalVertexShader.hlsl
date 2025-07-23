@@ -8,8 +8,7 @@ cbuffer ModelBuffer : register(b0)
 
 cbuffer CameraBuffer : register(b1)
 {
-    float4x4 view;
-    float4x4 projection;
+    matrix viewProj;
 };
 
 struct GeometryShaderInput

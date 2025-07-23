@@ -16,8 +16,7 @@ cbuffer VertexConstantData : register(b0)
 
 cbuffer CameraConstantBuffer : register(b1)
 {
-    matrix view;
-    matrix projection;
+    matrix viewProj;
 };
 
 PixelShaderInput main(VertexShaderInput input)
@@ -46,8 +45,7 @@ PixelShaderInput main(VertexShaderInput input)
     output.posWorld = pos.xyz;
     
     // pos wvp
-    pos = mul(pos, view);
-    pos = mul(pos, projection);
+    pos = mul(pos, viewProj);
     output.posProj = pos;
     
     // texcoord 

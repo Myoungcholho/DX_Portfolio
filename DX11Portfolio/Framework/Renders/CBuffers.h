@@ -28,6 +28,16 @@ struct WorldConstantBuffer
     Matrix World;
 };
 
+struct ViewProjectionConstantBuffer
+{
+    Matrix viewProj;
+};
+
+struct MirrorViewProjectionConstantBuffer
+{
+    Matrix mirrorViewProj;
+};
+
 struct TreeConstants
 {
     int index;
@@ -70,7 +80,7 @@ struct CameraConstantBuffer
 
 struct LegacyMaterialConstantBuffer
 {
-    LegacyMaterial material;
+    LegacyMaterial legacyMaterial;
 };
 
 struct LightConstantBuffer

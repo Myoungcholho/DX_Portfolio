@@ -28,12 +28,13 @@ void CubeMapSkyRenderer::Initialize()
 	worldInvConstantBufferData.World = transform->GetWorldMatrix().Transpose();
 	worldInvConstantBufferData.InvTranspose = transform->GetWorldMatrix().Invert().Transpose();
 
-	ViewProjectionData.view = Matrix();
-	ViewProjectionData.projection = Matrix();
+	viewProjectionData.viewProj = Matrix();
+	mirrorViewProjectionData.mirrorViewProj = Matrix();
 
 	// VS의 ConstantBuffer
 	D3D::Get()->CreateConstantBuffer(worldInvConstantBufferData, m_cubeMapping.CubeMesh->VSCBuffer);
-	D3D::Get()->CreateConstantBuffer(ViewProjectionData, ViewProjectionBuffer);	// 카메라 기준으로 같이 이동하려고
+	D3D::Get()->CreateConstantBuffer(viewProjectionData, ViewProjectionBuffer);	// 카메라 기준으로 같이 이동하려고
+	D3D::Get()->CreateConstantBuffer(mirrorViewProjectionData, mirrorViewProjectionBuffer);
 	D3D::Get()->CreateConstantBuffer(cubeMappingConstantBufferData, cubeMappingConstantBuffer);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -70,10 +71,6 @@ void CubeMapSkyRenderer::Initialize()
 	D3D::Get()->CreatePixelShader(L"CubeMapping/CubeMappingPS.hlsl",m_cubeMapping.PixelShader);
 }
 
-void CubeMapSkyRenderer::Destroy()
-{
-}
-
 void CubeMapSkyRenderer::UpdateGUI()
 {
 	ImGui::Begin("SkyCubeMap");
@@ -91,7 +88,7 @@ void CubeMapSkyRenderer::Tick()
 	// PS(b0)
 	D3D::Get()->UpdateBuffer(cubeMappingConstantBufferData, cubeMappingConstantBuffer);
 
-	// (b1)
+	// VS(b0)
 	worldInvConstantBufferData.World = transform->GetWorldMatrix().Transpose();
 	worldInvConstantBufferData.InvTranspose = worldInvConstantBufferData.World;
 	worldInvConstantBufferData.InvTranspose.Translation(Vector3(0.0f));
@@ -99,17 +96,24 @@ void CubeMapSkyRenderer::Tick()
 
 	D3D::Get()->UpdateBuffer(worldInvConstantBufferData, m_cubeMapping.CubeMesh->VSCBuffer);
 
-	// (b2)
+	// VS(b2)
 	Matrix view = CContext::Get()->GetViewMatrix();
 	view._41 = 0.0f, view._42 = 0.0f, view._43 = 0.0f;
-	ViewProjectionData.view = view.Transpose();
-	ViewProjectionData.projection = CContext::Get()->GetProjectionMatrix().Transpose();
+	Matrix proj = CContext::Get()->GetProjectionMatrix();
+	Matrix viewProj = view * proj;
+	viewProjectionData.viewProj = viewProj.Transpose();
 
-	D3D::Get()->UpdateBuffer(ViewProjectionData, ViewProjectionBuffer);
+	D3D::Get()->UpdateBuffer(viewProjectionData, ViewProjectionBuffer);
+
+	// mirror
+	Matrix mirror = CContext::Get()->GetMirrorMatrix();
+	mirrorViewProjectionData.mirrorViewProj = (mirror * view * proj).Transpose();
+
+	D3D::Get()->UpdateBuffer(mirrorViewProjectionData, mirrorViewProjectionBuffer);
 
 }
 
-void CubeMapSkyRenderer::Render()
+void CubeMapSkyRenderer::Render(const bool& mirror)
 {
 	UINT stride = sizeof(FVertexPNTT);
 	UINT offset = 0;
@@ -122,7 +126,10 @@ void CubeMapSkyRenderer::Render()
 
 	// VS
 	D3D::Get()->GetDeviceContext()->VSSetConstantBuffers(0, 1, m_cubeMapping.CubeMesh->VSCBuffer.GetAddressOf());
-	D3D::Get()->GetDeviceContext()->VSSetConstantBuffers(2, 1, ViewProjectionBuffer.GetAddressOf());
+	if(mirror == false)
+		D3D::Get()->GetDeviceContext()->VSSetConstantBuffers(2, 1, ViewProjectionBuffer.GetAddressOf());
+	else
+		D3D::Get()->GetDeviceContext()->VSSetConstantBuffers(2, 1, mirrorViewProjectionBuffer.GetAddressOf());
 	D3D::Get()->GetDeviceContext()->VSSetShader(m_cubeMapping.VertexShader.Get(), 0, 0);
 
 	// PS

@@ -109,6 +109,15 @@
     <ClInclude Include="PostProcess\PostProcess.h">
       <Filter>PostProcess</Filter>
     </ClInclude>
+    <ClInclude Include="Renders\GraphicsCommon.h">
+      <Filter>Renders</Filter>
+    </ClInclude>
+    <ClInclude Include="Renders\GraphicsPSO.h">
+      <Filter>Renders</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\DXUitls.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Framework.cpp" />
@@ -190,6 +199,12 @@
     </ClCompile>
     <ClCompile Include="PostProcess\PostProcess.cpp">
       <Filter>PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="Renders\GraphicsCommon.cpp">
+      <Filter>Renders</Filter>
+    </ClCompile>
+    <ClCompile Include="Renders\GraphicsPSO.cpp">
+      <Filter>Renders</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

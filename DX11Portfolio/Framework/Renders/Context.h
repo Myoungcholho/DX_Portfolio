@@ -2,12 +2,6 @@
 #include <directxtk/SimpleMath.h>
 #include <memory>
 
-struct ViewProjectionConstantBuffer
-{
-	Matrix view;
-	Matrix projection;
-};
-
 class CContext
 {
 public:
@@ -26,8 +20,13 @@ public:
 	void Tick_WorldTime();
 
 	void Render();
+	void RenderConstantBuffer();
+	void RenderMirrorConstantBuffer();
 
 	void ResizeScreen();
+
+public:
+	void UpdateMirror(const Matrix& mirror);
 
 public:
 	class CCamera* GetCamera() { return View.get(); }
@@ -36,6 +35,7 @@ public:
 public:
 	SimpleMath::Matrix GetViewMatrix();
 	SimpleMath::Matrix GetProjectionMatrix();
+	SimpleMath::Matrix GetMirrorMatrix();
 
 public:
 	void SetHideSetting(bool InValue) { bHideSetting = InValue; }
@@ -52,7 +52,13 @@ private:
 	SimpleMath::Matrix Projection;
 	std::unique_ptr<D3D11_VIEWPORT> Viewport;
 
-	ComPtr<ID3D11Buffer> m_constantBuffer;
+private:
+	Matrix mirror;
 
+private:
 	ViewProjectionConstantBuffer m_constantBufferData;
+	MirrorViewProjectionConstantBuffer mirrorViewProjectionConstantBufferData;
+
+	ComPtr<ID3D11Buffer> m_constantBuffer;
+	ComPtr<ID3D11Buffer> mirrorViewProjectionConstantBuffer;
 };

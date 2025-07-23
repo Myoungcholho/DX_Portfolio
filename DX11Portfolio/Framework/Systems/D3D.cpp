@@ -53,6 +53,25 @@ void D3D::SetDesc(const D3DDesc& InDesc)
 	D3dDesc = InDesc;
 }
 
+void D3D::SaveAndBindTempDepthStencil()
+{
+	// 1. 가지고 와서 temp에 DSV를 복사한다
+	DeviceContext->CopyResource(Temp_DSV_Texture.Get(), DSV_Texture.Get());
+
+	// 2. 원본 DSV정보는 유지할수있도록하기 위해 복사한 DSV를 사용한다
+	const float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	vector<ID3D11RenderTargetView*> renderTargetViews = { m_floatRTV.Get() };
+	DeviceContext->OMSetRenderTargets(UINT(renderTargetViews.size()), renderTargetViews.data(), Temp_DepthStencilView.Get());
+}
+
+void D3D::RestoreOriginalDepthStencil()
+{
+	// 1. 원래 쓰던 DSV를 OM에 바인딩
+	const float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	vector<ID3D11RenderTargetView*> renderTargetViews = { m_floatRTV.Get() };
+	DeviceContext->OMSetRenderTargets(UINT(renderTargetViews.size()), renderTargetViews.data(), DepthStencilView.Get());
+}
+
 void D3D::CreateDevice()
 {
 	DXGI_MODE_DESC desc = {};
@@ -136,20 +155,6 @@ void D3D::CreateBuffers()
 	ThrowIfFailed(Device->CreateRenderTargetView(m_resolvedBuffer.Get(), NULL, m_resolvedRTV.GetAddressOf()));
 }
 
-void D3D::CreateRasterizerState()
-{
-	D3D11_RASTERIZER_DESC desc = {};
-	desc.FillMode = D3D11_FILL_SOLID;
-	desc.CullMode = D3D11_CULL_BACK;
-	desc.FrontCounterClockwise = false;
-	desc.DepthClipEnable = true;			// MinDepth ~ MaxDepth 밖이라면 그리지 않겠다!
-
-	HRESULT hr = Device->CreateRasterizerState(&desc, RasterizerState.GetAddressOf());
-	assert(SUCCEEDED(hr));
-
-	DeviceContext->RSSetState(RasterizerState.Get());
-}
-
 void D3D::CreateDepthBuffer()
 {
 	D3D11_TEXTURE2D_DESC depthStencilBufferDesc;
@@ -173,24 +178,11 @@ void D3D::CreateDepthBuffer()
 	depthStencilBufferDesc.CPUAccessFlags = 0;
 	depthStencilBufferDesc.MiscFlags = 0;
 
-	ThrowIfFailed(Device->CreateTexture2D(&depthStencilBufferDesc, 0, DSV_Texture.GetAddressOf()));
-	ThrowIfFailed(Device->CreateDepthStencilView(DSV_Texture.Get(), 0, DepthStencilView.GetAddressOf()));
-}
+	Device->CreateTexture2D(&depthStencilBufferDesc, 0, DSV_Texture.GetAddressOf());
+	Device->CreateDepthStencilView(DSV_Texture.Get(), 0, DepthStencilView.GetAddressOf());
 
-void D3D::CreateDepthStencilState()
-{
-	D3D11_DEPTH_STENCIL_DESC dsDesc = {};
-	ZeroMemory(&dsDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
-	dsDesc.DepthEnable = true;
-	dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	dsDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-
-	dsDesc.StencilEnable = false; // true면 Stencil 연산도 정의 필요
-
-	HRESULT hr = Device->CreateDepthStencilState(&dsDesc, DepthStencilState.GetAddressOf());
-	assert(SUCCEEDED(hr));
-
-	DeviceContext->OMSetDepthStencilState(DepthStencilState.Get(), 0);
+	Device->CreateTexture2D(&depthStencilBufferDesc, 0, Temp_DSV_Texture.GetAddressOf());
+	Device->CreateDepthStencilView(Temp_DSV_Texture.Get(), 0, Temp_DepthStencilView.GetAddressOf());
 }
 
 void D3D::CreateIndexBuffer(const std::vector<uint16_t>& indices, ComPtr<ID3D11Buffer>& m_indexBuffer)
@@ -235,13 +227,27 @@ ComPtr<ID3D11ShaderResourceView> D3D::GetMainShaderResourceView()
 
 void D3D::StartRenderPass()
 {
+	// RTV
 	const float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-	DeviceContext->ClearRenderTargetView(m_floatRTV.Get(), clearColor);
-	DeviceContext->ClearDepthStencilView(DepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0);
-
 	vector<ID3D11RenderTargetView*> renderTargetViews = { m_floatRTV.Get() };
+	for (size_t i = 0; i < renderTargetViews.size(); ++i)
+	{
+		DeviceContext->ClearRenderTargetView(renderTargetViews[i], clearColor);
+	}
 	DeviceContext->OMSetRenderTargets(UINT(renderTargetViews.size()), renderTargetViews.data(), DepthStencilView.Get());
-	DeviceContext->OMSetDepthStencilState(DepthStencilState.Get(), 0);
+
+	// DSV
+	DeviceContext->ClearDepthStencilView(DepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0);
+}
+
+void D3D::ClearMainDepth(D3D11_CLEAR_FLAG ClearFlags,FLOAT Depth,UINT8 Stencil)
+{
+	DeviceContext->ClearDepthStencilView(DepthStencilView.Get(), ClearFlags, Depth, Stencil);
+}
+
+void D3D::ClearTempDepth(D3D11_CLEAR_FLAG ClearFlags, FLOAT Depth, UINT8 Stencil)
+{
+	DeviceContext->ClearDepthStencilView(Temp_DepthStencilView.Get(), ClearFlags, Depth, Stencil);
 }
 
 void D3D::Present()
@@ -549,8 +555,8 @@ D3D::D3D()
 	CreateDevice();				// SwapChain, Device, Context 생성
 	CreateBuffers();			// RTV들 생성
 	
-	CreateRasterizerState();
-	CreateDepthStencilState();
+	//CreateRasterizerState();
+	//CreateDepthStencilState();
 }
 
 D3D::~D3D()
@@ -561,8 +567,7 @@ D3D::~D3D()
 	DeviceContext.Reset();
 	Device.Reset();
 	SwapChain.Reset();
-	RasterizerState.Reset();
-	DepthStencilState.Reset();
+	//RasterizerState.Reset();
 }
 
 void D3D::Init()

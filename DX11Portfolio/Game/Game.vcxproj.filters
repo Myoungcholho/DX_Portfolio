@@ -36,6 +36,9 @@
     <ClInclude Include="Object\MeshGroup.h">
       <Filter>Object</Filter>
     </ClInclude>
+    <ClInclude Include="Object\Mirror.h">
+      <Filter>Object</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Pch.cpp" />
@@ -71,6 +74,9 @@
       <Filter>Environment</Filter>
     </ClCompile>
     <ClCompile Include="Object\MeshGroup.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Mirror.cpp">
       <Filter>Object</Filter>
     </ClCompile>
   </ItemGroup>

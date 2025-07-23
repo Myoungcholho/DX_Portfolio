@@ -11,6 +11,7 @@
 
 // 오브젝트
 #include "Object/MeshGroup.h"
+#include "Object/Mirror.h"
 
 // 환경
 #include "Environment/CubeMapSkyRenderer.h"

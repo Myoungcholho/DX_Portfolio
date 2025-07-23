@@ -12,14 +12,6 @@ struct D3DDesc
 	bool VSync;
 };
 
-inline void ThrowIfFailed(HRESULT hr) 
-{
-	if (FAILED(hr)) 
-	{
-		throw std::exception();
-	}
-}
-
 class D3D
 {
 public:
@@ -33,14 +25,16 @@ public:
 	static const D3DDesc& GetDesc();
 	static void SetDesc(const D3DDesc& InDesc);
 
+public:
+	void SaveAndBindTempDepthStencil();
+	void RestoreOriginalDepthStencil();
+
 private:
 	void CreateDevice();
 	void CreateBuffers();
 	
-	void CreateRasterizerState();
 	void CreateDepthBuffer();
-	void CreateDepthStencilState();
-	//void CreateNoDepthStencilState();
+	
 
 public:
 	template <typename T_VERTEX>
@@ -107,8 +101,12 @@ public:
 	ComPtr<ID3D11RenderTargetView> GetMainRenderTargetView();
 	ComPtr<ID3D11ShaderResourceView> GetMainShaderResourceView();
 
+public:
 	void StartRenderPass();
+	void ClearMainDepth(D3D11_CLEAR_FLAG ClearFlags, FLOAT Depth, UINT8 Stencil);
+	void ClearTempDepth(D3D11_CLEAR_FLAG ClearFlags, FLOAT Depth, UINT8 Stencil);
 
+public:
 	void Present();
 
 	void ResizeScreen(float InWidth, float InHeight);
@@ -163,11 +161,12 @@ private:
 	ComPtr<ID3D11RenderTargetView> m_backBufferRTV;
 	ComPtr<ID3D11ShaderResourceView> ShaderResourceView;
 
-	ComPtr<ID3D11RasterizerState> RasterizerState;
+	//ComPtr<ID3D11RasterizerState> RasterizerState;
 
 	ComPtr<ID3D11Texture2D> DSV_Texture;
 	ComPtr<ID3D11DepthStencilView> DepthStencilView;
-	ComPtr<ID3D11DepthStencilState> DepthStencilState;
+	ComPtr<ID3D11Texture2D> Temp_DSV_Texture;
+	ComPtr<ID3D11DepthStencilView> Temp_DepthStencilView;
 
 private:
 	ComPtr<ID3D11Texture2D> m_floatBuffer;

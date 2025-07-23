@@ -105,7 +105,7 @@ PBRMeshData ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 
 		// 노말 복사
 		vertex.normalModel.x = mesh->mNormals[i].x;
-		if (!isGLTF) // gltf 모델은 y/z축이 뒤바뀌고 y축을 음수로
+		if (isGLTF) // gltf 모델은 y/z축이 뒤바뀌고 y축을 음수로
 		{
 			vertex.normalModel.y = mesh->mNormals[i].z;
 			vertex.normalModel.z = -mesh->mNormals[i].y;

@@ -6,8 +6,7 @@ cbuffer BillboardPointsConstantData : register(b0)
 
 cbuffer CameraBuffer : register(b1)
 {
-    matrix view;
-    matrix projection;
+    matrix viewProj;
 };
 
 cbuffer WorldBuffer : register(b2)

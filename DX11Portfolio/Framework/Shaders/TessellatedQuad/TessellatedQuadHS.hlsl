@@ -7,8 +7,7 @@ cbuffer ConstantData : register(b0)
 
 cbuffer CameraBuffer : register(b1)
 {
-    Matrix view;
-    Matrix proj;
+    Matrix viewProj;
 }
 
 struct VertexOut

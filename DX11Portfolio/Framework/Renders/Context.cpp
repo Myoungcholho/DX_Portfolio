@@ -39,9 +39,11 @@ CContext::CContext()
 	Viewport->MinDepth = 0;
 	Viewport->MaxDepth = 1;
 
-	m_constantBufferData.view = Matrix();
-	m_constantBufferData.projection = Matrix();
+	m_constantBufferData.viewProj = Matrix();
 	D3D::Get()->CreateConstantBuffer(m_constantBufferData, m_constantBuffer);
+
+	mirrorViewProjectionConstantBufferData.mirrorViewProj = Matrix();
+	D3D::Get()->CreateConstantBuffer(mirrorViewProjectionConstantBufferData, mirrorViewProjectionConstantBuffer);
 }
 
 CContext::~CContext()
@@ -54,11 +56,12 @@ void CContext::Tick()
 	Tick_View();
 	Tick_WorldTime();
 
-	// 2. 뷰 행렬 (카메라에서 가져오기)
-	m_constantBufferData.view = GetViewMatrix().Transpose();
+	// viewProj 업데이트
+	Matrix view = GetViewMatrix();
+	Matrix proj = GetProjectionMatrix();
+	Matrix viewProj = view * proj;
 
-	// 3. 프로젝션 행렬 (컨텍스트에서 가져오기)
-	m_constantBufferData.projection = GetProjectionMatrix().Transpose();
+	m_constantBufferData.viewProj = viewProj.Transpose();
 
 	D3D::Get()->UpdateBuffer(m_constantBufferData, m_constantBuffer);
 }
@@ -115,16 +118,21 @@ void CContext::Tick_WorldTime()
 	ImGui::End();
 }
 
+void CContext::UpdateMirror(const Matrix& mirror)
+{
+	this->mirror = mirror;
+
+	Matrix view = GetViewMatrix();
+	Matrix proj = GetProjectionMatrix();
+	mirrorViewProjectionConstantBufferData.mirrorViewProj = (mirror * view * proj).Transpose();
+
+	D3D::Get()->UpdateBuffer(mirrorViewProjectionConstantBufferData, mirrorViewProjectionConstantBuffer);
+}
+
 void CContext::Render()
 {
 	// 카메라와 관련된 설정으로 Context가 하는게 맞다.
 	D3D::Get()->GetDeviceContext()->RSSetViewports(1, Viewport.get());
-	
-	// View Projection ConstantBuffer로 전송
-	D3D::Get()->GetDeviceContext()->VSSetConstantBuffers(1, 1, m_constantBuffer.GetAddressOf());
-	D3D::Get()->GetDeviceContext()->GSSetConstantBuffers(1, 1, m_constantBuffer.GetAddressOf());
-	D3D::Get()->GetDeviceContext()->HSSetConstantBuffers(1, 1, m_constantBuffer.GetAddressOf());
-	D3D::Get()->GetDeviceContext()->DSSetConstantBuffers(1, 1, m_constantBuffer.GetAddressOf());
 
 	string str = string("FrameRate : ") + to_string((int)ImGui::GetIO().Framerate);
 	ImGuiManager::Get()->RenderText(5, 5, 1, 1, 1, str);
@@ -141,6 +149,21 @@ void CContext::Render()
 
 	str = std::format("View Position : {:3.2f}, {:3.2f}, {:3.2f}", position.x, position.y, position.z);
 	ImGuiManager::Get()->RenderText(5, 50, 1, 1, 1, str);
+}
+
+void CContext::RenderConstantBuffer()
+{
+	// View Projection ConstantBuffer로 전송
+	D3D::Get()->GetDeviceContext()->VSSetConstantBuffers(1, 1, m_constantBuffer.GetAddressOf());
+	D3D::Get()->GetDeviceContext()->GSSetConstantBuffers(1, 1, m_constantBuffer.GetAddressOf());
+	D3D::Get()->GetDeviceContext()->HSSetConstantBuffers(1, 1, m_constantBuffer.GetAddressOf());
+	D3D::Get()->GetDeviceContext()->DSSetConstantBuffers(1, 1, m_constantBuffer.GetAddressOf());
+}
+
+void CContext::RenderMirrorConstantBuffer()
+{
+	// Mirror View Projection 전송
+	D3D::Get()->GetDeviceContext()->VSSetConstantBuffers(1, 1, mirrorViewProjectionConstantBuffer.GetAddressOf());
 }
 
 void CContext::ResizeScreen()
@@ -164,4 +187,9 @@ SimpleMath::Matrix CContext::GetViewMatrix()
 SimpleMath::Matrix CContext::GetProjectionMatrix()
 {
 	return View->GetProjectionMatrix();
+}
+
+SimpleMath::Matrix CContext::GetMirrorMatrix()
+{
+	return mirror;
 }

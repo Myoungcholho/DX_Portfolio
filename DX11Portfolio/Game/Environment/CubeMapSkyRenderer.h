@@ -8,26 +8,27 @@
 using DirectX::SimpleMath::Matrix;
 using DirectX::SimpleMath::Vector3;
 
-class CubeMapSkyRenderer : public IExecutable
+class CubeMapSkyRenderer
 {
 public:
-	virtual void Initialize();
-	virtual void Destroy();
+	void Initialize();
+	void UpdateGUI();
+	void Tick();
+	void Render(const bool &mirror);
 
-	virtual void UpdateGUI();
-	virtual void Tick();
-	virtual void Render();
 
 private:
 	CubeMapping m_cubeMapping;
 
 private:
 	WorldInvConstantBuffer worldInvConstantBufferData;
-	ViewProjectionConstantBuffer ViewProjectionData;
+	ViewProjectionConstantBuffer viewProjectionData;
+	MirrorViewProjectionConstantBuffer mirrorViewProjectionData;
 	CubeMappingConstantBuffer cubeMappingConstantBufferData;
 
 private:
 	ComPtr<ID3D11Buffer> ViewProjectionBuffer;
+	ComPtr<ID3D11Buffer> mirrorViewProjectionBuffer;
 	ComPtr<ID3D11Buffer> cubeMappingConstantBuffer;
 
 

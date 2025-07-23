@@ -11,7 +11,8 @@ using DirectX::SimpleMath::Vector3;
 class MeshGroup : public IExecutable
 {
 public:
-	MeshGroup(std::string basePath, std::string filename);
+	MeshGroup(std::string basePath, std::string filename,std::string name);
+	MeshGroup(const vector<PBRMeshData>& meshes, string name);
 
 public:
 	virtual void Initialize();
@@ -20,6 +21,13 @@ public:
 	virtual void UpdateGUI();
 	virtual void Tick();
 	virtual void Render();
+
+public:
+	std::shared_ptr<Transform> GetTransform() { return transform; }
+
+public:
+	BasicVertexConstantBuffer m_basicVertexConstData;
+	BasicPixelConstantBuffer m_basicPixelConstData;
 
 private:
 	void NormalInit(vector<PBRMeshData>& meshes, vector<D3D11_INPUT_ELEMENT_DESC>& basicInputElements);
@@ -43,10 +51,8 @@ private:
 	//RimParamsConstantBuffer rimParamsConstantBufferData;
 	WorldInvConstantBuffer worldInvConstantBufferData;
 	LightConstantBuffer lightConstantBufferData;
-	
-	BasicVertexConstantBuffer m_basicVertexConstData;
-	BasicPixelConstantBuffer m_basicPixelConstData;
 
+private:
 
 	// ConstnatBuffer
 	//ComPtr<ID3D11Buffer> worldInvConstantBuffer;
@@ -64,13 +70,16 @@ private:
 	ComPtr<ID3D11InputLayout> m_inputLayout;
 
 private:
+	vector<PBRMeshData> meshes;
+
+private:
 	shared_ptr<Transform> transform;
 
 private:
 	float MaterialDiffuse = 0.8f;
 	float MaterialSpecular = 1.0f;
 
-	string Name = "Player";
+	string Name = "Object_";
 
 private:
 	string basePath;

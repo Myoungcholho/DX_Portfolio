@@ -6,8 +6,7 @@ cbuffer BasicVertexCBufferData : register(b0)
 
 cbuffer CameraCBuffer : register(b1)
 {
-    matrix view;
-    matrix projection;
+    matrix viewProj;
 };
 
 struct GeometryShaderInput
@@ -32,13 +31,11 @@ void main(point GeometryShaderInput input[1], inout LineStream<PixelShaderInput>
     float4 normalWorld = mul(normalModel, invTranspose);
     normalWorld = float4(normalize(normalWorld.xyz), 0.0);
     
-    output.pos = mul(posWorld, view);
-    output.pos = mul(output.pos, projection);
+    output.pos = mul(posWorld, viewProj);
     output.color = float3(1.0, 1.0, 0.0);
     outputStream.Append(output);
     
-    output.pos = mul(posWorld + 0.05f * normalWorld, view);
-    output.pos = mul(output.pos, projection);
+    output.pos = mul(posWorld + 0.05f * normalWorld, viewProj);
     output.color = float3(1.0, 0.0, 0.0);
     outputStream.Append(output);
 }

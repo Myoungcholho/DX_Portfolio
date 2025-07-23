@@ -129,8 +129,8 @@ void TextureGround::UpdateGUI()
 		ImGui::SliderFloat("HeightScale", &heightMapConstantBufferData.heightScale, 0.0f, 1.0f);
 
 		// Material
-		ImGui::SliderFloat3("MaterialDiffuse", &materialConstantBufferData.material.diffuse.x, 0.0f, 1.0f);
-		ImGui::SliderFloat3("MaterialSpecular", &materialConstantBufferData.material.specular.x, 0.0f, 1.0f);
+		ImGui::SliderFloat3("MaterialDiffuse", &materialConstantBufferData.legacyMaterial.diffuse.x, 0.0f, 1.0f);
+		ImGui::SliderFloat3("MaterialSpecular", &materialConstantBufferData.legacyMaterial.specular.x, 0.0f, 1.0f);
 
 		// transform Á¶Àý
 		Vector3 pos = transform->GetPosition();

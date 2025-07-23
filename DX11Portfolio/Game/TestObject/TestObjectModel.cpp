@@ -140,8 +140,8 @@ void TestObjectModel::Render()
         // 2. Sampler ¼³Á¤
         D3D::Get()->GetDeviceContext()->PSSetSamplers(0, 1, GraphicsDevice::Get()->GetLinearWrapSampler());
 
-        // Rim(b1)
-        D3D::Get()->GetDeviceContext()->PSSetConstantBuffers(1, 1, RimParamsCBuffer.GetAddressOf());
+        // Rim(b2)
+        D3D::Get()->GetDeviceContext()->PSSetConstantBuffers(2, 1, RimParamsCBuffer.GetAddressOf());
 
         D3D::Get()->GetDeviceContext()->VSSetConstantBuffers(0, 1, mesh->VSCBuffer.GetAddressOf());
         D3D::Get()->GetDeviceContext()->PSSetConstantBuffers(0, 1, mesh->PSCBuffer.GetAddressOf());

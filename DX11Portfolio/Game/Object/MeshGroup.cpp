@@ -2,18 +2,29 @@
 #include "MeshGroup.h"
 
 
-MeshGroup::MeshGroup(std::string basePath, std::string filename)
+MeshGroup::MeshGroup(std::string basePath, std::string filename,string name)
 {
 	this->basePath = basePath;
 	this->filename = filename;
+
+    meshes = GeomtryGenerator::ReadFromFileModel(basePath, filename);
+
+    this->Name += name;
+
+    transform = make_shared<Transform>();
+}
+
+MeshGroup::MeshGroup(const vector<PBRMeshData>& meshes,string name)
+{
+    this->meshes = meshes;
+
+    this->Name += name;
+
+    transform = make_shared<Transform>();
 }
 
 void MeshGroup::Initialize()
 {
-	// transform ¼³Á¤
-	transform = make_shared<Transform>();
-	transform->SetPosition(Vector3(0, -2.5, 10));
-
     // ConstantBuffer 
     worldInvConstantBufferData.World = Matrix();
     worldInvConstantBufferData.InvTranspose = Matrix();
@@ -24,7 +35,6 @@ void MeshGroup::Initialize()
     D3D::Get()->CreateConstantBuffer(lightConstantBufferData, lightConstantBuffer);
 
 	// Mesh Read
-	auto meshes = GeomtryGenerator::ReadFromFileModel(basePath, filename);
     for (const auto& meshData : meshes) 
     {
         auto newMesh = std::make_shared<Mesh>();
@@ -122,7 +132,7 @@ void MeshGroup::Destroy()
 
 void MeshGroup::UpdateGUI()
 {
-    ImGui::Begin("Model");
+    ImGui::Begin(("Model" + Name).c_str());
     {
         ImGui::SetNextItemOpen(false, ImGuiCond_Once);
         if (ImGui::TreeNode("Texture"))

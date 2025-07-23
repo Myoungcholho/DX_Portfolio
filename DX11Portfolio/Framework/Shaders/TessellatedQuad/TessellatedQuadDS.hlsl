@@ -7,8 +7,7 @@ cbuffer ConstantData : register(b0)
 
 cbuffer CameraBuffer : register(b1)
 {
-    Matrix view;
-    Matrix proj;
+    Matrix viewProj;
 }
 
 struct PatchConstOutput
@@ -41,8 +40,7 @@ DomainOut main(PatchConstOutput patchConst,
     
     dout.pos = float4(p, 1.0);
     dout.pos = mul(dout.pos, model);
-    dout.pos = mul(dout.pos, view);
-    dout.pos = mul(dout.pos, proj);
+    dout.pos = mul(dout.pos, viewProj);
 	
     return dout;
 }

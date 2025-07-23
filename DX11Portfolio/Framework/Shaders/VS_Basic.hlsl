@@ -8,8 +8,7 @@ cbuffer BasicVertexConstantBuffer : register(b0)
 
 cbuffer CameraBuffer : register(b1)
 {
-    matrix view;
-    matrix projection;
+    matrix viewProj;
 };
 
 PSInput_PNT main(VSInput_PNT input)
@@ -21,8 +20,7 @@ PSInput_PNT main(VSInput_PNT input)
     
     output.posWorld = pos.xyz;
     
-    pos = mul(pos, view);
-    pos = mul(pos, projection);
+    pos = mul(pos, viewProj);
     
     output.posProj = pos;
     output.texcoord = input.texcoord;

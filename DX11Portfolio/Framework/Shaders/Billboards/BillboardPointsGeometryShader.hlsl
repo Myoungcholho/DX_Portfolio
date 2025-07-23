@@ -6,8 +6,7 @@ cbuffer BillboardPointsConstantData : register(b0)
 
 cbuffer CameraBuffer : register(b1)
 {
-    matrix view;
-    matrix proj;
+    matrix viewProj;
 };
 
 cbuffer WorldBuffer : register(b2)
@@ -43,8 +42,7 @@ void main(point GeometryShaderInput input[1], uint primID : SV_PrimitiveID,
     
     // 왼쪽 하단
     output.pos = input[0].pos - hw * right - hw * up;
-    output.pos = mul(output.pos, view);
-    output.pos = mul(output.pos, proj);
+    output.pos = mul(output.pos, viewProj);
     output.texCoord = float2(0.0, 1.0);
     output.primID = primID;
     
@@ -52,8 +50,7 @@ void main(point GeometryShaderInput input[1], uint primID : SV_PrimitiveID,
 
         // 오른쪽 하단
     output.pos = input[0].pos + hw * right - hw * up;
-    output.pos = mul(output.pos, view);
-    output.pos = mul(output.pos, proj);
+    output.pos = mul(output.pos, viewProj);
     output.texCoord = float2(1.0, 1.0);
     output.primID = primID;
     
@@ -61,8 +58,7 @@ void main(point GeometryShaderInput input[1], uint primID : SV_PrimitiveID,
     
     // 왼쪽 상단
     output.pos = input[0].pos - hw * right + hw * up;
-    output.pos = mul(output.pos, view);
-    output.pos = mul(output.pos, proj);
+    output.pos = mul(output.pos, viewProj);
     output.texCoord = float2(0.0, 0.0);
     output.primID = primID;
     
@@ -71,8 +67,7 @@ void main(point GeometryShaderInput input[1], uint primID : SV_PrimitiveID,
     
     // 오른쪽 상단
     output.pos = input[0].pos + hw * right + hw * up;
-    output.pos = mul(output.pos, view);
-    output.pos = mul(output.pos, proj);
+    output.pos = mul(output.pos, viewProj);
     output.texCoord = float2(1.0, 0.0);
     output.primID = primID;
     

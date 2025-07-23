@@ -18,5 +18,7 @@ private:
 	void LightCreate();
 
 private:
+	CubeMapSkyRenderer* cubeMapSky;
 	vector<IExecutable*> executes;
+	vector<Mirror*> mirrors;
 };
