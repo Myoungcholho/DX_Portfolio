@@ -9,25 +9,30 @@ public:
 	Transform(Matrix* InMatrix);
 
 public:
+	Transform operator*(const Transform& other) const;
+
+public:
 	Vector3 GetForward();
 	Vector3 GetUp();
 	Vector3 GetRight();
 
 public:
 	const Matrix& GetWorldMatrix();
+	void SetWorldMatrix(const Matrix& matrix);
 
 public:
 	// Position
-	const Vector3& GetPosition();
+	const Vector3& GetPosition() { return Position; }
 	void SetPosition(const Vector3& InValue);
 
 	// Scale
-	const Vector3& GetScale();
+	const Vector3& GetScale() { return Scale; }
 	void SetScale(const Vector3& InValue);
 
 	// Rotation
-	Vector3 GetRotation();
+	Vector3 GetRotation() { return RotationEuler; }
 	void SetRotation(const Vector3& InValue);
+	void SetRotation(const Quaternion& quat);
 
 public:
 	void Translate(const Vector3& InDelta);

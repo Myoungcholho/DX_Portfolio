@@ -11,12 +11,12 @@ using DirectX::SimpleMath::Vector3;
 class TextureGround : public IExecutable
 {
 public:
-	virtual void Initialize();
-	virtual void Destroy();
+	virtual void Initialize();	// 1회 호출
+	virtual void Destroy();		
 
-	virtual void Tick();
-	virtual void UpdateGUI();
-	virtual void Render();
+	virtual void Tick();		// 매프레임 호출
+	virtual void UpdateGUI();	// 매프레임 호출
+	virtual void Render();		// 매프레임 호출 (맨 마지막)
 
 private:
 	void OldRender();
@@ -27,9 +27,9 @@ private:
 	ComPtr<ID3D11VertexShader> m_vertexShader;
 	ComPtr<ID3D11VertexShader> m_vertexShaderPASS;
 
-	ComPtr<ID3D11HullShader> m_hullShader;
-	ComPtr<ID3D11DomainShader> m_domainShader;
-	ComPtr<ID3D11GeometryShader> m_geometryShader;
+	//ComPtr<ID3D11HullShader> m_hullShader;
+	//ComPtr<ID3D11DomainShader> m_domainShader;
+	//ComPtr<ID3D11GeometryShader> m_geometryShader;
 	ComPtr<ID3D11PixelShader> m_pixelShader;
 
 private:

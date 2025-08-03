@@ -6,17 +6,17 @@
 
 #include "VertexLayout.h"
 
-struct MeshData
-{
-	vector<FVertex> vertices;
-	vector<uint32_t> indices;
-	string textureFilename;
-	string fullFilename;
-};
+//struct MeshData
+//{
+//	vector<GrassVertex> vertices;
+//	vector<uint32_t> indices;
+//	string textureFilename;
+//	string fullFilename;
+//};
 
 struct PBRMeshData
 {
-	std::vector<FVertexPNTT> vertices;
+	std::vector<Vertex> vertices;
 	std::vector<uint32_t> indices;
 	
 	string albedoTextureFilename;		// 기본 색 정의

@@ -90,13 +90,13 @@ void ModelLoader::ProcessNode(aiNode* node, const aiScene* scene, Matrix matrix)
 /// </summary>
 PBRMeshData ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 {
-	std::vector<FVertexPNTT> vertices;
+	std::vector<Vertex> vertices;
 	std::vector<uint32_t> indices;
 
 	// 1. 버텍스 정보 추출
 	for (UINT i = 0; i < mesh->mNumVertices; i++) 
 	{
-		FVertexPNTT vertex;
+		Vertex vertex;
 
 		// 위치 좌표 복사
 		vertex.position.x = mesh->mVertices[i].x;

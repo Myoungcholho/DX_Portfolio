@@ -39,11 +39,14 @@ CContext::CContext()
 	Viewport->MinDepth = 0;
 	Viewport->MaxDepth = 1;
 
-	m_constantBufferData.viewProj = Matrix();
-	D3D::Get()->CreateConstantBuffer(m_constantBufferData, m_constantBuffer);
+	//m_constantBufferData.viewProj = Matrix();
+	//D3D::Get()->CreateConstantBuffer(m_constantBufferData, m_constantBuffer);
+	//D3D11Utils::CreateConstBuffer(D3D::Get()->GetDeviceCom(), m_constantBufferData, m_constantBuffer);
 
-	mirrorViewProjectionConstantBufferData.mirrorViewProj = Matrix();
-	D3D::Get()->CreateConstantBuffer(mirrorViewProjectionConstantBufferData, mirrorViewProjectionConstantBuffer);
+	//mirrorViewProjectionConstantBufferData.mirrorViewProj = Matrix();
+	//D3D::Get()->CreateConstantBuffer(mirrorViewProjectionConstantBufferData, mirrorViewProjectionConstantBuffer);
+	
+	//D3D11Utils::CreateConstBuffer(D3D::Get()->GetDeviceCom(), mirrorViewProjectionConstantBufferData, mirrorViewProjectionConstantBuffer);
 }
 
 CContext::~CContext()
@@ -55,15 +58,6 @@ void CContext::Tick()
 {
 	Tick_View();
 	Tick_WorldTime();
-
-	// viewProj 업데이트
-	Matrix view = GetViewMatrix();
-	Matrix proj = GetProjectionMatrix();
-	Matrix viewProj = view * proj;
-
-	m_constantBufferData.viewProj = viewProj.Transpose();
-
-	D3D::Get()->UpdateBuffer(m_constantBufferData, m_constantBuffer);
 }
 
 void CContext::Tick_View()
@@ -110,23 +104,18 @@ void CContext::Tick_WorldTime()
 	if (CKeyboard::Get()->Press(VK_SUBTRACT))
 		CTimer::Get()->AddWorldTime(*CTimer::Get()->GetManualTimeSpeed() * -1.0f);
 	
-	ImGui::Begin("Context");
-	{
-		ImGui::Text("-GlobalRenderOption-");
-		ImGui::Checkbox("WireRendering", &bWireRender);
-	}
-	ImGui::End();
 }
 
 void CContext::UpdateMirror(const Matrix& mirror)
 {
-	this->mirror = mirror;
+	//this->mirror = mirror;
 
-	Matrix view = GetViewMatrix();
-	Matrix proj = GetProjectionMatrix();
-	mirrorViewProjectionConstantBufferData.mirrorViewProj = (mirror * view * proj).Transpose();
+	//Matrix view = GetViewMatrix();
+	//Matrix proj = GetProjectionMatrix();
+	//mirrorViewProjectionConstantBufferData.mirrorViewProj = (mirror * view * proj).Transpose();
 
-	D3D::Get()->UpdateBuffer(mirrorViewProjectionConstantBufferData, mirrorViewProjectionConstantBuffer);
+	//D3D::Get()->UpdateBuffer(mirrorViewProjectionConstantBufferData, mirrorViewProjectionConstantBuffer);
+	//D3D11Utils::UpdateBuffer(D3D::Get()->GetDeviceCom(), D3D::Get()->GetDeviceContextCom(),mirrorViewProjectionConstantBufferData, mirrorViewProjectionConstantBuffer);
 }
 
 void CContext::Render()
@@ -154,16 +143,16 @@ void CContext::Render()
 void CContext::RenderConstantBuffer()
 {
 	// View Projection ConstantBuffer로 전송
-	D3D::Get()->GetDeviceContext()->VSSetConstantBuffers(1, 1, m_constantBuffer.GetAddressOf());
-	D3D::Get()->GetDeviceContext()->GSSetConstantBuffers(1, 1, m_constantBuffer.GetAddressOf());
-	D3D::Get()->GetDeviceContext()->HSSetConstantBuffers(1, 1, m_constantBuffer.GetAddressOf());
-	D3D::Get()->GetDeviceContext()->DSSetConstantBuffers(1, 1, m_constantBuffer.GetAddressOf());
+	//D3D::Get()->GetDeviceContext()->VSSetConstantBuffers(1, 1, m_constantBuffer.GetAddressOf());
+	//D3D::Get()->GetDeviceContext()->GSSetConstantBuffers(1, 1, m_constantBuffer.GetAddressOf());
+	//D3D::Get()->GetDeviceContext()->HSSetConstantBuffers(1, 1, m_constantBuffer.GetAddressOf());
+	//D3D::Get()->GetDeviceContext()->DSSetConstantBuffers(1, 1, m_constantBuffer.GetAddressOf());
 }
 
 void CContext::RenderMirrorConstantBuffer()
 {
 	// Mirror View Projection 전송
-	D3D::Get()->GetDeviceContext()->VSSetConstantBuffers(1, 1, mirrorViewProjectionConstantBuffer.GetAddressOf());
+	//D3D::Get()->GetDeviceContext()->VSSetConstantBuffers(1, 1, mirrorViewProjectionConstantBuffer.GetAddressOf());
 }
 
 void CContext::ResizeScreen()
@@ -189,7 +178,7 @@ SimpleMath::Matrix CContext::GetProjectionMatrix()
 	return View->GetProjectionMatrix();
 }
 
-SimpleMath::Matrix CContext::GetMirrorMatrix()
-{
-	return mirror;
-}
+//SimpleMath::Matrix CContext::GetMirrorMatrix()
+//{
+//	//return mirror;
+//}

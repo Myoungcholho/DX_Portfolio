@@ -11,8 +11,8 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 	WindowDesc winDesc;
 	winDesc.AppName = L"DirectXPortfolio";
 	winDesc.Instance = InInstance;
-	winDesc.Width = 1920; // 1280 -> 1920
-	winDesc.Height = 1080; // 720 -> 1080
+	winDesc.Width = 1920; 
+	winDesc.Height = 1080;
 	winDesc.Background = Color(0.2f, 0.2f, 0.2f, 1.0f);
 
 	// 윈도우 생성
@@ -22,9 +22,7 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 	D3DDesc d3dDesc = { hwnd, winDesc.Width, winDesc.Height, true };
 	D3D::SetDesc(d3dDesc);
 	D3D::Create();
-
-	// 전역 GraphicsDevice 초기화
-	GraphicsDevice::Create();
+	D3D::Get()->GraphicsInit();
 
 	// ImGUI 초기화
 	ImGUIDesc imguiDesc = {};
@@ -38,11 +36,55 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 
 
 	// Game Run
-	auto executor = std::make_unique<ExecutionManager>();
-	WPARAM result = Window::Run(executor.get());
+	UGameInstance* game = new UGameInstance();
+	game->Init();
+
+	UWorld* world = game->GetWorld();
+
+	ComPtr<ID3D11Device> device = D3D::Get()->GetDeviceCom();
+	ComPtr<ID3D11DeviceContext> context = D3D::Get()->GetDeviceContextCom();
+
+	// 여기서 액터 생성, 나중에는 Load 클래스로 변경
+	{
+		ASkyboxActor* skyboxActor = world->SpawnActor<ASkyboxActor>();
+
+		PBRMeshData skyboxMesh = GeomtryGenerator::MakeBox(40.0f);
+		std::reverse(skyboxMesh.indices.begin(), skyboxMesh.indices.end());
+
+		skyboxActor->GetSkyboxComponent()->SetDevice(device);
+		skyboxActor->GetSkyboxComponent()->SetContext(context);
+		skyboxActor->GetSkyboxComponent()->SetPBRMeshData(vector{ skyboxMesh });	
+	}
+
+	// 바닥
+	{
+		AStaticMeshActor* staticActor = world->SpawnActor<AStaticMeshActor>();
+
+		PBRMeshData ground = GeomtryGenerator::MakeSquareGrid(2048, 2048, 20.f, { 40.0f,40.0f });
+		string path = "../../../_Textures/PBR/rock-wall-mortar-ue/";
+		ground.albedoTextureFilename = path + "rock-wall-mortar_albedo.png";
+		ground.normalTextureFilename = path+ "rock-wall-mortar_normal-dx.png";
+		ground.heightTextureFilename = path+ "rock-wall-mortar_height.png";
+		ground.aoTextureFilename = path+ "rock-wall-mortar_ao.png";
+		ground.metallicTextureFilename = path + "rock-wall-mortar_metallic.png";
+		ground.roughnessTextureFilename = path + "rock-wall-mortar_roughness.png";
+
+		staticActor->GetStaticMeshComponent()->SetDevice(device);
+		staticActor->GetStaticMeshComponent()->SetContext(context);
+		staticActor->GetStaticMeshComponent()->SetPBRMeshData(vector{ ground });
+
+		staticActor->GetStaticMeshComponent()->SetRelativePosition(Vector3(0, -10, 0));
+		staticActor->GetStaticMeshComponent()->SetRelativeRotation(Vector3(90.0f, 0.0f, 0.0f));  // 단위: 도 (Euler)
+	}
+
+
+	// 모든 액터 배치가 끝났다면
+	world->StartAllActors();
+
+
+	WPARAM result = Window::Run(game);
 
 	ImGuiManager::Destroy();
-	GraphicsDevice::Destory();
 	D3D::Destroy();
 	Window::Destroy();
 

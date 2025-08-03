@@ -86,7 +86,7 @@ PBRMeshData GeomtryGenerator::MakeSquare(const float scale, const Vector2 texSca
 
     for (size_t i = 0; i < positions.size(); i++) 
     {
-        FVertexPNTT v;
+        Vertex v;
         v.position = positions[i];
         v.normalModel = normals[i];
         v.texcoord = texcoords[i] * texScale;
@@ -220,7 +220,7 @@ PBRMeshData GeomtryGenerator::MakeBox(const float scale)
     PBRMeshData meshData;
     for (size_t i = 0; i < positions.size(); i++) 
     {
-        FVertexPNTT v;
+        Vertex v;
         v.position = positions[i];
         v.normalModel = normals[i];
         v.texcoord = texcoords[i];
@@ -247,7 +247,7 @@ PBRMeshData GeomtryGenerator::MakeSphere(const float radius, const int numSlices
 
     PBRMeshData meshData;
 
-    vector<FVertexPNTT>& vertices = meshData.vertices;
+    vector<Vertex>& vertices = meshData.vertices;
 
     for (int j = 0; j <= numStacks; j++) {
 
@@ -257,7 +257,7 @@ PBRMeshData GeomtryGenerator::MakeSphere(const float radius, const int numSlices
 
         for (int i = 0; i <= numSlices; i++) 
         {
-            FVertexPNTT v;
+            Vertex v;
 
             // 시작점을 x-z 평면에서 회전시키면서 원을 만드는 구조
             v.position = Vector3::Transform(
@@ -324,11 +324,11 @@ PBRMeshData GeomtryGenerator::MakeSquareGrid(const int numSlices, const int numS
         float x = -1.0f;
         for (int i = 0; i < numSlices + 1; i++) 
         {
-            FVertexPNTT v;
+            Vertex v;
             v.position = Vector3(x, y, 0.0f) * scale;
             v.normalModel = Vector3(0.0f, 0.0f, -1.0f);
             v.texcoord = Vector2(x + 1.0f, y + 1.0f) * 0.5f * texScale;
-            cout << v.texcoord.x << " " << v.texcoord.y << "\n";
+            //cout << v.texcoord.x << " " << v.texcoord.y << "\n";
             v.tangentModel = Vector3(1.0f, 0.0f, 0.0f);
 
             meshData.vertices.push_back(v);
@@ -338,22 +338,42 @@ PBRMeshData GeomtryGenerator::MakeSquareGrid(const int numSlices, const int numS
         y -= dy;
     }
 
-    for (int j = 0; j < numStacks; j++) 
+    for (int j = 0; j < numStacks; j++)
     {
-        for (int i = 0; i < numSlices; i++) 
+        for (int i = 0; i < numSlices; i++)
         {
             int i0 = j * (numSlices + 1) + i;
             int i1 = i0 + 1;
             int i2 = i0 + (numSlices + 1);
             int i3 = i2 + 1;
 
-            // 4개 정점 = 1 patch (좌상, 우상, 좌하, 우하)
-            meshData.indices.push_back(i0); // top-left
-            meshData.indices.push_back(i1); // top-right
-            meshData.indices.push_back(i2); // bottom-left
-            meshData.indices.push_back(i3); // bottom-right
+            // 삼각형 2개로 구성
+            meshData.indices.push_back(i0);
+            meshData.indices.push_back(i1);
+            meshData.indices.push_back(i2);
+
+            meshData.indices.push_back(i2);
+            meshData.indices.push_back(i1);
+            meshData.indices.push_back(i3);
         }
     }
+
+    //for (int j = 0; j < numStacks; j++) 
+    //{
+    //    for (int i = 0; i < numSlices; i++) 
+    //    {
+    //        int i0 = j * (numSlices + 1) + i;
+    //        int i1 = i0 + 1;
+    //        int i2 = i0 + (numSlices + 1);
+    //        int i3 = i2 + 1;
+
+    //        // 4개 정점 = 1 patch (좌상, 우상, 좌하, 우하)
+    //        meshData.indices.push_back(i0); // top-left
+    //        meshData.indices.push_back(i1); // top-right
+    //        meshData.indices.push_back(i2); // bottom-left
+    //        meshData.indices.push_back(i3); // bottom-right
+    //    }
+    //}
 
     return meshData;
 }

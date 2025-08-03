@@ -45,7 +45,7 @@ struct PSInput_PNCT
     float2 uv : TEXCOORD0;
 };
 ///////////////////////////////////////////////////////////////////////////////
-struct VertexShaderInput
+struct VertexShaderInput2
 {
     float3 posModel : POSITION; //모델 좌표계의 위치 position
     float3 normalModel : NORMAL0; // 모델 좌표계의 normal    
@@ -53,7 +53,7 @@ struct VertexShaderInput
     float3 tangentModel : TANGENT0;
 };
 
-struct PixelShaderInput
+struct PixelShaderInput2
 {
     float4 posProj : SV_POSITION; // Screen position
     float3 posWorld : POSITION; // World position (조명 계산에 사용)

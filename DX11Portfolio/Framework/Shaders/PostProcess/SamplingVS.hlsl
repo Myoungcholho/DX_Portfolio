@@ -1,9 +1,9 @@
+#include "../Common.hlsli"
+
 struct SamplingVertexShaderInput
 {
     float3 position : POSITION;
-    float3 normal : NORMAL;
     float2 texcoord : TEXCOORD;
-    float3 tangent : TANGENT;
 };
 
 struct SamplingPixelShaderInput

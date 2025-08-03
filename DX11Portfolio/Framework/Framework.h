@@ -19,6 +19,7 @@ using namespace chrono;
 // MathHelpers
 #include "MathHelper.h"
 #include "Utilities/D3D11Utils.h"
+#include "Components/Transform.h"
 
 // ComPtr
 #include <wrl/client.h>
@@ -46,9 +47,6 @@ using Microsoft::WRL::ComPtr;
 #include <imgui_impl_dx11.h>
 #include <imgui_impl_win32.h>
 
-// Component
-#include "Components/Transform.h"
-
 // Core
 #include "Core/Math.h"
 #include "Core/Color.h"
@@ -65,6 +63,8 @@ using Microsoft::WRL::ComPtr;
 #include "Renders/Texture.h"
 #include "Renders/Mesh.h"
 #include "Renders/CubeMapping.h"
+#include "Renders/Model.h"
+
 
 // PostProcess
 #include "PostProcess/ImageFilter.h"
@@ -99,3 +99,19 @@ using Microsoft::WRL::ComPtr;
 #include "Billboards/BillboardData.h"
 #include "Billboards/IBillboardRenderer.h"
 #include "Billboards/BillboardRenderer_GS.h"
+
+// Component
+#include "Components/UObject.h"
+#include "Components/UActorComponent.h"
+#include "Components/AActor.h"
+#include "Components/USceneComponent.h"
+#include "Components/UPrimitiveComponent.h"
+#include "Renders/URenderQueue.h"
+#include "Components/UStaticMeshComponent.h"
+#include "Components/ULightComponent.h"
+#include "Components/UWorld.h"
+#include "Components/USkyboxComponent.h"
+
+#include "Renders/URenderer.h"
+#include "Core/URenderManager.h"
+#include "Core/UGameInstance.h"

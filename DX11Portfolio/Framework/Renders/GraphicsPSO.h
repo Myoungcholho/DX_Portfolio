@@ -5,6 +5,7 @@ class GraphicsPSO
 public:
 	void operator=(const GraphicsPSO& pso);
 	void SetBlendFactor(const float blendFactor[4]);
+    void Apply(ID3D11DeviceContext* context) const;
 
 public:
     // Shader

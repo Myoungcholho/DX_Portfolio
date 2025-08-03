@@ -115,8 +115,53 @@
     <ClInclude Include="Renders\GraphicsPSO.h">
       <Filter>Renders</Filter>
     </ClInclude>
-    <ClInclude Include="Utilities\DXUitls.h">
+    <ClInclude Include="Utilities\D3D11Utils.h">
       <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\UObject.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\UActorComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\AActor.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\UWorld.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\USceneComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\UPrimitiveComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\UStaticMeshComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Renders\RenderTypes.h">
+      <Filter>Renders</Filter>
+    </ClInclude>
+    <ClInclude Include="Renders\URenderQueue.h">
+      <Filter>Renders</Filter>
+    </ClInclude>
+    <ClInclude Include="Renders\Model.h">
+      <Filter>Renders</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\UGameInstance.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Renders\URenderer.h">
+      <Filter>Renders</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\USkyboxComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\URenderManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\ULightComponent.h">
+      <Filter>Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -206,6 +251,48 @@
     <ClCompile Include="Renders\GraphicsPSO.cpp">
       <Filter>Renders</Filter>
     </ClCompile>
+    <ClCompile Include="Utilities\D3D11Utils.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\UActorComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\AActor.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\UWorld.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\USceneComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\UPrimitiveComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\UStaticMeshComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Renders\URenderQueue.cpp">
+      <Filter>Renders</Filter>
+    </ClCompile>
+    <ClCompile Include="Renders\Model.cpp">
+      <Filter>Renders</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\UGameInstance.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Renders\URenderer.cpp">
+      <Filter>Renders</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\USkyboxComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\URenderManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\ULightComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="System">
@@ -241,9 +328,6 @@
     <Filter Include="Billboards">
       <UniqueIdentifier>{bc8933c8-005b-41d7-9a75-1eef4994d147}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shaders\TessellatedQuad">
-      <UniqueIdentifier>{f67c1f1e-863a-475f-80aa-b6e8e3af43de}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shaders\BasicShader">
       <UniqueIdentifier>{e9ff52e4-8823-46d3-b397-ef628c4f36f8}</UniqueIdentifier>
     </Filter>
@@ -259,32 +343,11 @@
     <Filter Include="Shaders\ObjectShader">
       <UniqueIdentifier>{1f908029-1ab8-44e5-b2f3-287533c2d6a3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\DrawNormal">
+      <UniqueIdentifier>{55a12397-0426-4a26-9914-155cce550763}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\PlaneVertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\PlanePixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\FloorVS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\FloorPS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\PS_Basic.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\VS_Basic.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\NormalVertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\NormalPixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\Billboards\BillboardPointsVertexShader.hlsl">
       <Filter>Shaders\Billboards</Filter>
     </FxCompile>
@@ -293,36 +356,6 @@
     </FxCompile>
     <FxCompile Include="Shaders\Billboards\BillboardPointsPixelShader.hlsl">
       <Filter>Shaders\Billboards</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\NormalGeometryShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\TessellatedQuad\TessellatedQuadVS.hlsl">
-      <Filter>Shaders\TessellatedQuad</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\TessellatedQuad\TessellatedQuadHS.hlsl">
-      <Filter>Shaders\TessellatedQuad</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\TessellatedQuad\TessellatedQuadDS.hlsl">
-      <Filter>Shaders\TessellatedQuad</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\TessellatedQuad\TessellatedQuadPS.hlsl">
-      <Filter>Shaders\TessellatedQuad</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\BasicShader\BasicVertexShader.hlsl">
-      <Filter>Shaders\BasicShader</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\BasicShader\BasicPixelShader.hlsl">
-      <Filter>Shaders\BasicShader</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\BasicShader\BasicHullShader.hlsl">
-      <Filter>Shaders\BasicShader</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\BasicShader\BasicDomainShader.hlsl">
-      <Filter>Shaders\BasicShader</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\BasicShader\BasicVertexShaderPASS.hlsl">
-      <Filter>Shaders\BasicShader</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\PostProcess\BloomDownPS.hlsl">
       <Filter>Shaders\PostProcess</Filter>
@@ -333,20 +366,32 @@
     <FxCompile Include="Shaders\PostProcess\CombinePixelShader.hlsl">
       <Filter>Shaders\PostProcess</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\CubeMapping\CubeMappingVS.hlsl">
-      <Filter>Shaders\CubeMapping</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\CubeMapping\CubeMappingPS.hlsl">
-      <Filter>Shaders\CubeMapping</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\PostProcess\SamplingVS.hlsl">
       <Filter>Shaders\PostProcess</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\ObjectShader\ObjectVertexShader.hlsl">
-      <Filter>Shaders\ObjectShader</Filter>
+    <FxCompile Include="Shaders\DrawNormal\NormalVS.hlsl">
+      <Filter>Shaders\DrawNormal</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\ObjectShader\ObjectPixelShader.hlsl">
-      <Filter>Shaders\ObjectShader</Filter>
+    <FxCompile Include="Shaders\DrawNormal\NormalPS.hlsl">
+      <Filter>Shaders\DrawNormal</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\DrawNormal\NormalGS.hlsl">
+      <Filter>Shaders\DrawNormal</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\SimplePS.hlsl">
+      <Filter>Shaders\PostProcess</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\CubeMapping\SkyboxVS.hlsl">
+      <Filter>Shaders\CubeMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\CubeMapping\SkyboxPS.hlsl">
+      <Filter>Shaders\CubeMapping</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\BasicShader\BasicVS.hlsl">
+      <Filter>Shaders\BasicShader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\BasicShader\BasicPS.hlsl">
+      <Filter>Shaders\BasicShader</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

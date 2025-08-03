@@ -48,6 +48,9 @@ struct WorldInvConstantBuffer
 {
     Matrix World;
     Matrix InvTranspose;
+    int useHeightMap = 0;
+    float heightScale = 0.0f;
+    Vector2 dummy;
 };
 
 struct NormalVertexCBuffer
@@ -154,4 +157,41 @@ struct BillboardPointCBuffer
 {
     Vector3 EyeWorld;
     float width;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+struct GlobalConstants
+{
+    Matrix view;
+    Matrix proj;
+    Matrix viewProj;
+    Vector3 eyeWorld;
+    float strengthIBL = 1.0f;
+    int textureToDraw = 0;              // 0: Env, 1: Specular, 2: Irradiance, 그외: 검은색
+    float envLodBias = 0.0f;            // 환경맵 LodBias
+    float lodBias = 2.0f;               // 다른 물체들 LodBias
+    float dummy2;
+
+    Light lights[MAX_LIGHTS];
+};
+
+struct MaterialConstants {
+
+    Vector3 albedoFactor = Vector3(1.0f); // 12
+    float roughnessFactor = 1.0f;
+    float metallicFactor = 1.0f;
+    Vector3 emissionFactor = Vector3(0.0f);
+
+    // 여러 옵션들에 uint 플래그 하나만 사용할 수 있음 비트 마스킹
+    int useAlbedoMap = 0;
+    int useNormalMap = 0;
+    int useAOMap = 0;
+    int invertNormalMapY = 0;
+    int useMetallicMap = 0;
+    int useRoughnessMap = 0;
+    int useEmissiveMap = 0;
+    float expose = 1.0f;
+    float gamma = 1.0f;
+    Vector3 dummy;
+
 };

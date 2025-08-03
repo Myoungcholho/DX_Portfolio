@@ -30,12 +30,11 @@ public:
 
 public:
 	class CCamera* GetCamera() { return View.get(); }
-	bool GetWireRender() { return bWireRender; }
 
 public:
 	SimpleMath::Matrix GetViewMatrix();
 	SimpleMath::Matrix GetProjectionMatrix();
-	SimpleMath::Matrix GetMirrorMatrix();
+	//SimpleMath::Matrix GetMirrorMatrix();
 
 public:
 	void SetHideSetting(bool InValue) { bHideSetting = InValue; }
@@ -45,7 +44,6 @@ private:
 
 private:
 	bool bHideSetting = false;
-	bool bWireRender = false;
 
 private:
 	std::unique_ptr<CCamera> View;
@@ -53,12 +51,12 @@ private:
 	std::unique_ptr<D3D11_VIEWPORT> Viewport;
 
 private:
-	Matrix mirror;
+	//Matrix mirror;
 
 private:
-	ViewProjectionConstantBuffer m_constantBufferData;
-	MirrorViewProjectionConstantBuffer mirrorViewProjectionConstantBufferData;
+	//ViewProjectionConstantBuffer m_constantBufferData;
+	//MirrorViewProjectionConstantBuffer mirrorViewProjectionConstantBufferData;
 
-	ComPtr<ID3D11Buffer> m_constantBuffer;
-	ComPtr<ID3D11Buffer> mirrorViewProjectionConstantBuffer;
+	//ComPtr<ID3D11Buffer> m_constantBuffer;
+	//ComPtr<ID3D11Buffer> mirrorViewProjectionConstantBuffer;
 };

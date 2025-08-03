@@ -221,9 +221,96 @@ void Graphics::InitShaders(ComPtr<ID3D11Device>& device)
 		 D3D11_INPUT_PER_VERTEX_DATA, 0},
 	};
 
+	// VS
+	D3D11Utils::CreateVertexShaderAndInputLayout(device, L"BasicShader/BasicVS.hlsl",basicIEs, basicVS, basicIL);
+	D3D11Utils::CreateVertexShaderAndInputLayout(device, L"DrawNormal/NormalVS.hlsl", basicIEs, normalVS, basicIL);
+	D3D11Utils::CreateVertexShaderAndInputLayout(device, L"PostProcess/SamplingVS.hlsl", samplingIED, samplingVS, samplingIL);
+	D3D11Utils::CreateVertexShaderAndInputLayout(device, L"CubeMapping/SkyboxVS.hlsl", skyboxIE, skyboxVS, skyboxIL);
 
+	// PS
+	D3D11Utils::CreatePixelShader(device, L"BasicShader/BasicPS.hlsl", basicPS);
+	D3D11Utils::CreatePixelShader(device, L"DrawNormal/NormalPS.hlsl", normalPS);
+	D3D11Utils::CreatePixelShader(device, L"CubeMapping/SkyboxPS.hlsl", skyboxPS);
+	D3D11Utils::CreatePixelShader(device, L"PostProcess/CombinePixelShader.hlsl", combinePS);		
+	D3D11Utils::CreatePixelShader(device, L"PostProcess/BloomDownPS.hlsl", bloomDownPS);
+	D3D11Utils::CreatePixelShader(device, L"PostProcess/BloomUpPS.hlsl", bloomUpPS);
+	D3D11Utils::CreatePixelShader(device, L"PostProcess/SimplePS.hlsl", simplePS);
+
+	// GS
+	D3D11Utils::CreateGeometryShader(device, L"DrawNormal/NormalGS.hlsl", normalGS);
 }
 void Graphics::InitPipelineStates(ComPtr<ID3D11Device>& device)
 {
+	// defaultSolidPSO;
+	defaultSolidPSO.m_vertexShader = basicVS;
+	defaultSolidPSO.m_inputLayout = basicIL;
+	defaultSolidPSO.m_pixelShader = basicPS;
+	defaultSolidPSO.m_rasterizerState = solidRS;
+	defaultSolidPSO.m_primitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
+	// defaultWirePSO
+	defaultWirePSO = defaultSolidPSO;
+	defaultWirePSO.m_rasterizerState = wireRS;
+
+	// stencilMarkPSO;
+	stencilMaskPSO = defaultSolidPSO;
+	stencilMaskPSO.m_depthStencilState = maskDSS;
+	stencilMaskPSO.m_stencilRef = 1;
+	stencilMaskPSO.m_pixelShader = simplePS;
+
+	// reflectSolidPSO: 반사되면 Winding 반대
+	reflectSolidPSO = defaultSolidPSO;
+	reflectSolidPSO.m_depthStencilState = drawMaskedDSS;
+	reflectSolidPSO.m_rasterizerState = solidCCWRS; // 반시계
+	reflectSolidPSO.m_stencilRef = 1;
+
+	// reflectWirePSO: 반사되면 Winding 반대
+	reflectWirePSO = reflectSolidPSO;
+	reflectWirePSO.m_rasterizerState = wireCCWRS; // 반시계
+	reflectWirePSO.m_stencilRef = 1;
+
+	// mirrorBlendSolidPSO;
+	mirrorBlendSolidPSO = defaultSolidPSO;
+	mirrorBlendSolidPSO.m_blendState = mirrorBS;
+	mirrorBlendSolidPSO.m_depthStencilState = drawMaskedDSS;
+	mirrorBlendSolidPSO.m_stencilRef = 1;
+
+	// mirrorBlendWirePSO;
+	mirrorBlendWirePSO = defaultWirePSO;
+	mirrorBlendWirePSO.m_blendState = mirrorBS;
+	mirrorBlendWirePSO.m_depthStencilState = drawMaskedDSS;
+	mirrorBlendWirePSO.m_stencilRef = 1;
+
+	// skyboxSolidPSO
+	skyboxSolidPSO = defaultSolidPSO;
+	skyboxSolidPSO.m_vertexShader = skyboxVS;
+	skyboxSolidPSO.m_pixelShader = skyboxPS;
+	skyboxSolidPSO.m_inputLayout = skyboxIL;
+
+	// skyboxWirePSO
+	skyboxWirePSO = skyboxSolidPSO;
+	skyboxWirePSO.m_rasterizerState = wireRS;
+
+	// reflectSkyboxSolidPSO
+	reflectSkyboxSolidPSO = skyboxSolidPSO;
+	reflectSkyboxSolidPSO.m_depthStencilState = drawMaskedDSS;
+	reflectSkyboxSolidPSO.m_rasterizerState = solidCCWRS; // 반시계
+	reflectSkyboxSolidPSO.m_stencilRef = 1;
+
+	// reflectSkyboxWirePSO
+	reflectSkyboxWirePSO = reflectSkyboxSolidPSO;
+	reflectSkyboxWirePSO.m_rasterizerState = wireCCWRS;
+	reflectSkyboxWirePSO.m_stencilRef = 1;
+
+	// normalsPSO
+	normalsPSO = defaultSolidPSO;
+	normalsPSO.m_vertexShader = normalVS;
+	normalsPSO.m_geometryShader = normalGS;
+	normalsPSO.m_pixelShader = normalPS;
+	normalsPSO.m_primitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
+
+	// postProcessingPSO
+	postProcessingPSO.m_vertexShader = samplingVS;
+	postProcessingPSO.m_inputLayout = samplingIL;
+	postProcessingPSO.m_rasterizerState = postProcessingRS;
 }

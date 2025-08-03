@@ -7,21 +7,21 @@ void BillboardInstance::Initialize(vector<BillboardPoint>& points)
 	transform = make_shared<Transform>();
 
 	// VertexBuffer 持失, 
-	D3D::Get()->CreateVertexBuffer(m_points, m_vertexBuffer);
+	//D3D::Get()->CreateVertexBuffer(m_points, m_vertexBuffer);
 
 	// VS, GS Cbuffer 持失
 	WorldMatrixData.World = Matrix();
-	D3D::Get()->CreateConstantBuffer(WorldMatrixData, WorldConstantBuffer);
+	//D3D::Get()->CreateConstantBuffer(WorldMatrixData, WorldConstantBuffer);
 
 	TreeIndexData.index = rand() % 5;
-	D3D::Get()->CreateConstantBuffer(TreeIndexData, TreeIndexBuffer);
+	//D3D::Get()->CreateConstantBuffer(TreeIndexData, TreeIndexBuffer);
 }
 
 void BillboardInstance::Tick()
 {
 	WorldMatrixData.World = transform->GetWorldMatrix().Transpose();
 
-	D3D::Get()->UpdateBuffer(WorldMatrixData, WorldConstantBuffer);
+	//D3D::Get()->UpdateBuffer(WorldMatrixData, WorldConstantBuffer);
 }
 
 void BillboardInstance::UpdateGUI()

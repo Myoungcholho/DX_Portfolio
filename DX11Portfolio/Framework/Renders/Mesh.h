@@ -24,12 +24,14 @@ struct Mesh
     ComPtr<ID3D11Buffer> vertexBuffer;
     ComPtr<ID3D11Buffer> indexBuffer;
 
-    UINT m_indexCount = 0;
-    UINT m_vertexCount = 0;
+    UINT indexCount = 0;
+    UINT vertexCount = 0;
+    UINT stride = 0;
+    UINT offset = 0;
 
     // ConstantBuffer -> 현재는 하나로 통합했지만 나중에 분리할 것
-    ComPtr<ID3D11Buffer> vertexConstantBuffer;
-    ComPtr<ID3D11Buffer> pixelConstantBuffer;
+    ComPtr<ID3D11Buffer> vertexConstBuffer;
+    ComPtr<ID3D11Buffer> pixelConstBuffer;
 
     // Texturing
     ComPtr<ID3D11Texture2D> albedoTexture;

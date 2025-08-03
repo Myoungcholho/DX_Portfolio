@@ -1,14 +1,21 @@
 #include"Framework.h"
 #include"ImageFilter.h"
 
-ImageFilter::ImageFilter(ComPtr<ID3D11PixelShader>& pixelShader, int width, int height)
+ImageFilter::ImageFilter(ComPtr<ID3D11Device>& device,
+    ComPtr<ID3D11DeviceContext>& context,
+    ComPtr<ID3D11PixelShader>& pixelShader, int width,
+    int height) 
 {
-	Initialize(pixelShader, width, height);
+    Initialize(device, context, pixelShader, width, height);
 }
 
-void ImageFilter::Initialize(ComPtr<ID3D11PixelShader>& pixelShader, int width, int height)
+void ImageFilter::Initialize(ComPtr<ID3D11Device>& device,
+    ComPtr<ID3D11DeviceContext>& context,
+    ComPtr<ID3D11PixelShader>& pixelShader, int width,
+    int height) 
 {
-	pixelShader.CopyTo(m_pixelShader.GetAddressOf());
+
+    ThrowIfFailed(pixelShader.CopyTo(m_pixelShader.GetAddressOf()));
 
     ZeroMemory(&m_viewport, sizeof(D3D11_VIEWPORT));
     m_viewport.TopLeftX = 0;
@@ -21,20 +28,19 @@ void ImageFilter::Initialize(ComPtr<ID3D11PixelShader>& pixelShader, int width, 
     m_constData.dx = 1.0f / width;
     m_constData.dy = 1.0f / height;
 
-    D3D::Get()->CreateConstantBuffer(m_constData, m_constBuffer);
+    D3D11Utils::CreateConstBuffer(device, m_constData, m_constBuffer);
 }
 
-void ImageFilter::UpdateConstantBuffers()
+void ImageFilter::UpdateConstantBuffers(ComPtr<ID3D11Device>& device,ComPtr<ID3D11DeviceContext>& context) 
 {
-    D3D::Get()->UpdateBuffer(m_constData, m_constBuffer);
+    D3D11Utils::UpdateBuffer(device, context, m_constData, m_constBuffer);
 }
 
-void ImageFilter::Render() const
+void ImageFilter::Render(ComPtr<ID3D11DeviceContext>& context) const 
 {
+
     assert(m_shaderResources.size() > 0);
     assert(m_renderTargets.size() > 0);
-
-    ID3D11DeviceContext* context = D3D::Get()->GetDeviceContext();
 
     context->RSSetViewports(1, &m_viewport);
     context->OMSetRenderTargets(UINT(m_renderTargets.size()),m_renderTargets.data(), NULL);
@@ -43,8 +49,9 @@ void ImageFilter::Render() const
     context->PSSetConstantBuffers(0, 1, m_constBuffer.GetAddressOf());
 }
 
-void ImageFilter::SetShaderResources(const std::vector<ComPtr<ID3D11ShaderResourceView>>& resources)
+void ImageFilter::SetShaderResources(const std::vector<ComPtr<ID3D11ShaderResourceView>>& resources) 
 {
+
     m_shaderResources.clear();
     for (const auto& res : resources) 
     {
@@ -52,7 +59,7 @@ void ImageFilter::SetShaderResources(const std::vector<ComPtr<ID3D11ShaderResour
     }
 }
 
-void ImageFilter::SetRenderTargets(const std::vector<ComPtr<ID3D11RenderTargetView>>& targets)
+void ImageFilter::SetRenderTargets(const std::vector<ComPtr<ID3D11RenderTargetView>>& targets) 
 {
     m_renderTargets.clear();
     for (const auto& tar : targets) 

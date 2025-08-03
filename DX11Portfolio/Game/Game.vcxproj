@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -110,6 +110,7 @@
       <AdditionalIncludeDirectories>./;../../_Lib;../Framework;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -134,38 +135,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Actors\ASkyboxActor.h" />
+    <ClInclude Include="Actors\AStaticMeshActor.h" />
     <ClInclude Include="Environment\BillboardSystem.h" />
     <ClInclude Include="Environment\CubeMapSkyRenderer.h" />
     <ClInclude Include="Environment\TexturedGround.h" />
     <ClInclude Include="ObjectCollection.h" />
-    <ClInclude Include="Object\MeshGroup.h" />
     <ClInclude Include="Object\Mirror.h" />
     <ClInclude Include="Pch.h" />
-    <ClInclude Include="TestObject\TestObjectCube.h" />
-    <ClInclude Include="TestObject\TestObjectCylinder.h" />
-    <ClInclude Include="TestObject\TestObjectGrid.h" />
-    <ClInclude Include="TestObject\TestObjectModel.h" />
-    <ClInclude Include="TestObject\TestObjectPlane.h" />
-    <ClInclude Include="TestObject\TestObjectQuad.h" />
-    <ClInclude Include="TestObject\TestObjectSphere.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Actors\ASkyboxActor.cpp" />
+    <ClCompile Include="Actors\AStaticMeshActor.cpp" />
     <ClCompile Include="Environment\BillboardSystem.cpp" />
     <ClCompile Include="Environment\CubeMapSkyRenderer.cpp" />
     <ClCompile Include="Environment\TexturedGround.cpp" />
     <ClCompile Include="ObjectCollection.cpp" />
-    <ClCompile Include="Object\MeshGroup.cpp" />
     <ClCompile Include="Object\Mirror.cpp" />
     <ClCompile Include="Pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="TestObject\TestObjectCube.cpp" />
-    <ClCompile Include="TestObject\TestObjectCylinder.cpp" />
-    <ClCompile Include="TestObject\TestObjectGrid.cpp" />
-    <ClCompile Include="TestObject\TestObjectModel.cpp" />
-    <ClCompile Include="TestObject\TestObjectPlane.cpp" />
-    <ClCompile Include="TestObject\TestObjectQuad.cpp" />
-    <ClCompile Include="TestObject\TestObjectSphere.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

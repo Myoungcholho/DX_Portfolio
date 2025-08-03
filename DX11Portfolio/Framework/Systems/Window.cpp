@@ -1,27 +1,20 @@
 #include "Framework.h"
 #include "Window.h"
-#include "IExecutable.h"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam,
 	LPARAM lParam);
 
-IExecutable* Window::Executor = nullptr;
 HWND Window::Handle = nullptr;
 WindowDesc Window::Desc = {};
 
 // 실제 게임 Loop
-WPARAM Window::Run(IExecutable* InExecutor)
+WPARAM Window::Run(UGameInstance* game)
 {
 	CKeyboard::Create();
 	CTimer::Create();
 	CMouse::Create();
 	CContext::Create();
 	Engine::Create();
-
-	D3D::Get()->Init();
-
-	Executor = InExecutor;
-	Executor->Initialize();
 
 	MSG msg;
 	ZeroMemory(&msg, sizeof(MSG));
@@ -38,11 +31,11 @@ WPARAM Window::Run(IExecutable* InExecutor)
 		}
 		else
 		{
-			MainRender();
+			MainRender(game);
 		}
 	}
 
-	Executor->Destroy();
+	game->Destroy();
 
 	Engine::Destory();
 	CContext::Destroy();
@@ -106,17 +99,14 @@ LRESULT Window::WndProc(HWND InHandle, UINT InMessage, WPARAM InwParam, LPARAM I
 
 	if (InMessage == WM_SIZE)
 	{
-		if (Executor != nullptr)
-		{
-			float width = (float)LOWORD(InlParam);
-			float height = (float)HIWORD(InlParam);
+		float width = (float)LOWORD(InlParam);
+		float height = (float)HIWORD(InlParam);
 
-			if (D3D::Get() != nullptr)
-				D3D::Get()->ResizeScreen(width, height);
+		if (D3D::Get() != nullptr)
+			D3D::Get()->ResizeScreen(width, height);
 
-			if (CContext::Get() != nullptr)
-				CContext::Get()->ResizeScreen();
-		}
+		if (CContext::Get() != nullptr)
+			CContext::Get()->ResizeScreen();	
 	}
 
 	if (InMessage == WM_KEYDOWN)
@@ -139,17 +129,20 @@ LRESULT Window::WndProc(HWND InHandle, UINT InMessage, WPARAM InwParam, LPARAM I
 	return DefWindowProc(InHandle, InMessage, InwParam, InlParam);
 }
 
-void Window::MainRender()
+void Window::MainRender(UGameInstance* game)
 {
-	ImGuiManager::BeginFrame();
+	ImGuiManager::BeginFrame(); // 싱글톤 Tick에서 호출됨
 
-	D3D::Get()->UpdateGUI();
-	Executor->UpdateGUI();
+	//D3D::Get()->UpdateGUI();
+	//Executor->UpdateGUI();
+
+	game->OnGUI();
 
 	CTimer::Get()->Tick();
 	CMouse::Get()->Tick();
 	CContext::Get()->Tick();
-	Executor->Tick();
+
+	game->Tick();
 
 
 	//Rendering
@@ -159,14 +152,15 @@ void Window::MainRender()
 		// 카메라 포함
 		CContext::Get()->Render();
 		
+
 		// 물체 렌더링
-		Executor->Render();
+		game->Render();
 
+		//ImGuiManager::Get()->Render();
+		//ImGuiManager::EndFrame();
 		// 포스트 프로세스
-		D3D::Get()->Render();
-	}
+		//D3D::Get()->Render();
 
-	ImGuiManager::Get()->Render();
-	ImGuiManager::EndFrame();
-	D3D::Get()->Present();
+		//D3D::Get()->Present();
+	}
 }
