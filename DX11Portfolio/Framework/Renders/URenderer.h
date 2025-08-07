@@ -7,7 +7,7 @@ public:
 
 public:
 	void Init();
-	void RenderFrame(URenderQueue* queue);
+	void RenderFrame(const URenderQueue& queue);
 	void UpdateGlobalConstants(
 		const Vector3& eyeWorld,
 		const Matrix& viewRow,
@@ -19,9 +19,9 @@ public:
 
 private:
 	void BeginFrame();
-	void RenderOpaque(URenderQueue* queue);
-	void RenderSkyBox(URenderQueue* queue);
-	void RenderMirror(URenderQueue* queue);
+	void RenderOpaque(const URenderQueue& queue);
+	void RenderSkyBox(const URenderQueue& queue);
+	void RenderMirror(const URenderQueue& queue);
 	//void RenderPostProcess(URenderQueue* queue);
 	void EndFrame();
 
@@ -37,13 +37,16 @@ private:
 	PostProcess m_postProcess;
 
 private:
+	std::unique_ptr<D3D11_VIEWPORT> Viewport;
+
+private:
 	// 공통으로 사용하는 텍스처들
 	ComPtr<ID3D11ShaderResourceView> m_envSRV;
 	ComPtr<ID3D11ShaderResourceView> m_specularSRV;
 	ComPtr<ID3D11ShaderResourceView> m_irradianceSRV;
 	ComPtr<ID3D11ShaderResourceView> m_brdfSRV;
 
-	// 공통으로 사용하는 상수 데이터
+	// 공통으로 사용하는 상수 데이터	
 	GlobalConstants m_globalConstsCPU;
 	GlobalConstants m_reflectGlobalConstsCPU;
 	ComPtr<ID3D11Buffer> m_globalConstsGPU;

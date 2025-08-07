@@ -51,8 +51,6 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 		PBRMeshData skyboxMesh = GeomtryGenerator::MakeBox(40.0f);
 		std::reverse(skyboxMesh.indices.begin(), skyboxMesh.indices.end());
 
-		skyboxActor->GetSkyboxComponent()->SetDevice(device);
-		skyboxActor->GetSkyboxComponent()->SetContext(context);
 		skyboxActor->GetSkyboxComponent()->SetPBRMeshData(vector{ skyboxMesh });	
 	}
 
@@ -69,8 +67,6 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 		ground.metallicTextureFilename = path + "rock-wall-mortar_metallic.png";
 		ground.roughnessTextureFilename = path + "rock-wall-mortar_roughness.png";
 
-		staticActor->GetStaticMeshComponent()->SetDevice(device);
-		staticActor->GetStaticMeshComponent()->SetContext(context);
 		staticActor->GetStaticMeshComponent()->SetPBRMeshData(vector{ ground });
 
 		staticActor->GetStaticMeshComponent()->SetRelativePosition(Vector3(0, -10, 0));
@@ -81,10 +77,11 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 	// 모든 액터 배치가 끝났다면
 	world->StartAllActors();
 
-
 	WPARAM result = Window::Run(game);
 
-	ImGuiManager::Destroy();
+	delete game;
+
+	//ImGuiManager::Destroy();
 	D3D::Destroy();
 	Window::Destroy();
 

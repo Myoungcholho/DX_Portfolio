@@ -4,10 +4,12 @@
 
 #include "AActor.h"
 
+class URenderManager;
+
 class UWorld : public UObject
 {
 public:
-    URenderQueue* GetRenderQueue() { return &m_renderQueue; }
+    //URenderQueue* GetRenderQueue() { return &m_renderQueue; }
 
 public:
     template<typename T>
@@ -38,10 +40,13 @@ public:
     void UnregisterLight(ULightComponent* light);
     const vector<ULightComponent*>& GetLights() const;
 
+public:
+    void SetRenderManager(URenderManager* manager) { m_renderManager = manager; }
+
 private:
     vector<AActor*> Actors;
     vector<ULightComponent*> LightComponents;
 
 private:
-    URenderQueue m_renderQueue;
+    URenderManager* m_renderManager = nullptr;
 };

@@ -1,28 +1,30 @@
 #include "Framework.h"
 #include "URenderQueue.h"
 
-void URenderQueue::Add(UPrimitiveComponent* comp)
+void URenderQueue::AddProxy(std::shared_ptr<URenderProxy> proxy)
 {
-	switch (comp->GetRenderPass())
-	{
-	case ERenderPass::Opaque:
-		opaqueList.push_back(comp);
-		break;
-	case ERenderPass::Skybox:
-		skyboxList.push_back(comp);
-		break;
-	case ERenderPass::Transparent:
+    if (!proxy)
+        return;
 
-		break;
-	case ERenderPass::Shadow:
+    // 소유권 이전
+    m_allProxies.push_back(std::move(proxy));
+    URenderProxy* raw = m_allProxies.back().get();
 
-		break;
-	}
+    // 분류
+    switch (raw->renderPass)
+    {
+    case ERenderPass::Skybox:
+        m_skyboxList.push_back(raw);
+        break;
+    case ERenderPass::Opaque:
+        m_opaqueList.push_back(raw);
+        break;
+    }
 }
 
 void URenderQueue::Clear()
 {
-	opaqueList.clear();
-	mirrorList.clear();
-	skyboxList.clear();
+    m_skyboxList.clear();
+    m_opaqueList.clear();
+    m_transparentList.clear();
 }

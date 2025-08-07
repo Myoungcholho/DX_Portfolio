@@ -27,26 +27,6 @@ CContext* CContext::Get()
 CContext::CContext()
 {
 	View = std::make_unique<CCamera>();
-
-	float width = D3D::GetDesc().Width;
-	float height = D3D::GetDesc().Height;
-
-	Viewport = std::make_unique<D3D11_VIEWPORT>();
-	Viewport->TopLeftX = 0;
-	Viewport->TopLeftY = 0;
-	Viewport->Width = width;
-	Viewport->Height = height;
-	Viewport->MinDepth = 0;
-	Viewport->MaxDepth = 1;
-
-	//m_constantBufferData.viewProj = Matrix();
-	//D3D::Get()->CreateConstantBuffer(m_constantBufferData, m_constantBuffer);
-	//D3D11Utils::CreateConstBuffer(D3D::Get()->GetDeviceCom(), m_constantBufferData, m_constantBuffer);
-
-	//mirrorViewProjectionConstantBufferData.mirrorViewProj = Matrix();
-	//D3D::Get()->CreateConstantBuffer(mirrorViewProjectionConstantBufferData, mirrorViewProjectionConstantBuffer);
-	
-	//D3D11Utils::CreateConstBuffer(D3D::Get()->GetDeviceCom(), mirrorViewProjectionConstantBufferData, mirrorViewProjectionConstantBuffer);
 }
 
 CContext::~CContext()
@@ -83,11 +63,12 @@ void CContext::Tick_View()
 		View->SetPosition(Position);
 
 
+		// 마우스
 		Vector3 delta = CMouse::Get()->GetMoveDelta();
 
 		Vector3 Rotation = View->GetRotation();
-		Rotation.x = Rotation.x + delta.y * View->GetRotationSpeed() * CTimer::Get()->GetDeltaTime();
-		Rotation.y = Rotation.y + delta.x * View->GetRotationSpeed() * CTimer::Get()->GetDeltaTime();
+		Rotation.x = Rotation.x + delta.y * View->GetRotationSpeed();// *CTimer::Get()->GetDeltaTime();
+		Rotation.y = Rotation.y + delta.x * View->GetRotationSpeed();// *CTimer::Get()->GetDeltaTime();
 		Rotation.z = 0.0f;
 
 		View->SetRotation(Rotation);
@@ -98,6 +79,7 @@ void CContext::Tick_View()
 
 void CContext::Tick_WorldTime()
 {
+	// '+' 키
 	if (CKeyboard::Get()->Press(VK_ADD))
 		CTimer::Get()->AddWorldTime(*CTimer::Get()->GetManualTimeSpeed());
 
@@ -121,11 +103,14 @@ void CContext::UpdateMirror(const Matrix& mirror)
 void CContext::Render()
 {
 	// 카메라와 관련된 설정으로 Context가 하는게 맞다.
-	D3D::Get()->GetDeviceContext()->RSSetViewports(1, Viewport.get());
+	//D3D::Get()->GetDeviceContext()->RSSetViewports(1, Viewport.get());
 
-	string str = string("FrameRate : ") + to_string((int)ImGui::GetIO().Framerate);
-	ImGuiManager::Get()->RenderText(5, 5, 1, 1, 1, str);
-
+	string str = "";
+	if (ImGui::GetCurrentContext() != nullptr && ImGui::GetIO().Framerate > 0)
+	{
+		str = string("FrameRate : ") + to_string((int)ImGui::GetIO().Framerate);
+		ImGuiManager::Get()->RenderText(5, 5, 1, 1, 1, str);
+	}
 	str = std::format("Running Time : {:0.6f}", CTimer::Get()->GetRunningTime());
 	ImGuiManager::Get()->RenderText(5, 20, 1, 1, 1, str);
 
@@ -157,7 +142,7 @@ void CContext::RenderMirrorConstantBuffer()
 
 void CContext::ResizeScreen()
 {
-	float width = D3D::GetDesc().Width;
+	/*float width = D3D::GetDesc().Width;
 	float height = D3D::GetDesc().Height;
 
 	Viewport->TopLeftX = 0;
@@ -165,7 +150,7 @@ void CContext::ResizeScreen()
 	Viewport->Width = width;
 	Viewport->Height = height;
 	Viewport->MinDepth = 0;
-	Viewport->MaxDepth = 1;
+	Viewport->MaxDepth = 1;*/
 }
 
 SimpleMath::Matrix CContext::GetViewMatrix()

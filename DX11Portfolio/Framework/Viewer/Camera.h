@@ -51,7 +51,7 @@ private:
 
 private:
 	float MoveSpeed = 10.0f;
-	float RotationSpeed = 20.f;
+	float RotationSpeed = 0.5f;
 
 private:
 	Matrix ViewMatrix;

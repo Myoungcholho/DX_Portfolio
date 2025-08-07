@@ -162,9 +162,12 @@ copy /Y "$(SolutionDir)Debug\$(ProjectName).pdb" "$(SolutionDir)EntryPoint\"</Co
     <ClInclude Include="Components\ULightComponent.h" />
     <ClInclude Include="Components\UObject.h" />
     <ClInclude Include="Components\UPrimitiveComponent.h" />
+    <ClInclude Include="Components\URenderProxy.h" />
     <ClInclude Include="Components\USceneComponent.h" />
     <ClInclude Include="Components\USkyboxComponent.h" />
+    <ClInclude Include="Components\USkyboxRenderProxy.h" />
     <ClInclude Include="Components\UStaticMeshComponent.h" />
+    <ClInclude Include="Components\UStaticMeshRenderProxy.h" />
     <ClInclude Include="Components\UWorld.h" />
     <ClInclude Include="Core\Color.h" />
     <ClInclude Include="Core\DynamicMulticastDelegate.h" />
@@ -206,6 +209,7 @@ copy /Y "$(SolutionDir)Debug\$(ProjectName).pdb" "$(SolutionDir)EntryPoint\"</Co
     <ClInclude Include="Systems\Window.h" />
     <ClInclude Include="Utilities\D3D11Utils.h" />
     <ClInclude Include="Utilities\Path.h" />
+    <ClInclude Include="Utilities\Profiler.h" />
     <ClInclude Include="Utilities\String.h" />
     <ClInclude Include="Viewer\Camera.h" />
   </ItemGroup>
@@ -217,9 +221,12 @@ copy /Y "$(SolutionDir)Debug\$(ProjectName).pdb" "$(SolutionDir)EntryPoint\"</Co
     <ClCompile Include="Components\UActorComponent.cpp" />
     <ClCompile Include="Components\ULightComponent.cpp" />
     <ClCompile Include="Components\UPrimitiveComponent.cpp" />
+    <ClCompile Include="Components\URenderProxy.cpp" />
     <ClCompile Include="Components\USceneComponent.cpp" />
     <ClCompile Include="Components\USkyboxComponent.cpp" />
+    <ClCompile Include="Components\USkyboxRenderProxy.cpp" />
     <ClCompile Include="Components\UStaticMeshComponent.cpp" />
+    <ClCompile Include="Components\UStaticMeshRenderProxy.cpp" />
     <ClCompile Include="Components\UWorld.cpp" />
     <ClCompile Include="Core\Color.cpp" />
     <ClCompile Include="Core\DynamicMulticastDelegate.cpp" />
@@ -255,6 +262,7 @@ copy /Y "$(SolutionDir)Debug\$(ProjectName).pdb" "$(SolutionDir)EntryPoint\"</Co
     <ClCompile Include="Systems\Window.cpp" />
     <ClCompile Include="Utilities\D3D11Utils.cpp" />
     <ClCompile Include="Utilities\Path.cpp" />
+    <ClCompile Include="Utilities\profiler.cpp" />
     <ClCompile Include="Utilities\String.cpp" />
     <ClCompile Include="Viewer\Camera.cpp" />
   </ItemGroup>

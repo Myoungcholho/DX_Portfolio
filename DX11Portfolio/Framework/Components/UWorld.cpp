@@ -16,11 +16,23 @@ void UWorld::Tick()
 
 void UWorld::Render()
 {
-	m_renderQueue.Clear();
+	vector<shared_ptr<URenderProxy>> proxies;
 
-	// 액터들을 RenderQueue에 등록
 	for (auto actor : Actors)
-		actor->Render();
+	{
+		for (auto comp : actor->GetComponents())
+		{
+			if (auto prim = dynamic_cast<UPrimitiveComponent*>(comp.get()))
+			{
+				auto proxy = prim->GetRenderProxy();
+
+				proxies.push_back(std::move(proxy));
+			}
+		}
+	}
+
+	if(m_renderManager)
+		m_renderManager->EnqueueProxies(std::move(proxies));
 }
 
 void UWorld::Destroy()

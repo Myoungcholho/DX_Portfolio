@@ -20,6 +20,7 @@ using namespace chrono;
 #include "MathHelper.h"
 #include "Utilities/D3D11Utils.h"
 #include "Components/Transform.h"
+#include "Utilities/Profiler.h"
 
 // ComPtr
 #include <wrl/client.h>
@@ -100,6 +101,11 @@ using Microsoft::WRL::ComPtr;
 #include "Billboards/IBillboardRenderer.h"
 #include "Billboards/BillboardRenderer_GS.h"
 
+// Proxy
+#include "Components/URenderProxy.h"
+#include "Components/UStaticMeshRenderProxy.h"
+#include "Components/USkyboxRenderProxy.h"
+
 // Component
 #include "Components/UObject.h"
 #include "Components/UActorComponent.h"
@@ -111,6 +117,7 @@ using Microsoft::WRL::ComPtr;
 #include "Components/ULightComponent.h"
 #include "Components/UWorld.h"
 #include "Components/USkyboxComponent.h"
+
 
 #include "Renders/URenderer.h"
 #include "Core/URenderManager.h"

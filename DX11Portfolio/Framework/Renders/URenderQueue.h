@@ -8,17 +8,21 @@
 class URenderQueue
 {
 public:
-	void Add(UPrimitiveComponent* comp);
+	// 프록시 추가 (소유권 이전)
+	void AddProxy(std::shared_ptr<URenderProxy> proxy);
+
+	// 프록시 목록 제공 (렌더링용)
+	const std::vector<URenderProxy*>& GetSkyboxList() const { return m_skyboxList; }
+	const std::vector<URenderProxy*>& GetOpaqueList() const { return m_opaqueList; }
+	const std::vector<URenderProxy*>& GetTransparentList() const { return m_transparentList; }
+
+	// 프레임 끝나고 초기화
 	void Clear();
 
-public:
-	// 읽기 전용으로 RETURN
-	const vector<UPrimitiveComponent*>& GetOpaqueList() const { return opaqueList; }
-	const vector<UPrimitiveComponent*>& GetSkyboxList() const { return skyboxList; }
-	const vector<UPrimitiveComponent*>& GetMirrorList() const { return mirrorList; }
-
 private:
-	std::vector<UPrimitiveComponent*> opaqueList;
-	std::vector<UPrimitiveComponent*> skyboxList;
-	std::vector<UPrimitiveComponent*> mirrorList;
+	std::vector<std::shared_ptr<URenderProxy>> m_allProxies;
+
+	std::vector<URenderProxy*> m_skyboxList;
+	std::vector<URenderProxy*> m_opaqueList;
+	std::vector<URenderProxy*> m_transparentList;
 };

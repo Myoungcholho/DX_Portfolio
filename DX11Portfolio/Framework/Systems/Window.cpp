@@ -131,10 +131,7 @@ LRESULT Window::WndProc(HWND InHandle, UINT InMessage, WPARAM InwParam, LPARAM I
 
 void Window::MainRender(UGameInstance* game)
 {
-	ImGuiManager::BeginFrame(); // ½Ì±ÛÅæ Tick¿¡¼­ È£ÃâµÊ
-
-	//D3D::Get()->UpdateGUI();
-	//Executor->UpdateGUI();
+	ImGuiManager::Get()->BeginFrame(); // ½Ì±ÛÅæ Tick¿¡¼­ È£ÃâµÊ
 
 	game->OnGUI();
 
@@ -144,23 +141,7 @@ void Window::MainRender(UGameInstance* game)
 
 	game->Tick();
 
-
-	//Rendering
-	{
-		//D3D::Get()->StartRenderPass();
-
-		// Ä«¸Ş¶ó Æ÷ÇÔ
-		CContext::Get()->Render();
-		
-
-		// ¹°Ã¼ ·»´õ¸µ
-		game->Render();
-
-		//ImGuiManager::Get()->Render();
-		//ImGuiManager::EndFrame();
-		// Æ÷½ºÆ® ÇÁ·Î¼¼½º
-		//D3D::Get()->Render();
-
-		//D3D::Get()->Present();
-	}
+	CContext::Get()->Render();
+	ImGuiManager::Get()->EndFrame();
+	game->Render();
 }

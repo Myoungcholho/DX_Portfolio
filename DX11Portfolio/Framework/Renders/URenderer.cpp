@@ -8,6 +8,18 @@ URenderer::URenderer()
 	numQualityLevels = D3D::Get()->m_numQualityLevels;
 	useMSAA = D3D::Get()->m_useMSAA;
 
+	float width = D3D::GetDesc().Width;
+	float height = D3D::GetDesc().Height;
+
+	Viewport = std::make_unique<D3D11_VIEWPORT>();
+	Viewport->TopLeftX = 0;
+	Viewport->TopLeftY = 0;
+	Viewport->Width = width;
+	Viewport->Height = height;
+	Viewport->MinDepth = 0;
+	Viewport->MaxDepth = 1;
+
+
 	D3D11_TEXTURE2D_DESC desc = {};
 	desc.Width = D3D::Get()->GetDesc().Width;
 	desc.Height = D3D::Get()->GetDesc().Height;
@@ -64,6 +76,7 @@ void URenderer::Init()
 
 }
 
+//RenderLoop에서 호출
 void URenderer::UpdateGlobalConstants(const Vector3& eyeWorld, const Matrix& viewRow, const Matrix& projRow, const Matrix& refl)
 {
 	m_globalConstsCPU.eyeWorld = eyeWorld;
@@ -80,7 +93,7 @@ void URenderer::UpdateGlobalConstants(const Vector3& eyeWorld, const Matrix& vie
 }
 
 /// <summary>
-/// 렌더링 전역 값 수정
+/// 렌더링 전역 값 수정, URenderManager가 호출
 /// </summary>
 void URenderer::OnGUI()
 {
@@ -94,13 +107,14 @@ void URenderer::OnGUI()
 		flag += ImGui::SliderFloat("Exposure", &m_postProcess.m_combineFilter.m_constData.option1,0.0f, 10.0f);
 		flag += ImGui::SliderFloat("Gamma", &m_postProcess.m_combineFilter.m_constData.option2, 0.1f, 5.0f);
 
+		// 여기 값복사만 해야한다.
 		if(flag)
 			m_postProcess.m_combineFilter.UpdateConstantBuffers(device, context);
 	}
 	ImGui::End();
 }
 
-void URenderer::RenderFrame(URenderQueue* queue)
+void URenderer::RenderFrame(const URenderQueue& queue)
 {
 	BeginFrame();
 
@@ -151,32 +165,35 @@ void URenderer::BeginFrame()
 	context->VSSetConstantBuffers(1, 1, m_globalConstsGPU.GetAddressOf());
 	context->PSSetConstantBuffers(1, 1, m_globalConstsGPU.GetAddressOf());
 	context->GSSetConstantBuffers(1, 1, m_globalConstsGPU.GetAddressOf());
+
+	// Viewport설정
+	D3D::Get()->GetDeviceContext()->RSSetViewports(1, Viewport.get());
 }
 
-void URenderer::RenderSkyBox(URenderQueue* queue)
+void URenderer::RenderSkyBox(const URenderQueue& queue)
 {
 	bWireRender ? Graphics::skyboxWirePSO.Apply(context.Get()) : Graphics::skyboxSolidPSO.Apply(context.Get());
 
-	for (auto* comp : queue->GetSkyboxList())
+	for (auto* comp : queue.GetSkyboxList())
 	{
 		comp->UpdateConstantBuffers(device, context);
-		comp->Render(context);
+		comp->Draw(context.Get());
 	}
 }
 
-void URenderer::RenderOpaque(URenderQueue* queue)
+void URenderer::RenderOpaque(const URenderQueue& queue)
 {
 	bWireRender ? Graphics::defaultWirePSO.Apply(context.Get()) : Graphics::defaultSolidPSO.Apply(context.Get());
 
-	for (auto* comp : queue->GetOpaqueList())
+	for (auto* comp : queue.GetOpaqueList())
 	{
 		comp->UpdateConstantBuffers(device, context);
-		comp->Render(context);
+		comp->Draw(context.Get());
 	}
 }
 
 
-void URenderer::RenderMirror(URenderQueue* queue)
+void URenderer::RenderMirror(const URenderQueue& queue)
 {
 
 }
@@ -208,8 +225,6 @@ void URenderer::RenderPostProcess()
 
 void URenderer::Present()
 {
-	ImGuiManager::Get()->Render();
-	ImGuiManager::EndFrame();
-
+	//ImGuiManager::Get()->RenderStoredDrawData();
 	D3D::Get()->Present();
 }

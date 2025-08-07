@@ -48,15 +48,4 @@ private:
 private:
 	std::unique_ptr<CCamera> View;
 	SimpleMath::Matrix Projection;
-	std::unique_ptr<D3D11_VIEWPORT> Viewport;
-
-private:
-	//Matrix mirror;
-
-private:
-	//ViewProjectionConstantBuffer m_constantBufferData;
-	//MirrorViewProjectionConstantBuffer mirrorViewProjectionConstantBufferData;
-
-	//ComPtr<ID3D11Buffer> m_constantBuffer;
-	//ComPtr<ID3D11Buffer> mirrorViewProjectionConstantBuffer;
 };

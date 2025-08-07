@@ -7,7 +7,7 @@ public:
 
 public:
     virtual void OnAttach(AActor* owner) override;
-    virtual void OnDetach() override;
+    //virtual void OnDetach() override;
 
     void SetRadiance(const Vector3& value) { radiance = value; }
     void SetFalloff(float start, float end) { fallOffStart = start; fallOffEnd = end; }

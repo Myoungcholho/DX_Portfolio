@@ -163,6 +163,18 @@
     <ClInclude Include="Components\ULightComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
+    <ClInclude Include="Utilities\Profiler.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\URenderProxy.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\UStaticMeshRenderProxy.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\USkyboxRenderProxy.h">
+      <Filter>Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Framework.cpp" />
@@ -291,6 +303,18 @@
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="Components\ULightComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\profiler.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\URenderProxy.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\UStaticMeshRenderProxy.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\USkyboxRenderProxy.cpp">
       <Filter>Components</Filter>
     </ClCompile>
   </ItemGroup>

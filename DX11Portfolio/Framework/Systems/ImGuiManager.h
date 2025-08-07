@@ -6,9 +6,6 @@ struct ImGUIDesc
     ComPtr<ID3D11Device> Device;
     ComPtr<ID3D11DeviceContext> DeviceContext;
 
-    /*ID3D11Device* Device;
-    ID3D11DeviceContext* DeviceContext;*/
-
     float Width;
     float Height;
 };
@@ -21,25 +18,22 @@ public:
 public:
     static void SetDesc(const ImGUIDesc& InDesc);
     static void Create();
-
-    // 종료 시
     static void Shutdown();
     static void Destroy();
 
 public:
-    static void BeginFrame();
-    static void EndFrame();
-
-public:
-    void Render(); 
-
+    void BeginFrame();
+    void EndFrame();
+    void RenderDrawData(ID3D11DeviceContext* context);
+   
 public:
     void RenderText(float x, float y, float r, float g, float b, string content);
     void RenderText(float x, float y, float r, float g, float b, float a, string content);
-
+    
 private:
     static bool initialized;
     static ImGUIDesc ImGuiDesc;
+    static ImGuiManager* Instance;
 
 private:
     void Initialize();
@@ -47,9 +41,6 @@ private:
 private:
     ImGuiManager();
     ~ImGuiManager();
-
-private:
-    static ImGuiManager* Instance;
 
 private:
     struct FGuiText
@@ -61,5 +52,15 @@ private:
 
 private:
     vector<FGuiText> Contents;
+    
+private:
+    std::mutex m_drawDataMutex;
+    ImDrawData* m_drawDataBuffers[3] = { nullptr, nullptr, nullptr };
+    int m_writeIndex = 1;     // 게임 쓰레드가 쓸 인덱스
+    int m_renderedIndex = 0;  // 렌더 쓰레드가 그릴 인덱스
+
+private:
+    ImDrawData* CloneDrawData(ImDrawData* src);
+    void FreeDrawData(ImDrawData* drawData);
 };
 

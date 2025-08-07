@@ -36,11 +36,13 @@ void AActor::Tick()
 void AActor::Render()
 {
 	// 렌더링 가능한 컴포넌트의 Type을 보고 Queue에 넣기
-	for (auto comp : Components)
+	/*for (auto comp : Components)
 	{
 		if (auto prim = dynamic_cast<UPrimitiveComponent*>(comp.get()))
 			GetWorld()->GetRenderQueue()->Add(prim);
-	}
+	}*/
+
+	// 이제 UWorld에서 직접 얻어서 돌림
 }
 
 void AActor::OnGUI()
