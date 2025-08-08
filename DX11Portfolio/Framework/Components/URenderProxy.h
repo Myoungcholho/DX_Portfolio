@@ -8,9 +8,14 @@ public:
 	URenderProxy();
 	virtual ~URenderProxy() = default;
 	virtual void Draw(ID3D11DeviceContext* context) = 0;
+	virtual void DrawNormal(ID3D11DeviceContext* context) {}
 
 	ERenderPass renderPass = ERenderPass::Opaque;
 	bool bVisible = true;
+	bool m_drawNormal = false;
+
+public:
+	void SetDrawNormal(bool drawNormal) { m_drawNormal = drawNormal; }
 
 public:
 	virtual void Init(const vector<PBRMeshData>& meshData) { }
@@ -19,6 +24,8 @@ public:
 	virtual void UpdateConstantBuffers(				// Primitive는 World, InVTransfom만 관리
 		ComPtr<ID3D11Device>& device,
 		ComPtr<ID3D11DeviceContext>& context) {}
+
+	MaterialConstants GetMaterialConstants() { return m_materialConstsCPU; }
 
 protected:
 	vector<shared_ptr<Mesh>> m_meshes;				// 그릴 Mesh GPU 정보

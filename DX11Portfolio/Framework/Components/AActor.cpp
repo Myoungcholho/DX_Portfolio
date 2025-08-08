@@ -1,6 +1,13 @@
 #include "Framework.h"
 #include "AActor.h"
 
+static int s_actorID = 0;
+
+AActor::AActor()
+{
+	m_name = "Actor_" + std::to_string(s_actorID++);
+}
+
 void AActor::SetRootComponent(shared_ptr<USceneComponent> comp)
 {
 	root = comp;

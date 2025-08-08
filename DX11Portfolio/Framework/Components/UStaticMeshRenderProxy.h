@@ -11,4 +11,5 @@ public:
 
 public:
 	void Draw(ID3D11DeviceContext* context) override;	
+	void DrawNormal(ID3D11DeviceContext* context) override;
 };

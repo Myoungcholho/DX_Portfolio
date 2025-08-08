@@ -73,10 +73,10 @@ void USceneComponent::UpdateWorldTransformRecursive()
 }
 
 
-const Transform& USceneComponent::GetWorldTransform() const
-{
-    return m_worldTransform;
-}
+//const Transform& USceneComponent::GetWorldTransform() const
+//{
+//    return m_worldTransform;
+//}
 
 void USceneComponent::AttachTo(USceneComponent* parent)
 {

@@ -11,13 +11,21 @@ class UWorld;
 
 class AActor : public UObject
 {
+public:
+	AActor();
+
 protected:
 	std::vector<shared_ptr<UActorComponent>> Components;
 	std::shared_ptr<USceneComponent> root = nullptr;
+	std::string m_name;
 	UWorld* m_world = nullptr;
-
+	
 public:
 	std::shared_ptr<Transform> transform = std::make_shared<Transform>();
+
+public:
+	void SetName(const std::string& name) { m_name = name; }
+	string GetName() { return m_name; }
 
 public:
 	void Destroy() override;

@@ -3,6 +3,8 @@
 // Actors
 #include "Actors/ASkyboxActor.h"
 #include "Actors/AStaticMeshActor.h"
+#include "Actors/APlayer.h"
+#include "Actors/ALight.h"
 
 // 오브젝트
 #include "Object/Mirror.h"

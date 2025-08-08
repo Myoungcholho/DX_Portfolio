@@ -34,18 +34,11 @@ public:
     void OnGUI();
 
     void StartAllActors();
-
-public:
-    void RegisterLight(ULightComponent* light);
-    void UnregisterLight(ULightComponent* light);
-    const vector<ULightComponent*>& GetLights() const;
-
 public:
     void SetRenderManager(URenderManager* manager) { m_renderManager = manager; }
 
 private:
     vector<AActor*> Actors;
-    vector<ULightComponent*> LightComponents;
 
 private:
     URenderManager* m_renderManager = nullptr;

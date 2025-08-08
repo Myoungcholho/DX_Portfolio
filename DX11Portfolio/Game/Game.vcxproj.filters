@@ -21,6 +21,12 @@
     <ClInclude Include="Actors\ASkyboxActor.h">
       <Filter>Actors</Filter>
     </ClInclude>
+    <ClInclude Include="Actors\APlayer.h">
+      <Filter>Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="Actors\ALight.h">
+      <Filter>Actors</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Pch.cpp" />
@@ -41,6 +47,12 @@
       <Filter>Actors</Filter>
     </ClCompile>
     <ClCompile Include="Actors\ASkyboxActor.cpp">
+      <Filter>Actors</Filter>
+    </ClCompile>
+    <ClCompile Include="Actors\APlayer.cpp">
+      <Filter>Actors</Filter>
+    </ClCompile>
+    <ClCompile Include="Actors\ALight.cpp">
       <Filter>Actors</Filter>
     </ClCompile>
   </ItemGroup>

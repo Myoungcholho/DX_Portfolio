@@ -17,22 +17,32 @@ void UWorld::Tick()
 void UWorld::Render()
 {
 	vector<shared_ptr<URenderProxy>> proxies;
+	vector<LightData> lights;
+
 
 	for (auto actor : Actors)
 	{
 		for (auto comp : actor->GetComponents())
 		{
+			// 렌더 프록시 수집
 			if (auto prim = dynamic_cast<UPrimitiveComponent*>(comp.get()))
 			{
 				auto proxy = prim->GetRenderProxy();
 
 				proxies.push_back(std::move(proxy));
 			}
+
+			// 라이트 수집
+			if(auto light = dynamic_cast<ULightComponent*>(comp.get()))
+			{
+				lights.push_back(light->GetLightData()); // 위치, 색, 방향 등
+			}
+
 		}
 	}
 
 	if(m_renderManager)
-		m_renderManager->EnqueueProxies(std::move(proxies));
+		m_renderManager->EnqueueProxies(std::move(proxies),lights);
 }
 
 void UWorld::Destroy()
@@ -59,17 +69,3 @@ void UWorld::StartAllActors()
 		actor->BeginPlay();
 }
 
-void UWorld::RegisterLight(ULightComponent* light)
-{
-	LightComponents.push_back(light);
-}
-
-void UWorld::UnregisterLight(ULightComponent* light)
-{
-	erase(LightComponents, light);
-}
-
-const vector<ULightComponent*>& UWorld::GetLights() const
-{
-	return LightComponents;
-}

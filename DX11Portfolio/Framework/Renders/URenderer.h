@@ -13,6 +13,8 @@ public:
 		const Matrix& viewRow,
 		const Matrix& projRow,
 		const Matrix& refl = Matrix());
+	void UpdateGlobalLights(const vector<LightData>& lights);
+
 	void OnGUI();
 	void RenderPostProcess();
 	void Present();
@@ -21,6 +23,7 @@ private:
 	void BeginFrame();
 	void RenderOpaque(const URenderQueue& queue);
 	void RenderSkyBox(const URenderQueue& queue);
+	void RenderNormal(const URenderQueue& queue);
 	void RenderMirror(const URenderQueue& queue);
 	//void RenderPostProcess(URenderQueue* queue);
 	void EndFrame();

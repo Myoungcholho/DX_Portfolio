@@ -41,7 +41,7 @@ void ExecutionManager::CreateExecutables()
 
 void ExecutionManager::LightCreate()
 {
-	Light pointLight;
+	LightData pointLight;
 	pointLight.position = Vector3(1.0f, -2.5f, 10.0f);
 	pointLight.radiance = Vector3(10.0f);
 	pointLight.fallOffStart = 0.0;

@@ -10,7 +10,7 @@ enum class LightType : int
     Spot = 2
 };
 
-struct Light
+struct LightData
 {
     Vector3 radiance = Vector3(1.0f);                   // 빛의 세기
     float fallOffStart = 0.0f;                          // 감쇠 시작 거리
@@ -88,7 +88,7 @@ struct LegacyMaterialConstantBuffer
 
 struct LightConstantBuffer
 {
-    Light lights[MAX_LIGHTS];
+    LightData lights[MAX_LIGHTS];
     int lightCount;
     Vector3 padding;
 };
@@ -132,7 +132,7 @@ struct BasicPixelConstantBuffer
     bool UseTexture;
 
     Material material;
-    Light lights[MAX_LIGHTS];
+    LightData lights[MAX_LIGHTS];
 
     int useAlbedoMap = 0;
     int useNormalMap = 0;
@@ -172,7 +172,7 @@ struct GlobalConstants
     float lodBias = 2.0f;               // 다른 물체들 LodBias
     float dummy2;
 
-    Light lights[MAX_LIGHTS];
+    LightData lights[MAX_LIGHTS];
 };
 
 struct MaterialConstants {

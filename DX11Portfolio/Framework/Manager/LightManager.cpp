@@ -11,7 +11,7 @@ LightManager::~LightManager()
 	lights.clear();
 }
 
-void LightManager::AddLight(const Light& light)
+void LightManager::AddLight(const LightData& light)
 {
 	lights.push_back(light);
 }
@@ -40,7 +40,7 @@ void LightManager::UpdateCBuffer(LightConstantBuffer& outData, const Vector3& re
 	size_t count = 0;
 	size_t safeCount = min(maxCount, size_t(MAX_LIGHTS));
 
-	for (const Light& light : lights)
+	for (const LightData& light : lights)
 	{
 		if (count >= safeCount)
 			break;

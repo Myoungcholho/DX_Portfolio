@@ -28,7 +28,7 @@ public:
     void UpdateWorldTransformRecursive();               
 
     // 월드행렬 반환
-    const Transform& GetWorldTransform() const;
+    //const Transform& GetWorldTransform() const;
 
     // 계층 구조 구성
     void AttachTo(USceneComponent* parent);

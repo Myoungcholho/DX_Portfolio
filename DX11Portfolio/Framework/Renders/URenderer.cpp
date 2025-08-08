@@ -92,6 +92,16 @@ void URenderer::UpdateGlobalConstants(const Vector3& eyeWorld, const Matrix& vie
 	D3D11Utils::UpdateBuffer(device, context, m_reflectGlobalConstsCPU, m_reflectGlobalConstsGPU);
 }
 
+void URenderer::UpdateGlobalLights(const vector<LightData>& lights)
+{
+	for (int i = 0; i < lights.size(); ++i)
+	{
+		if (i >= MAX_LIGHTS)
+			break;
+		m_globalConstsCPU.lights[i] = lights[i];
+	}
+}
+
 /// <summary>
 /// 렌더링 전역 값 수정, URenderManager가 호출
 /// </summary>
@@ -105,11 +115,7 @@ void URenderer::OnGUI()
 		int flag = 0;
 		flag += ImGui::SliderFloat("Bloom Strength", &m_postProcess.m_combineFilter.m_constData.strength, 0.0f, 1.0f);
 		flag += ImGui::SliderFloat("Exposure", &m_postProcess.m_combineFilter.m_constData.option1,0.0f, 10.0f);
-		flag += ImGui::SliderFloat("Gamma", &m_postProcess.m_combineFilter.m_constData.option2, 0.1f, 5.0f);
-
-		// 여기 값복사만 해야한다.
-		if(flag)
-			m_postProcess.m_combineFilter.UpdateConstantBuffers(device, context);
+		flag += ImGui::SliderFloat("Gamma", &m_postProcess.m_combineFilter.m_constData.option2, 0.1f, 5.0f);	
 	}
 	ImGui::End();
 }
@@ -120,6 +126,8 @@ void URenderer::RenderFrame(const URenderQueue& queue)
 
 	RenderSkyBox(queue);
 	RenderOpaque(queue);
+	RenderNormal(queue);
+
 
 	EndFrame();
 }
@@ -181,6 +189,7 @@ void URenderer::RenderSkyBox(const URenderQueue& queue)
 	}
 }
 
+
 void URenderer::RenderOpaque(const URenderQueue& queue)
 {
 	bWireRender ? Graphics::defaultWirePSO.Apply(context.Get()) : Graphics::defaultSolidPSO.Apply(context.Get());
@@ -192,6 +201,16 @@ void URenderer::RenderOpaque(const URenderQueue& queue)
 	}
 }
 
+void URenderer::RenderNormal(const URenderQueue& queue)
+{
+	Graphics::normalsPSO.Apply(context.Get());
+	for (auto* comp : queue.GetOpaqueList())
+	{
+		if (comp->m_drawNormal)
+			comp->DrawNormal(context.Get());
+	}
+
+}
 
 void URenderer::RenderMirror(const URenderQueue& queue)
 {
@@ -212,19 +231,20 @@ void URenderer::RenderPostProcess()
 
 	context->ResolveSubresource
 	(
-		m_resolvedBuffer.Get(), // 대상 (싱글샘플 텍스처)
-		0,                      // 대상 서브리소스 index
-		m_floatBuffer.Get(),    // 소스 (MSAA 텍스처)
-		0,                      // 소스 서브리소스 index
-		DXGI_FORMAT_R16G16B16A16_FLOAT // 포맷 일치해야 함
+		m_resolvedBuffer.Get(),				 // 대상 (싱글샘플 텍스처)
+		0,									 // 대상 서브리소스 index
+		m_floatBuffer.Get(),				 // 소스 (MSAA 텍스처)
+		0,									 // 소스 서브리소스 index
+		DXGI_FORMAT_R16G16B16A16_FLOAT		 // 포맷 일치해야 함
 	);
 
 	Graphics::postProcessingPSO.Apply(context.Get());
+
+	m_postProcess.m_combineFilter.UpdateConstantBuffers(device, context);
 	m_postProcess.Render(context);
 }
 
 void URenderer::Present()
 {
-	//ImGuiManager::Get()->RenderStoredDrawData();
 	D3D::Get()->Present();
 }

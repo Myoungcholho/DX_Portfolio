@@ -8,6 +8,7 @@ void UStaticMeshComponent::Init()
     renderProxy->renderPass = GetRenderPass();
     renderProxy->bVisible = bVisible;
 
+    m_materialConstsCPU = renderProxy->GetMaterialConstants();
 }
 
 void UStaticMeshComponent::RefreshConstantsCPU()
@@ -18,7 +19,9 @@ void UStaticMeshComponent::RefreshConstantsCPU()
 
 void UStaticMeshComponent::OnGUI()
 {
-    if (ImGui::TreeNode("Material"))
+    string str = Owner->GetName() + "Material";
+    ImGui::Begin("Actors");
+    if (ImGui::TreeNode(str.c_str()))
     {
         int flag = 0;
 
@@ -48,26 +51,18 @@ void UStaticMeshComponent::OnGUI()
         flag += ImGui::CheckboxFlags(
             "Use RoughnessMap", &m_materialConstsCPU.useRoughnessMap,
             1);
+        
 
         if (flag)
         {
             RefreshConstantsCPU();
         }
 
-        //ImGui::Checkbox("Draw Normals", &m_mainObj->m_drawNormals);
+        ImGui::Checkbox("Draw Normals", &m_drawNormals);
 
         ImGui::TreePop();
     }
-}
-
-void UStaticMeshComponent::RenderNormal(ComPtr<ID3D11DeviceContext>& context)
-{
-    /*for (const auto& mesh : m_meshes)
-    {
-        context->GSSetConstantBuffers(0, 1, m_meshConstsGPU.GetAddressOf());
-        context->IASetVertexBuffers(0, 1, mesh->vertexBuffer.GetAddressOf(), &mesh->stride, &mesh->offset);
-        context->Draw(mesh->vertexCount, 0);
-    }*/
+    ImGui::End();
 }
 
 shared_ptr<URenderProxy> UStaticMeshComponent::GetRenderProxy()
@@ -76,6 +71,7 @@ shared_ptr<URenderProxy> UStaticMeshComponent::GetRenderProxy()
 
     renderProxy->SetMeshConstants(m_meshConstsCPU);
     renderProxy->SetMaterialConstants(m_materialConstsCPU);
+    renderProxy->SetDrawNormal(m_drawNormals);
 
     return renderProxy;
 }

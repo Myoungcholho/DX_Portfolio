@@ -37,12 +37,14 @@ void URenderManager::Stop()
 		m_renderThread.join();
 }
 
-void URenderManager::EnqueueProxies(vector<shared_ptr<URenderProxy>> proxies)
+void URenderManager::EnqueueProxies(vector<shared_ptr<URenderProxy>> proxies, vector<LightData> lights)
 {
 	// 쓰기 인덱스에 렌더링 리스트 저장하고 읽기 인덱스와 교체
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 		m_renderQueues[m_writeIndex] = std::move(proxies);
+		m_renderLightData[m_writeIndex] = lights;
+
 		std::swap(m_writeIndex, m_readIndex);
 		m_renderReady = true;
 	}
@@ -56,11 +58,12 @@ void URenderManager::RenderLoop()
 	// 종료플레그가 있다면 돌지 않음
 	while (!m_shouldExit)
 	{
+		PRO_BEGIN(L"RenderFrame");
 		std::vector<std::shared_ptr<URenderProxy>> proxiesToRender;
 
 		{
 			// 대기하다가 렌더링이 준비되거나 종료 플래그가 true일때 탈출
-			std::unique_lock<std::mutex> lock(m_mutex);
+			std::unique_lock<std::mutex> lock(m_mutex);	
 			m_condition.wait(lock, [&]() { return m_renderReady || m_shouldExit; });
 
 			if (m_shouldExit)
@@ -77,7 +80,7 @@ void URenderManager::RenderLoop()
 		Matrix proj = CContext::Get()->GetProjectionMatrix();
 
 		m_renderer->UpdateGlobalConstants(eye, view, proj);
-
+		m_renderer->UpdateGlobalLights(m_renderLightData[m_readIndex]);
 		
 		// 렌더큐에 넣어서 내부에서 분류
 		URenderQueue renderQueue;
@@ -92,12 +95,15 @@ void URenderManager::RenderLoop()
 		// 인자로 렌더큐를 전달해서 렌더링 시작
 		m_renderer->RenderFrame(renderQueue);
 
+
+
 		// 후처리 및 출력
 		m_renderer->RenderPostProcess();
 
 		ImGuiManager::Get()->RenderDrawData(context);
 
 		m_renderer->Present();
+		PRO_END(L"RenderFrame");
 	}
 }
 

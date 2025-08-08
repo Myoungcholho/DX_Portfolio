@@ -138,7 +138,38 @@ PixelShaderOutput main(PixelShaderInput input)
     
     float3 directLighting = float3(0, 0, 0);
 
-    // 여기 포인트 라이트 구현
+    [unroll]
+    for (int i = 0; i < MAX_LIGHTS; ++i)
+    {
+        if (light[i].type == LIGHT_TYPE_POINT)
+        {
+            float3 lightVec = light[i].position - input.posWorld;
+            float lightDist = length(lightVec);
+            lightVec /= lightDist;
+            float3 halfway = normalize(pixelToEye + lightVec);
+        
+            float NdotI = max(0.0, dot(normalWorld, lightVec));
+            float NdotH = max(0.0, dot(normalWorld, halfway));
+            float NdotO = max(0.0, dot(normalWorld, pixelToEye));
+        
+            const float3 Fdielectric = 0.04; // 비금속(Dielectric) 재질의 F0
+            float3 F0 = lerp(Fdielectric, albedo, metallic);
+            float3 F = SchlickFresnel(F0, max(0.0, dot(halfway, pixelToEye)));
+            float3 kd = lerp(float3(1, 1, 1) - F, float3(0, 0, 0), metallic);
+            float3 diffuseBRDF = kd * albedo;
+
+            float D = NdfGGX(NdotH, roughness);
+            float3 G = SchlickGGX(NdotI, NdotO, roughness);
+            float3 specularBRDF = (F * D * G) / max(1e-5, 4.0 * NdotI * NdotO);
+
+            float att = saturate((light[i].fallOffEnd - lightDist)
+                                     / (light[i].fallOffEnd - light[i].fallOffStart));
+            float3 radiance = light[i].radiance * att;
+
+            directLighting += (diffuseBRDF + specularBRDF) * radiance * NdotI;
+        }
+    }
+    
     
     PixelShaderOutput output;
     output.pixelColor = float4(ambientLighting + directLighting + emission, 1.0);

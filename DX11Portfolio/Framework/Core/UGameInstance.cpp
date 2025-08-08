@@ -18,12 +18,12 @@ void UGameInstance::Init()
 
 void UGameInstance::Tick()
 {
-	//PRO_BEGIN(L"Game_Tick");
+	PRO_BEGIN(L"Game_Tick");
 	
 	if (m_world)
 		m_world->Tick();
 
-	//PRO_END(L"Game_Tick");
+	PRO_END(L"Game_Tick");
 }
 
 void UGameInstance::Render()
@@ -31,12 +31,12 @@ void UGameInstance::Render()
 	if (m_world == nullptr && m_renderManager == nullptr)
 		return;
 
-	//PRO_BEGIN(L"Game_Render");
+	PRO_BEGIN(L"Game_Render");
 	
 	if (m_world)
 		m_world->Render();					// 프록시 생성 → 렌더 매니저에 제출
 
-	//PRO_END(L"Game_Render");
+	PRO_END(L"Game_Render");
 
 }
 

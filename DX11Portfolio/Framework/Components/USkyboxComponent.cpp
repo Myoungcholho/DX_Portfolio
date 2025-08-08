@@ -7,6 +7,9 @@ void USkyboxComponent::Init()
     renderProxy->Init(m_meshData);
     renderProxy->renderPass = GetRenderPass();
     renderProxy->bVisible = bVisible;                       // 이건 아직 유효하지 않음
+
+    // GPU로드하면서 초기 셋팅값을 얻어옴
+    m_materialConstsCPU = renderProxy->GetMaterialConstants();
 }
 
 void USkyboxComponent::RefreshConstantsCPU()

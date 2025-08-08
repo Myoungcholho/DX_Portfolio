@@ -45,13 +45,21 @@ private:
 };
 
 
-#define PROFILE
+//#define PROFILE
 
 #ifdef PROFILE
-#define PRO_BEGIN(tag) PRO_BEGIN(tag)
-#define PRO_END(tag) PRO_END(tag)
+void PRO_BEGIN(const WCHAR* s)
+{
+	g_profile.ProfileBegin(s);
+}
+
+// 여기부터 하기
+void PRO_END(const WCHAR* s)
+{
+	g_profile.ProfileEnd(s);
+}
 
 #else
-#define PRO_BEGIN(tag)
-#define PRO_END(tag)
+inline void PRO_BEGIN(const WCHAR*) {}
+inline void PRO_END(const WCHAR*) {}
 #endif

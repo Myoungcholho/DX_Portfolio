@@ -44,7 +44,7 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 	ComPtr<ID3D11Device> device = D3D::Get()->GetDeviceCom();
 	ComPtr<ID3D11DeviceContext> context = D3D::Get()->GetDeviceContextCom();
 
-	// 여기서 액터 생성, 나중에는 Load 클래스로 변경
+	// SkyBox
 	{
 		ASkyboxActor* skyboxActor = world->SpawnActor<ASkyboxActor>();
 
@@ -69,10 +69,27 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 
 		staticActor->GetStaticMeshComponent()->SetPBRMeshData(vector{ ground });
 
-		staticActor->GetStaticMeshComponent()->SetRelativePosition(Vector3(0, -10, 0));
+		staticActor->GetStaticMeshComponent()->SetRelativePosition(Vector3(0, -1, 0));
 		staticActor->GetStaticMeshComponent()->SetRelativeRotation(Vector3(90.0f, 0.0f, 0.0f));  // 단위: 도 (Euler)
 	}
 
+	// 플레이어
+	{
+		APlayer* player = world->SpawnActor<APlayer>();
+
+		vector<PBRMeshData> meshes = GeomtryGenerator::ReadFromFileModel("medieval_vagrant_knights/", "scene.gltf");
+		
+		player->GetStaticMeshComponent()->SetPBRMeshData(meshes);
+		player->GetStaticMeshComponent()->SetRelativePosition(Vector3(0, 0, 0));
+		player->GetStaticMeshComponent()->SetRelativeRotation(Vector3(0.0f, 0.0f, 0.0f));  // 단위: 도 (Euler)
+	}
+
+	// 조명
+	{
+		ALight* light = world->SpawnActor<ALight>();
+
+		light->GetLightComponent()->SetRelativePosition(Vector3(0, 1, 0));
+	}
 
 	// 모든 액터 배치가 끝났다면
 	world->StartAllActors();
