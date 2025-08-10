@@ -43,10 +43,18 @@ using Microsoft::WRL::ComPtr;
 
 #include "Definitions.h"
 
-// ImGUI
-#include <imgui.h>
-#include <imgui_impl_dx11.h>
-#include <imgui_impl_win32.h>
+// 임구였던것
+#define IMGUI_ENABLE_DOCKING
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include "ImGUI/imgui.h"
+#include "ImGUI/imgui_impl_win32.h"
+#include "ImGUI/imgui_impl_dx11.h"
+#include "ImGUI/ImGuizmo.h"
+#include "ImGUI/imgui_internal.h"
+
+#include "Editor/Entity.h"
+#include "Editor/Editor.h"
+#include "Editor/EditorApplication.h"
 
 // Core
 #include "Core/Math.h"

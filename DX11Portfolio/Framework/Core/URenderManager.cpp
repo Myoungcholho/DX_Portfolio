@@ -95,8 +95,6 @@ void URenderManager::RenderLoop()
 		// 인자로 렌더큐를 전달해서 렌더링 시작
 		m_renderer->RenderFrame(renderQueue);
 
-
-
 		// 후처리 및 출력
 		m_renderer->RenderPostProcess();
 

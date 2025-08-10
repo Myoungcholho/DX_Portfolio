@@ -1,9 +1,16 @@
 ﻿#include "Framework.h"
+
 #include "ImGuiManager.h"
 
 ImGuiManager* ImGuiManager::Instance = nullptr;
 ImGUIDesc ImGuiManager::ImGuiDesc = {};
 bool ImGuiManager::initialized = false;
+
+#ifdef IMGUI_ENABLE_DOCKING
+#pragma message("✅ IMGUI_ENABLE_DOCKING is enabled!")
+#else
+#pragma message("❌ IMGUI_ENABLE_DOCKING is NOT defined!")
+#endif
 
 ImGuiManager* ImGuiManager::Get()
 {
@@ -55,12 +62,20 @@ void ImGuiManager::Initialize()
 {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
-	io.DisplaySize = ImVec2(ImGuiDesc.Width, ImGuiDesc.Height);
-	ImGui::StyleColorsLight();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
 
-	bool dxInit = ImGui_ImplDX11_Init(ImGuiDesc.Device.Get(), ImGuiDesc.DeviceContext.Get());
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
+	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
+
+	io.DisplaySize = ImVec2(ImGuiDesc.Width, ImGuiDesc.Height);
+	
+	//ImGui::StyleColorsLight();
+	ImGui::StyleColorsDark();
+
 	bool winInit = ImGui_ImplWin32_Init(ImGuiDesc.Hwnd);
+	bool dxInit = ImGui_ImplDX11_Init(ImGuiDesc.Device.Get(), ImGuiDesc.DeviceContext.Get());
 	assert(dxInit && winInit && "ImGui initialization failed");
 
 	initialized = true;
@@ -84,6 +99,8 @@ void ImGuiManager::BeginFrame()
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
+
+	//ShowSimpleDockUI();
 }
 
 /// <summary>
@@ -115,7 +132,14 @@ void ImGuiManager::EndFrame()
 	Contents.clear();
 	ImGui::End();
 
+	GizmoTest();
+
 	ImGui::Render();
+
+	//if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+	//{
+	//	ImGui::UpdatePlatformWindows(); // 창 생성 및 상태 갱신 (메인 스레드 필수)
+	//}
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -130,6 +154,9 @@ void ImGuiManager::EndFrame()
 	}
 }
 
+/// <summary>
+/// Render Thread에서만 호출해야한다.
+/// </summary>
 void ImGuiManager::RenderDrawData(ID3D11DeviceContext* context)
 {
 	std::lock_guard<std::mutex> lock(m_drawDataMutex);
@@ -142,7 +169,81 @@ void ImGuiManager::RenderDrawData(ID3D11DeviceContext* context)
 	{
 		ImGui_ImplDX11_RenderDrawData(drawData);
 		m_renderedIndex = nextRenderIndex;
+
+		//// 멀티 뷰포트가 켜져 있다면 서브 창들 렌더링도 실행
+		//if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		//{
+		//	ImGui::RenderPlatformWindowsDefault(nullptr, context);
+		//}
 	}
+}
+
+void ImGuiManager::ShowSimpleDockUI()
+{
+	// 1. DockSpace 생성
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_MenuBar;
+	ImGuiViewport* viewport = ImGui::GetMainViewport();
+
+	ImGui::SetNextWindowPos(viewport->WorkPos);
+	ImGui::SetNextWindowSize(viewport->WorkSize);
+	ImGui::SetNextWindowViewport(viewport->ID);
+
+	window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+		ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+
+	ImGui::Begin("DockSpace", nullptr, window_flags);
+	ImGui::PopStyleVar(2);
+
+	ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+	ImGui::DockSpace(dockspace_id, ImVec2(0, 0), ImGuiDockNodeFlags_None);
+	ImGui::End();
+
+	// 2. 간단한 도킹 가능한 창
+	ImGui::Begin("Hello Dock");
+	ImGui::Text("도킹 테스트용 창입니다!");
+	ImGui::End();
+}
+
+void ImGuiManager::GizmoTest()
+{
+	ImGuiIO& io = ImGui::GetIO();
+	ImGuizmo::SetOrthographic(false/*!isPerspective*/);
+	ImGuizmo::SetDrawlist(ImGui::GetCurrentWindow()->DrawList);
+
+
+	ImGuizmo::BeginFrame();
+
+	UINT width = ImGuiDesc.Width;
+	UINT height = ImGuiDesc.Height;
+	float windowWidth = (float)ImGui::GetWindowWidth();
+	float windowHeight = (float)ImGui::GetWindowHeight();
+
+	RECT rect = { 0, 0, 0, 0 };
+	::GetClientRect(ImGuiDesc.Hwnd, &rect);
+
+	ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, width, height);
+
+	Matrix viewMatirx;
+	Matrix projectionMatirx;
+
+	viewMatirx = CContext::Get()->GetViewMatrix();
+	projectionMatirx = CContext::Get()->GetProjectionMatrix();
+
+	Matrix modelMatrix;
+	XMVECTOR translation = XMVectorSet(0.0f, -10.0f, 0.0f, 1.0f);
+	XMVECTOR rotation = XMQuaternionIdentity();
+	XMVECTOR scale = XMVectorSet(1.0f, 1.0f, 1.0f, 0.0f);
+
+	modelMatrix = XMMatrixScalingFromVector(scale) *
+		XMMatrixRotationQuaternion(rotation) *
+		XMMatrixTranslationFromVector(translation);
+
+	ImGuizmo::Manipulate(*viewMatirx.m, *projectionMatirx.m,
+		ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::LOCAL, *modelMatrix.m);
 }
 
 ImDrawData* ImGuiManager::CloneDrawData(ImDrawData* src)

@@ -26,6 +26,9 @@ public:
     void EndFrame();
     void RenderDrawData(ID3D11DeviceContext* context);
    
+    void ShowSimpleDockUI();
+    void GizmoTest();
+
 public:
     void RenderText(float x, float y, float r, float g, float b, string content);
     void RenderText(float x, float y, float r, float g, float b, float a, string content);

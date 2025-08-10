@@ -1,8 +1,7 @@
 #include "Framework.h"
 #include "Window.h"
 
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam,
-	LPARAM lParam);
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam,LPARAM lParam);
 
 HWND Window::Handle = nullptr;
 WindowDesc Window::Desc = {};
@@ -90,43 +89,58 @@ void Window::Destroy()
 	UnregisterClass(Desc.AppName.c_str(), Desc.Instance);
 }
 
-LRESULT Window::WndProc(HWND InHandle, UINT InMessage, WPARAM InwParam, LPARAM InlParam)
+LRESULT Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	CMouse::Get()->WndProc(InMessage, InwParam, InlParam);
+	CMouse::Get()->WndProc(message, wParam, lParam);
 	
-	if (ImGui_ImplWin32_WndProcHandler(InHandle, InMessage, InwParam, InlParam))
+	if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))	// ImGui에 들어온 입력이라면 아래 로직은 처리하지 않겠다
 		return true;
 
-	if (InMessage == WM_SIZE)
+	switch (message)
 	{
-		float width = (float)LOWORD(InlParam);
-		float height = (float)HIWORD(InlParam);
+	case WM_SIZE:
+	{
+		float width = static_cast<float>(LOWORD(lParam));
+		float height = static_cast<float>(HIWORD(lParam));
 
 		if (D3D::Get() != nullptr)
 			D3D::Get()->ResizeScreen(width, height);
 
 		if (CContext::Get() != nullptr)
-			CContext::Get()->ResizeScreen();	
+			CContext::Get()->ResizeScreen();
+
+		break;
 	}
 
-	if (InMessage == WM_KEYDOWN)
-	{
-		if (InwParam == VK_ESCAPE)
+	case WM_KEYDOWN:
+		if (wParam == VK_ESCAPE)
 		{
 			PostQuitMessage(0);
-
 			return 0;
 		}
-	}
+		break;
 
-	if (InMessage == WM_CLOSE || InMessage == WM_DESTROY)
-	{
+	case WM_DPICHANGED:
+		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DpiEnableScaleViewports)
+		{
+			const RECT* suggested_rect = (RECT*)lParam;
+			::SetWindowPos(hWnd, NULL,
+				suggested_rect->left, suggested_rect->top,
+				suggested_rect->right - suggested_rect->left,
+				suggested_rect->bottom - suggested_rect->top,
+				SWP_NOZORDER | SWP_NOACTIVATE);
+		}
+		break;
+
+	case WM_CLOSE:
+	case WM_DESTROY:
 		PostQuitMessage(0);
-
 		return 0;
-	}
 
-	return DefWindowProc(InHandle, InMessage, InwParam, InlParam);
+	default:
+		break;
+	}
+	return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
 void Window::MainRender(UGameInstance* game)
