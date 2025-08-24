@@ -16,3 +16,10 @@ bool FDynamicMulticastDelegate::IsBound() const
 {
 	return !Delegates.empty();
 }
+
+void FDynamicMulticastDelegate::Remove(FDelegateHandle handle)
+{
+	Delegates.erase(std::remove_if(Delegates.begin(), Delegates.end(),
+		[&](const FBoundFunction& b) { return b.Handle == handle; }),
+		Delegates.end());
+}

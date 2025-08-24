@@ -20,7 +20,7 @@ void ModelLoader::Load(string basePath, string filename)
 {
 	// 1. gltf 파일이라면
 	if (GetExtension(filename) == ".gltf")
-		isGLTF = true;
+		isGLTF = false;
 
 	this->basePath = basePath;
 	Assimp::Importer importer;

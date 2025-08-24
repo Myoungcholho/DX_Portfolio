@@ -25,6 +25,10 @@ public:
     void SetRenderTargets(
         const std::vector<ComPtr<ID3D11RenderTargetView>>& targets);
 
+    void OnResize(ComPtr<ID3D11Device>& device, ComPtr<ID3D11DeviceContext>& context,
+        int width, int height);
+
+
 public:
     struct ImageFilterConstData 
     {

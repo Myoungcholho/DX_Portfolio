@@ -38,7 +38,6 @@ void ImageFilter::UpdateConstantBuffers(ComPtr<ID3D11Device>& device,ComPtr<ID3D
 
 void ImageFilter::Render(ComPtr<ID3D11DeviceContext>& context) const 
 {
-
     assert(m_shaderResources.size() > 0);
     assert(m_renderTargets.size() > 0);
 
@@ -66,4 +65,20 @@ void ImageFilter::SetRenderTargets(const std::vector<ComPtr<ID3D11RenderTargetVi
     {
         m_renderTargets.push_back(tar.Get());
     }
+}
+
+void ImageFilter::OnResize(ComPtr<ID3D11Device>& device, ComPtr<ID3D11DeviceContext>& context, int width, int height)
+{
+    m_shaderResources.clear();
+    m_renderTargets.clear();
+
+    m_viewport.TopLeftX = 0; m_viewport.TopLeftY = 0;
+    m_viewport.Width = float(width);
+    m_viewport.Height = float(height);
+    m_viewport.MinDepth = 0.0f; m_viewport.MaxDepth = 1.0f;
+
+    m_constData.dx = 1.0f / width;
+    m_constData.dy = 1.0f / height;
+
+    UpdateConstantBuffers(device,context);
 }

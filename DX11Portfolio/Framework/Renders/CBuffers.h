@@ -1,7 +1,12 @@
 #pragma once
 #include "Framework.h"
 
-#define MAX_LIGHTS 3
+#define MAX_LIGHTS 2
+#define LIGHT_OFF 0x00
+#define LIGHT_DIRECTIONAL 0x01
+#define LIGHT_POINT 0x02
+#define LIGHT_SPOT 0x04
+#define LIGHT_SHADOW 0x10
 
 enum class LightType : int
 {
@@ -17,10 +22,15 @@ struct LightData
     Vector3 direction = Vector3(0.0f, 0.0f, 1.0f);      // 방향
     float fallOffEnd = 10.0f;                           // 감쇠 끝 거리
     Vector3 position = Vector3(0.0f, 0.0f, -2.0f);      // 위치
-    float spotPower = 100.0f;                           // spot 라이트용
-    int type = 0;
+    float spotPower = 3.0f;                           // spot 라이트용
+
+    uint32_t type = LIGHT_OFF;
     int id = -1;
-    float dummy[2];
+    int mEnabled = 1;
+    float radius = 0.0f;
+
+    Matrix viewProj;
+    Matrix invProj;
 };
 
 struct WorldConstantBuffer
@@ -164,9 +174,12 @@ struct GlobalConstants
 {
     Matrix view;
     Matrix proj;
+    Matrix invProj;
     Matrix viewProj;
+    Matrix invViewProj;
+
     Vector3 eyeWorld;
-    float strengthIBL = 1.0f;
+    float strengthIBL = 0.5f;
     int textureToDraw = 0;              // 0: Env, 1: Specular, 2: Irradiance, 그외: 검은색
     float envLodBias = 0.0f;            // 환경맵 LodBias
     float lodBias = 2.0f;               // 다른 물체들 LodBias
@@ -194,4 +207,11 @@ struct MaterialConstants {
     float gamma = 1.0f;
     Vector3 dummy;
 
+};
+
+__declspec(align(256)) struct PostEffectsConstants 
+{
+    int mode = 1; // 1: Rendered image, 2: DepthOnly
+    float depthScale = 0.05f;
+    float fogStrength = 0.0;
 };

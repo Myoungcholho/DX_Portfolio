@@ -77,8 +77,8 @@ void CCamera::SetViewMatrix()
 	(
 		DirectX::XM_PI * 0.25f,
 		width / height,
-		0.1f,
-		1000.0f
+		0.01f,
+		100.0f
 	);
 }
 

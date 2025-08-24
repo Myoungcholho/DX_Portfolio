@@ -16,16 +16,13 @@ void PostProcess::Initialize(
 	m_mesh->indexCount = UINT(meshData.indices.size());
     D3D11Utils::CreateIndexBuffer(device, meshData.indices,m_mesh->indexBuffer);
 
-    m_bloomSRVs.resize(bloomLevels);
-    m_bloomRTVs.resize(bloomLevels);
-
     // Bloom Down/Up
     m_bloomSRVs.resize(bloomLevels);
     m_bloomRTVs.resize(bloomLevels);
-    for (int i = 0; i < bloomLevels; i++) 
+    for (int i = 0; i < bloomLevels; i++)
     {
         int div = int(pow(2, i));
-        CreateBuffer(device, context, width / div, height / div, m_bloomSRVs[i],m_bloomRTVs[i]);
+        CreateBuffer(device, context, width / div, height / div, m_bloomSRVs[i], m_bloomRTVs[i]);
     }
 
     m_bloomDownFilters.resize(bloomLevels - 1);
@@ -45,7 +42,7 @@ void PostProcess::Initialize(
 
 
     m_bloomUpFilters.resize(bloomLevels - 1);
-    for (int i = 0; i < bloomLevels - 1; i++) 
+    for (int i = 0; i < bloomLevels - 1; i++)
     {
         int level = bloomLevels - 2 - i;
         int div = int(pow(2, level));
@@ -115,4 +112,56 @@ void PostProcess::CreateBuffer(ComPtr<ID3D11Device>& device,
     ThrowIfFailed(device->CreateTexture2D(&txtDesc, NULL, texture.GetAddressOf()));
     ThrowIfFailed(device->CreateRenderTargetView(texture.Get(), NULL,rtv.GetAddressOf()));
     ThrowIfFailed(device->CreateShaderResourceView(texture.Get(), NULL,srv.GetAddressOf()));
+}
+
+void PostProcess::OnResize(ComPtr<ID3D11Device>& device, 
+    ComPtr<ID3D11DeviceContext>& context, 
+    const std::vector<ComPtr<ID3D11ShaderResourceView>>& resources, 
+    const std::vector<ComPtr<ID3D11RenderTargetView>>& targets, 
+    const int width, const int height, const int bloomLevels)
+{
+    // 1. 만들어진 bloomSRVs랑 bloomRTVs를 해제
+    for (auto& s : m_bloomSRVs)
+        s.Reset();
+    for (auto& r : m_bloomRTVs)
+        r.Reset();
+    m_bloomSRVs.clear();
+    m_bloomRTVs.clear();
+
+    // 2. 변경된 width와 height값으로 bloomSRVs와 bloomRTVs를 재생성
+    m_bloomSRVs.resize(bloomLevels);
+    m_bloomRTVs.resize(bloomLevels);
+    for (int i = 0; i < bloomLevels; ++i)
+    {
+        int div = int(pow(2, i));
+        CreateBuffer(device, context, width / div, height / div, m_bloomSRVs[i], m_bloomRTVs[i]);
+    }
+
+    // 3. 다운 필터 처리
+    for (int i = 0; i < bloomLevels - 1; i++)
+    {
+        int div = int(pow(2, i + 1));
+        m_bloomDownFilters[i].OnResize(device, context, width/div, height/div);
+        m_bloomDownFilters[i].SetShaderResources({ i == 0 ? resources[0] : m_bloomSRVs[i] });
+        m_bloomDownFilters[i].SetRenderTargets({ m_bloomRTVs[i + 1] });
+        m_bloomDownFilters[i].UpdateConstantBuffers(device, context);
+    }
+
+    // 4. 업 필터 처리
+    for (int i = 0; i < bloomLevels - 1; i++)
+    {
+        int level = bloomLevels - 2 - i;
+        int div = int(pow(2, level));
+        
+        m_bloomUpFilters[i].OnResize(device, context, width / div, height / div);
+        m_bloomUpFilters[i].SetShaderResources({ m_bloomSRVs[level + 1] });
+        m_bloomUpFilters[i].SetRenderTargets({ m_bloomRTVs[level] });
+        m_bloomUpFilters[i].UpdateConstantBuffers(device, context);
+    }
+
+    // 5. 합성필터 처리
+    m_combineFilter.OnResize(device, context, width, height);
+    m_combineFilter.SetShaderResources({ resources[0], m_bloomSRVs[0] });
+    m_combineFilter.SetRenderTargets(targets);       // 새 백버퍼 RTV!!
+    m_combineFilter.UpdateConstantBuffers(device, context);
 }

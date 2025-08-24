@@ -20,6 +20,14 @@ public:
         ComPtr<ID3D11ShaderResourceView>& srv,
         ComPtr<ID3D11RenderTargetView>& rtv);
 
+    void OnResize
+    (
+        ComPtr<ID3D11Device>& device,
+        ComPtr<ID3D11DeviceContext>& context,
+        const std::vector<ComPtr<ID3D11ShaderResourceView>>& resources,
+        const std::vector<ComPtr<ID3D11RenderTargetView>>& targets,
+        const int width, const int height, const int bloomLevels
+    );
 public:
     ImageFilter m_combineFilter;
     vector<ImageFilter> m_bloomDownFilters;

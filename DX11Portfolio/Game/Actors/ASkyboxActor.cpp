@@ -3,6 +3,7 @@
 
 ASkyboxActor::ASkyboxActor()
 {
+	m_name = "SkyBox";
 	m_skyboxComponent = make_shared<USkyboxComponent>();
 	root = m_skyboxComponent;
 	AddComponent(m_skyboxComponent);

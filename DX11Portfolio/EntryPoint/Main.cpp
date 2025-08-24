@@ -25,14 +25,14 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 	D3D::Get()->GraphicsInit();
 
 	// ImGUI 초기화
-	ImGUIDesc imguiDesc = {};
+	/*ImGUIDesc imguiDesc = {};
 	imguiDesc.Device = D3D::Get()->GetDeviceCom();
 	imguiDesc.DeviceContext = D3D::Get()->GetDeviceContextCom();
 	imguiDesc.Width = winDesc.Width;
 	imguiDesc.Height = winDesc.Height;
 	imguiDesc.Hwnd = hwnd;
 	ImGuiManager::SetDesc(imguiDesc);
-	ImGuiManager::Create();
+	ImGuiManager::Create();*/
 
 
 	// Game Run
@@ -48,7 +48,7 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 	{
 		ASkyboxActor* skyboxActor = world->SpawnActor<ASkyboxActor>();
 
-		PBRMeshData skyboxMesh = GeomtryGenerator::MakeBox(40.0f);
+		PBRMeshData skyboxMesh = GeomtryGenerator::MakeBox(50.0f);
 		std::reverse(skyboxMesh.indices.begin(), skyboxMesh.indices.end());
 
 		skyboxActor->GetSkyboxComponent()->SetPBRMeshData(vector{ skyboxMesh });	
@@ -68,7 +68,6 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 		ground.roughnessTextureFilename = path + "rock-wall-mortar_roughness.png";
 
 		staticActor->GetStaticMeshComponent()->SetPBRMeshData(vector{ ground });
-
 		staticActor->GetStaticMeshComponent()->SetRelativePosition(Vector3(0, -1, 0));
 		staticActor->GetStaticMeshComponent()->SetRelativeRotation(Vector3(90.0f, 0.0f, 0.0f));  // 단위: 도 (Euler)
 	}
@@ -77,10 +76,11 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 	{
 		APlayer* player = world->SpawnActor<APlayer>();
 
-		vector<PBRMeshData> meshes = GeomtryGenerator::ReadFromFileModel("medieval_vagrant_knights/", "scene.gltf");
-		
+		//vector<PBRMeshData> meshes = GeomtryGenerator::ReadFromFileModel("medieval_vagrant_knights/", "scene.gltf");
+		vector<PBRMeshData> meshes = GeomtryGenerator::ReadFromFileModel("stan_lee/", "scene.gltf");
+
 		player->GetStaticMeshComponent()->SetPBRMeshData(meshes);
-		player->GetStaticMeshComponent()->SetRelativePosition(Vector3(0, 0, 0));
+		player->GetStaticMeshComponent()->SetRelativePosition(Vector3(0, -0.5f, -9.5f));
 		player->GetStaticMeshComponent()->SetRelativeRotation(Vector3(0.0f, 0.0f, 0.0f));  // 단위: 도 (Euler)
 	}
 
@@ -88,7 +88,19 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 	{
 		ALight* light = world->SpawnActor<ALight>();
 
-		light->GetLightComponent()->SetRelativePosition(Vector3(0, 1, 0));
+		light->GetLightComponent()->SetRelativePosition(Vector3(0, 3, -14));
+		light->GetLightComponent()->SetRelativeRotation(Vector3(-25, 0, 0));
+		light->GetLightComponent()->SetLightType((uint32_t)LIGHT_DIRECTIONAL | LIGHT_SHADOW);
+		light->SetName("SpotLight");
+	}
+
+	{
+		//ALight* light = world->SpawnActor<ALight>();
+
+		//light->GetLightComponent()->SetRelativePosition(Vector3(-10, 10, -10));
+		//light->GetLightComponent()->SetRelativeRotation(Vector3(-90, -90, 0));
+		//light->GetLightComponent()->SetLightType((uint32_t)LIGHT_DIRECTIONAL | LIGHT_SHADOW);
+		//light->SetName("DirectionLight");
 	}
 
 	// 모든 액터 배치가 끝났다면

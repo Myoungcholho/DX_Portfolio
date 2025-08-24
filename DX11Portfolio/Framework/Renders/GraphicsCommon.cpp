@@ -7,6 +7,8 @@ namespace Graphics
 	// Sampler States
 	ComPtr<ID3D11SamplerState> linearWrapSS;
 	ComPtr<ID3D11SamplerState> linearClampSS;
+	ComPtr<ID3D11SamplerState> shadowPointSS;
+	ComPtr<ID3D11SamplerState> shadowCompareSS;
 	vector<ID3D11SamplerState*> sampleStates;
 
 	// Rasterizer States
@@ -29,6 +31,7 @@ namespace Graphics
 	ComPtr<ID3D11VertexShader> skyboxVS;
 	ComPtr<ID3D11VertexShader> samplingVS;
 	ComPtr<ID3D11VertexShader> normalVS;
+	ComPtr<ID3D11VertexShader> depthOnlyVS;
 
 	ComPtr<ID3D11PixelShader> basicPS;
 	ComPtr<ID3D11PixelShader> skyboxPS;
@@ -36,7 +39,9 @@ namespace Graphics
 	ComPtr<ID3D11PixelShader> bloomDownPS;
 	ComPtr<ID3D11PixelShader> bloomUpPS;
 	ComPtr<ID3D11PixelShader> normalPS;
-	ComPtr<ID3D11PixelShader> simplePS;
+	//ComPtr<ID3D11PixelShader> simplePS;
+	ComPtr<ID3D11PixelShader> depthOnlyPS;
+	ComPtr<ID3D11PixelShader> postEffectsPS;
 
 	ComPtr<ID3D11GeometryShader> normalGS;
 
@@ -59,6 +64,8 @@ namespace Graphics
 	GraphicsPSO reflectSkyboxSolidPSO;
 	GraphicsPSO reflectSkyboxWirePSO;
 	GraphicsPSO normalsPSO;
+	GraphicsPSO depthOnlyPSO;
+	GraphicsPSO postEffectsPSO;
 	GraphicsPSO postProcessingPSO;
 }
 
@@ -88,10 +95,27 @@ void Graphics::InitSamplers(ComPtr<ID3D11Device>& device)
 	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
 	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
 	device->CreateSamplerState(&sampDesc, linearClampSS.GetAddressOf());
+	// shadowPointSS
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	sampDesc.BorderColor[0] = 100.0f; // 큰 Z값
+	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+	device->CreateSamplerState(&sampDesc, shadowPointSS.GetAddressOf());
+	// shadowCompareSS
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	sampDesc.BorderColor[0] = 100.0f; // 큰 Z값
+	sampDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT; // TODO: linear?
+	sampDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+	device->CreateSamplerState(&sampDesc, shadowCompareSS.GetAddressOf());
 
 	// 샘플러 순서 주의
 	sampleStates.push_back(linearWrapSS.Get());
 	sampleStates.push_back(linearClampSS.Get());
+	sampleStates.push_back(shadowPointSS.Get());
+	sampleStates.push_back(shadowCompareSS.Get());
 }
 void Graphics::InitRasterizerStates(ComPtr<ID3D11Device>& device)
 {
@@ -226,6 +250,7 @@ void Graphics::InitShaders(ComPtr<ID3D11Device>& device)
 	D3D11Utils::CreateVertexShaderAndInputLayout(device, L"DrawNormal/NormalVS.hlsl", basicIEs, normalVS, basicIL);
 	D3D11Utils::CreateVertexShaderAndInputLayout(device, L"PostProcess/SamplingVS.hlsl", samplingIED, samplingVS, samplingIL);
 	D3D11Utils::CreateVertexShaderAndInputLayout(device, L"CubeMapping/SkyboxVS.hlsl", skyboxIE, skyboxVS, skyboxIL);
+	D3D11Utils::CreateVertexShaderAndInputLayout(device, L"DepthMap/DepthOnlyVS.hlsl", basicIEs, depthOnlyVS, skyboxIL);
 
 	// PS
 	D3D11Utils::CreatePixelShader(device, L"BasicShader/BasicPS.hlsl", basicPS);
@@ -234,7 +259,9 @@ void Graphics::InitShaders(ComPtr<ID3D11Device>& device)
 	D3D11Utils::CreatePixelShader(device, L"PostProcess/CombinePixelShader.hlsl", combinePS);		
 	D3D11Utils::CreatePixelShader(device, L"PostProcess/BloomDownPS.hlsl", bloomDownPS);
 	D3D11Utils::CreatePixelShader(device, L"PostProcess/BloomUpPS.hlsl", bloomUpPS);
-	D3D11Utils::CreatePixelShader(device, L"PostProcess/SimplePS.hlsl", simplePS);
+	//D3D11Utils::CreatePixelShader(device, L"PostProcess/SimplePS.hlsl", simplePS);
+	D3D11Utils::CreatePixelShader(device, L"DepthMap//DepthOnlyPS.hlsl", depthOnlyPS);
+	D3D11Utils::CreatePixelShader(device, L"PostProcess/PostEffectsPS.hlsl", postEffectsPS);
 
 	// GS
 	D3D11Utils::CreateGeometryShader(device, L"DrawNormal/NormalGS.hlsl", normalGS);
@@ -256,7 +283,9 @@ void Graphics::InitPipelineStates(ComPtr<ID3D11Device>& device)
 	stencilMaskPSO = defaultSolidPSO;
 	stencilMaskPSO.m_depthStencilState = maskDSS;
 	stencilMaskPSO.m_stencilRef = 1;
-	stencilMaskPSO.m_pixelShader = simplePS;
+	//stencilMaskPSO.m_pixelShader = simplePS;
+	stencilMaskPSO.m_vertexShader = depthOnlyVS;
+	stencilMaskPSO.m_pixelShader = depthOnlyPS;
 
 	// reflectSolidPSO: 반사되면 Winding 반대
 	reflectSolidPSO = defaultSolidPSO;
@@ -309,8 +338,20 @@ void Graphics::InitPipelineStates(ComPtr<ID3D11Device>& device)
 	normalsPSO.m_pixelShader = normalPS;
 	normalsPSO.m_primitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
 
+	// depthOnlyPSO
+	depthOnlyPSO = defaultSolidPSO;
+	depthOnlyPSO.m_vertexShader = depthOnlyVS;
+	depthOnlyPSO.m_pixelShader = depthOnlyPS;
+
+	// postEffectsPSO
+	postEffectsPSO.m_vertexShader = samplingVS;
+	postEffectsPSO.m_pixelShader = postEffectsPS;
+	postEffectsPSO.m_inputLayout = samplingIL;
+	postEffectsPSO.m_rasterizerState = postProcessingRS;
+
 	// postProcessingPSO
 	postProcessingPSO.m_vertexShader = samplingVS;
+	postProcessingPSO.m_pixelShader = depthOnlyPS; // 사용 안해서 nullptr줘도 되는데 안전하게 더미
 	postProcessingPSO.m_inputLayout = samplingIL;
 	postProcessingPSO.m_rasterizerState = postProcessingRS;
 }

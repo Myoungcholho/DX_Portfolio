@@ -14,9 +14,6 @@
     <ClInclude Include="Core\Color.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Systems\ImGuiManager.h">
-      <Filter>System</Filter>
-    </ClInclude>
     <ClInclude Include="Viewer\Camera.h">
       <Filter>Viewer</Filter>
     </ClInclude>
@@ -202,6 +199,51 @@
     <ClInclude Include="ImGUI\ImGuizmo.h">
       <Filter>ImGUI</Filter>
     </ClInclude>
+    <ClInclude Include="Editor\EditorApplication.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Entity.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Editor.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorWindow.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\ImGuiManager.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\InspectorWindow.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\WorldOutlinerWindow.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorSelection.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\TransformEditor.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\LightEditor.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\ComponentHierarchyWindow.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorGizmoSystem.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="PostProcess\PostEffects.h">
+      <Filter>PostProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\RendererSettingsWindow.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\StaticMeshEditor.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Framework.cpp" />
@@ -213,9 +255,6 @@
     </ClCompile>
     <ClCompile Include="Core\Color.cpp">
       <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Systems\ImGuiManager.cpp">
-      <Filter>System</Filter>
     </ClCompile>
     <ClCompile Include="Viewer\Camera.cpp">
       <Filter>Viewer</Filter>
@@ -368,6 +407,51 @@
     <ClCompile Include="ImGUI\ImGuizmo.cpp">
       <Filter>ImGUI</Filter>
     </ClCompile>
+    <ClCompile Include="Editor\EditorApplication.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Entity.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Editor.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorWindow.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\ImGuiManager.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\InspectorWindow.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\WorldOutlinerWindow.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorSelection.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\TransformEditor.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\LightEditor.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\ComponentHierarchyWindow.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorGizmoSystem.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcess\PostEffects.cpp">
+      <Filter>PostProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\RendererSettingsWindow.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\StaticMeshEditor.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="System">
@@ -421,14 +505,17 @@
     <Filter Include="Shaders\DrawNormal">
       <UniqueIdentifier>{55a12397-0426-4a26-9914-155cce550763}</UniqueIdentifier>
     </Filter>
-    <Filter Include="UI">
-      <UniqueIdentifier>{241e9a8b-f8a8-4037-987c-c136e603a493}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ImGUI">
       <UniqueIdentifier>{8f4cb728-2e29-4cd5-8856-0f32fb91384d}</UniqueIdentifier>
     </Filter>
     <Filter Include="ImGUIGizmo">
       <UniqueIdentifier>{76423dcd-e2cf-4b41-a029-edc6484cd115}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor">
+      <UniqueIdentifier>{1bd56b89-9cd3-485c-a3e4-d701169d8baf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\DepthMap">
+      <UniqueIdentifier>{a44a5e1e-aa9e-4b75-a2d7-4be973fd24c6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -476,6 +563,15 @@
     </FxCompile>
     <FxCompile Include="Shaders\BasicShader\BasicPS.hlsl">
       <Filter>Shaders\BasicShader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\DepthMap\DepthOnlyPS.hlsl">
+      <Filter>Shaders\DepthMap</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\DepthMap\DepthOnlyVS.hlsl">
+      <Filter>Shaders\DepthMap</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\PostEffectsPS.hlsl">
+      <Filter>Shaders\PostProcess</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

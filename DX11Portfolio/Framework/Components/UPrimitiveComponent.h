@@ -11,6 +11,11 @@ public:
 public:
 	WorldInvConstantBuffer& GetMeshConstants() { return m_meshConstsCPU; }
 	MaterialConstants& GetMaterialConstants() { return m_materialConstsCPU; }
+	bool GetNormalDraws() { return m_drawNormals; }
+
+	void SetMeshConstants(WorldInvConstantBuffer& Indata) { m_meshConstsCPU = Indata; }
+	void SetMaterialConstants(MaterialConstants& Indata) { m_materialConstsCPU = Indata; }
+	void SetNormalDraws(bool InValue) { m_drawNormals = InValue; }
 protected:
 	bool bVisible = true;
 	

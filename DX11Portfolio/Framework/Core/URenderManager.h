@@ -14,6 +14,9 @@ public:
 	~URenderManager();
 
 public:
+	URenderer* GerRenderer() { return m_renderer.get(); }
+
+public:
 	void Init();
 	void Stop();
 

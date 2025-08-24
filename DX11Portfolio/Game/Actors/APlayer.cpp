@@ -3,6 +3,7 @@
 
 APlayer::APlayer()
 {
+	m_name = "Player";
 	m_staticMeshComponent = make_shared<UStaticMeshComponent>();
 	root = m_staticMeshComponent;
 	AddComponent(m_staticMeshComponent);

@@ -34,11 +34,24 @@ public:
     void OnGUI();
 
     void StartAllActors();
+
+public:
+    vector<AActor*> GetActorsOf() { return Actors; }
+
 public:
     void SetRenderManager(URenderManager* manager) { m_renderManager = manager; }
 
+public:
+    // Actor 삭제 기능
+    void MarkActorForDestroy(AActor* actor);
+private:
+    void FlushDestroyed();
+    void RemoveActor(AActor* actor);
+    void UnregisterFromTick(AActor* actor);
+
 private:
     vector<AActor*> Actors;
+    vector<AActor*> PendingDestroy;
 
 private:
     URenderManager* m_renderManager = nullptr;

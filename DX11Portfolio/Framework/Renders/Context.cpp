@@ -105,7 +105,7 @@ void CContext::Render()
 	// 카메라와 관련된 설정으로 Context가 하는게 맞다.
 	//D3D::Get()->GetDeviceContext()->RSSetViewports(1, Viewport.get());
 
-	string str = "";
+	/*string str = "";
 	if (ImGui::GetCurrentContext() != nullptr && ImGui::GetIO().Framerate > 0)
 	{
 		str = string("FrameRate : ") + to_string((int)ImGui::GetIO().Framerate);
@@ -122,7 +122,7 @@ void CContext::Render()
 	ImGuiManager::Get()->RenderText(5, 35, 1, 1, 1, str);
 
 	str = std::format("View Position : {:3.2f}, {:3.2f}, {:3.2f}", position.x, position.y, position.z);
-	ImGuiManager::Get()->RenderText(5, 50, 1, 1, 1, str);
+	ImGuiManager::Get()->RenderText(5, 50, 1, 1, 1, str);*/
 }
 
 void CContext::RenderConstantBuffer()

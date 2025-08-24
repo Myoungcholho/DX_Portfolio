@@ -42,6 +42,10 @@ using Microsoft::WRL::ComPtr;
 #pragma comment(lib, "d3dcompiler.lib")
 
 #include "Definitions.h"
+// Core
+#include "Core/Math.h"
+#include "Core/Color.h"
+#include "Core/DynamicMulticastDelegate.h"
 
 // 임구였던것
 #define IMGUI_ENABLE_DOCKING
@@ -54,12 +58,21 @@ using Microsoft::WRL::ComPtr;
 
 #include "Editor/Entity.h"
 #include "Editor/Editor.h"
-#include "Editor/EditorApplication.h"
+#include "Editor/EditorWindow.h"
 
-// Core
-#include "Core/Math.h"
-#include "Core/Color.h"
-#include "Core/DynamicMulticastDelegate.h"
+#include "Editor/TransformEditor.h"
+#include "Editor/LightEditor.h"
+#include "Editor/StaticMeshEditor.h"
+
+#include "Editor/InspectorWindow.h"
+#include "Editor/EditorSelection.h"
+#include "Editor/WorldOutlinerWindow.h"
+#include "Editor/ComponentHierarchyWindow.h"
+#include "Editor/EditorGizmoSystem.h"
+#include "Editor/RendererSettingsWindow.h"
+
+#include "Editor/ImGuiManager.h"
+#include "Editor/EditorApplication.h"
 
 // Render
 #include "Renders/GraphicsPSO.h"
@@ -78,11 +91,11 @@ using Microsoft::WRL::ComPtr;
 // PostProcess
 #include "PostProcess/ImageFilter.h"
 #include "PostProcess/PostProcess.h"
+#include "PostProcess/PostEffects.h"
 
 // System
 #include "Systems/D3D.h"
 #include "Systems/GraphicsDevice.h"
-#include "Systems/ImGuiManager.h"
 #include "Systems/Timer.h"
 #include "Systems/Mouse.h"
 #include "Systems/Keyboard.h"

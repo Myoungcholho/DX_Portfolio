@@ -23,8 +23,11 @@
 
 class ULightComponent : public USceneComponent
 {
-protected:
-    LightData m_light;
+public:
+    ULightComponent();
+
+public:
+    const LightData& GetLightData();
 
 public:
     virtual void Tick() override;
@@ -32,12 +35,16 @@ public:
     void SetRadiance(const Vector3& rad) { m_light.radiance = rad; }
     void SetFalloff(float start, float end) { m_light.fallOffStart = start; m_light.fallOffEnd = end; }
     void SetSpotPower(float power) { m_light.spotPower = power; }
-    void SetLightType(int type) { m_light.type = type; }
+    void SetLightType(uint32_t type) { m_light.type = type; }
+    void SetEnabled(bool Enabled) { m_light.mEnabled = Enabled; }
 
-public:
-    const LightData& GetLightData();
-    bool IsEnabled() const { return bEnabled; }
+    const Vector3& GetRadiance() const { return m_light.radiance; }
+    float GetFalloffStart() const { return m_light.fallOffStart; }
+    float GetFalloffEnd() const { return m_light.fallOffEnd; }
+    float GetSpotPower() const { return m_light.spotPower; }
+    int GetLightType() const { return m_light.type; }
+    bool GetEnabled()const { return (bool)m_light.mEnabled; }
 
-private:
-    bool bEnabled = true;
+protected:
+    LightData m_light;
 };

@@ -13,6 +13,7 @@ public:
 
 public:
     UWorld* GetWorld(){ return m_world.get(); }
+    URenderer* GetRenderer() { return m_renderManager->GerRenderer(); }
 
 public:
     void Init();

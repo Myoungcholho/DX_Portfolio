@@ -63,8 +63,6 @@ private:
 
 public:
 	void GraphicsInit();
-	//void UpdateGUI();
-	//void Render();
 
 private:
 	static D3D* Instance;
@@ -78,17 +76,30 @@ public:
 	ComPtr<ID3D11Device> GetDeviceCom() const { return Device; }
 	ComPtr<ID3D11DeviceContext> GetDeviceContextCom() const { return DeviceContext; }
 
-	ComPtr<ID3D11RenderTargetView> GetBackBufferRTV();
-	ComPtr<ID3D11ShaderResourceView> GetBackBufferSRV();
-	ComPtr<ID3D11DepthStencilView> GetDepthStencilView();
+	ComPtr<ID3D11RenderTargetView> GetBackBufferRTV(){ return m_backBufferRTV; }
+	ComPtr<ID3D11DepthStencilView> GetDepthStencilView(){ return DepthStencilView; }
 
+	ComPtr<ID3D11RenderTargetView> GetFinalLDR_RTV() { return m_finalLDR_RTV;}
+	ComPtr<ID3D11ShaderResourceView> GetFinalLDR_SRV() { return m_finalLDR_SRV; }
+
+	ComPtr<ID3D11DepthStencilView> GetDepthOnly_DSV() { return m_depthOnlyDSV; }
+	ComPtr<ID3D11ShaderResourceView> GetDepthOnly_SRV() { return m_depthOnlySRV; }
 
 private:
 	ComPtr<IDXGISwapChain> SwapChain;
 	ComPtr<ID3D11RenderTargetView> m_backBufferRTV;
-	ComPtr<ID3D11ShaderResourceView> m_backBufferSRV;
 	ComPtr<ID3D11Texture2D> DSV_Texture;
 	ComPtr<ID3D11DepthStencilView> DepthStencilView;
+
+	// Depth Buffer 관련
+	ComPtr<ID3D11Texture2D> m_depthOnlyBuffer;
+	ComPtr<ID3D11DepthStencilView> m_depthOnlyDSV;
+	ComPtr<ID3D11ShaderResourceView> m_depthOnlySRV;
+
+	// SceneView를 위해
+	ComPtr<ID3D11Texture2D> m_finalLDR;
+	ComPtr<ID3D11RenderTargetView> m_finalLDR_RTV;
+	ComPtr<ID3D11ShaderResourceView> m_finalLDR_SRV;
 
 	ComPtr<ID3D11Device> Device;
 	ComPtr<ID3D11DeviceContext> DeviceContext;

@@ -3,7 +3,9 @@
 
 USceneComponent::USceneComponent()
 {
-    m_relativeTransform = Transform();
+    mName = "USceneComponent";
+
+    m_localTransform = Transform();
     m_worldTransform = Transform();
     m_parent = nullptr;
 }
@@ -13,32 +15,32 @@ USceneComponent::USceneComponent()
 /// </summary>
 void USceneComponent::SetRelativeTransform(const Transform& t)
 {
-    m_relativeTransform = t;                                                    // 부모가 누군진 모르지만 기준으로 한 Transform
-    UpdateWorldTransform();                                                     // WorldMatrix에 반영, 왜냐하면 렌더링할때는 이 정보가 사용되니
+    m_localTransform = t;                                                    // 부모가 누군진 모르지만 기준으로 한 Transform
+    UpdateWorldTransformRecursive();                                                     // WorldMatrix에 반영, 왜냐하면 렌더링할때는 이 정보가 사용되니
 }
 
 void USceneComponent::SetRelativePosition(const Vector3& position)
 {
-    m_relativeTransform.SetPosition(position);
-    UpdateWorldTransform();
+    m_localTransform.SetPosition(position);
+    UpdateWorldTransformRecursive();
 }
 
 void USceneComponent::SetRelativeRotation(const Quaternion& rotation)
 {
-    m_relativeTransform.SetRotation(rotation);
-    UpdateWorldTransform();
+    m_localTransform.SetRotation(rotation);
+    UpdateWorldTransformRecursive();
 }
 
 void USceneComponent::SetRelativeRotation(const Vector3& rotation)
 {
-    m_relativeTransform.SetRotation(rotation);
-    UpdateWorldTransform();
+    m_localTransform.SetRotation(rotation);
+    UpdateWorldTransformRecursive();
 }
 
 void USceneComponent::SetRelativeScale(const Vector3& scale)
 {
-    m_relativeTransform.SetScale(scale);
-    UpdateWorldTransform();
+    m_localTransform.SetScale(scale);
+    UpdateWorldTransformRecursive();
 }
 
 /// <summary>
@@ -48,11 +50,26 @@ void USceneComponent::UpdateWorldTransform()
 {
     if (m_parent)
     {
-        m_worldTransform = m_parent->m_worldTransform * m_relativeTransform;    // World행렬을 부모행렬과 상대행렬의 곱으로 구성
+#ifdef TransformTest
+        cout << "--------------------------------------------------\n";
+        cout << "Parent Before :" << m_parent->mName << "\n";
+        cout << "Pos :" << m_parent->m_worldTransform.GetPosition().x << "," << m_parent->m_worldTransform.GetPosition().y << "," << m_parent->m_worldTransform.GetPosition().z << "\n";
+        cout << "Rot :" << m_parent->m_worldTransform.GetRotation().x << "," << m_parent->m_worldTransform.GetRotation().y << "," << m_parent->m_worldTransform.GetRotation().z << "\n";
+        cout << "Scale :" << m_parent->m_worldTransform.GetScale().x << "," << m_parent->m_worldTransform.GetScale().y << "," << m_parent->m_worldTransform.GetScale().z << "\n";
+#endif // 
+
+        m_worldTransform = m_localTransform * m_parent->m_worldTransform;    // World행렬을 부모행렬과 상대행렬의 곱으로 구성
+
+#ifdef TransformTest
+        cout << "Name after :" << mName << "\n";
+        cout << "Pos :" << m_worldTransform.GetPosition().x << "," << m_worldTransform.GetPosition().y << "," << m_worldTransform.GetPosition().z << "\n";
+        cout << "Rot :" << m_worldTransform.GetRotation().x << "," << m_worldTransform.GetRotation().y << "," << m_worldTransform.GetRotation().z << "\n";
+        cout << "Scale :" << m_worldTransform.GetScale().x << "," << m_worldTransform.GetScale().y << "," << m_worldTransform.GetScale().z << "\n";
+#endif
     }
     else
     {
-        m_worldTransform = m_relativeTransform;                                 // 부모가 없다면 상대위치는 곧 월드위치
+        m_worldTransform = m_localTransform;                                 // 부모가 없다면 상대위치는 곧 월드위치
     }
 }
 
@@ -72,41 +89,111 @@ void USceneComponent::UpdateWorldTransformRecursive()
     }
 }
 
-
-//const Transform& USceneComponent::GetWorldTransform() const
-//{
-//    return m_worldTransform;
-//}
-
-void USceneComponent::AttachTo(USceneComponent* parent)
+bool USceneComponent::AttachTo(USceneComponent* newParent, EAttachMode mode)
 {
+    if (m_parent == newParent) return true;
+    if (newParent == this) return false;
+
+    // 새 부모의 조상들을 위로 타고 올라가면서 검사하며
+    // 내가 이미 위쪽에 있다면 Cycle이 생기므로 금지(false)
+    for (auto* p = newParent; p != nullptr; p = p->GetParent())
+        if (p == this) return false;
+
+    UpdateWorldTransform();
+    Matrix curWorld = m_worldTransform.GetWorldMatrix();
+
+    // 기존 부모로부터 분리
     if (m_parent)
     {
-        // 기존 부모로부터 분리
-        auto& siblings = m_parent->m_children;
-        siblings.erase(std::remove(siblings.begin(), siblings.end(), this), siblings.end());
+        auto& s = m_parent->m_children;
+        s.erase(std::remove(s.begin(), s.end(), this), s.end());
     }
 
-    m_parent = parent;
-
+    // 새 부모로 설정
+    m_parent = newParent;
     if (m_parent)
     {
         m_parent->m_children.push_back(this);
-        UpdateWorldTransform();
+        //UpdateWorldTransform();
     }
+
+    // 트랜스폼 모드 적용
+    switch (mode)
+    {
+    case EAttachMode::KeepWorld:        // 화면에서 안움직이게 유지하고 싶다!
+    {
+        const Matrix parentWorld = (m_parent) ? m_parent->GetWorldMatrix() : Matrix();
+        const Matrix newLocal = parentWorld.Invert() * curWorld;
+        m_localTransform.SetWorldMatrix(newLocal);
+        break;
+    }
+    case EAttachMode::KeepRelative:     // local값은 유지하고 싶다!
+    {
+        // relative는 그대로 World는 부모 기준으로 업데이트
+        break;
+    }
+    case EAttachMode::SnapToTarget:     // 부모의 위치에 따라가고 싶다!
+    {
+        // relativeTransform 초기화
+        m_localTransform = Transform{};
+        break;
+    }
+    }
+
+    UpdateWorldTransformRecursive();
+    return true;
 }
 
-void USceneComponent::Detach()
+bool USceneComponent::Detach(EAttachMode mode)
 {
+    UpdateWorldTransform();
+    const Matrix curWorld = m_worldTransform.GetWorldMatrix();
+
     if (m_parent)
     {
-        auto& siblings = m_parent->m_children;
-        siblings.erase(std::remove(siblings.begin(), siblings.end(), this), siblings.end());
+        vector<USceneComponent*>& s = m_parent->m_children;
+        s.erase(remove(s.begin(), s.end(), this), s.end());
         m_parent = nullptr;
-
-        // 부모 잃었으니 현재 상대 트랜스폼을 월드 트랜스폼으로 전환
-        m_relativeTransform = m_worldTransform;
     }
+    else
+    {
+        return true;
+    }
+
+    switch (mode)
+    {
+    case EAttachMode::KeepWorld:
+        // 부모 없음이면 World=Local → 현재 월드를 로컬에 굳힘
+        m_localTransform.SetWorldMatrix(curWorld);
+        break;
+
+    case EAttachMode::KeepRelative:
+        // 상대 유지 → 부모 사라졌으니 결과적으로 월드가 바뀜 (아무 것도 안 함)
+        break;
+
+    case EAttachMode::SnapToTarget:
+        // 월드 원점으로 스냅하고 싶으면 Identity, 아니면 정책에 맞춰 조정
+        m_localTransform = Transform{};
+        break;
+    }
+
+    UpdateWorldTransformRecursive();
+    return true;
+}
+
+Vector3 USceneComponent::GetRelativePosition()
+{
+    return m_localTransform.GetPosition();
+}
+
+Vector3 USceneComponent::GetRelativeRotationEuler()
+{
+    return m_localTransform.GetRotation();
+}
+
+Vector3 USceneComponent::GetRelativeScale()
+{
+    return m_localTransform.GetScale();
 }
 
 const std::vector<USceneComponent*>& USceneComponent::GetChildren() const
@@ -114,9 +201,15 @@ const std::vector<USceneComponent*>& USceneComponent::GetChildren() const
     return m_children;
 }
 
+
 USceneComponent* USceneComponent::GetParent() const
 {
     return m_parent;
+}
+
+Vector3 USceneComponent::GetForwardVector()
+{
+    return m_localTransform.GetForward();
 }
 
 USceneComponent* USceneComponent::GetRoot() const
@@ -124,4 +217,10 @@ USceneComponent* USceneComponent::GetRoot() const
     if (m_parent == nullptr)
         return const_cast<USceneComponent*>(this);
     return m_parent->GetRoot();
+}
+
+const Matrix& USceneComponent::GetWorldMatrix()
+{
+    UpdateWorldTransform();
+    return m_worldTransform.GetWorldMatrix();
 }

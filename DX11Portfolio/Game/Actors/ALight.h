@@ -13,5 +13,4 @@ public:
 
 private:
 	shared_ptr<ULightComponent> m_lightComponent;
-
 };

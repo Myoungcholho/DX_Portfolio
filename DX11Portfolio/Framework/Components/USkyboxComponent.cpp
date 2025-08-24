@@ -3,6 +3,8 @@
 
 void USkyboxComponent::Init()
 {
+    mName = "SkyboxComponent";
+
     renderProxy = make_shared<USkyboxRenderProxy>();
     renderProxy->Init(m_meshData);
     renderProxy->renderPass = GetRenderPass();

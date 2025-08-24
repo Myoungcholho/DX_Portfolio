@@ -325,8 +325,6 @@ void CreateTextureHelper(ComPtr<ID3D11Device>& device,
 
 	// ÇØ»óµµ¸¦ ³·Ãç°¡¸ç ¹Ó¸Ê »ý¼º
 	context->GenerateMips(srv.Get());
-
-	// HLSL ½¦ÀÌ´õ ¾È¿¡¼­´Â SampleLevel() »ç¿ë
 }
 
 

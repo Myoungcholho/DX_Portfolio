@@ -62,6 +62,8 @@ float3 GetNormal(PixelShaderInput input)
     return normalWorld;
 }
 
+// ------PBR의 IBL 계산------
+
 float3 DiffuseIBL(float3 albedo, float3 normalWorld, float3 pixelToEye,
                   float metallic)
 {
@@ -119,60 +121,155 @@ float SchlickGGX(float NdotI, float NdotO, float roughness)
     return SchlickG1(NdotI, k) * SchlickG1(NdotO, k);
 }
 
+float3 LightRadiance(Light light, float3 posWorld, float3 normalWorld, Texture2D shadowMap)
+{
+    float3 L;
+    float att;
+    if (light.type & LIGHT_DIRECTIONAL)
+    {
+        L = normalize(-light.direction);
+        att = 1.0;
+    }
+    else
+    {
+        float3 toLight = light.position - posWorld;
+        float dist = length(toLight);
+        L = toLight / max(dist, 1e-6);
+        att = saturate((light.fallOffEnd - dist) / (light.fallOffEnd - light.fallOffStart));
+    }
+
+    float spotFactor = (light.type & LIGHT_SPOT) ? pow(saturate(-dot(L, light.direction)), light.spotPower) : 1.0;
+
+    // Shadow map
+    float shadowFactor = 1.0;
+
+    if (light.type & LIGHT_SHADOW)
+    {
+        const float nearZ = 0.01; // 카메라 설정과 동일
+        
+        // 1. Project posWorld to light screen
+        float4 lightScreen = mul(float4(posWorld, 1.0), light.viewProj);
+        lightScreen.xyz /= lightScreen.w;
+        
+        float2 lightTexcoord = float2(lightScreen.x, -lightScreen.y);
+        lightTexcoord += 1.0;
+        lightTexcoord *= 0.5;
+        
+        //float depth = shadowMap.Sample(shadowPointSampler, lightTexcoord).r;
+        
+        //// ShadowMap < 빛기준으로 봤을때 Depth비교(지면)
+        //if (depth + 0.00001f < lightScreen.z)
+        //    shadowFactor = 0.0;
+        
+        //shadowFactor = shadowMap.SampleCmpLevelZero(shadowCompareSampler, lightTexcoord.xy, lightScreen.z - 0.00001f).r;
+        
+        uint width, height, numMips;
+        shadowMap.GetDimensions(0, width, height, numMips);
+        float dx = 1.0 / (float) width;
+        float percentLit = 0.0;
+        const float2 offsets[9] =
+        {
+            float2(-1, -1), float2(0, -1), float2(+1, -1),
+            float2(-1, 0), float2(0, 0), float2(+1, 0),
+            float2(-1, +1), float2(0, +1), float2(1, +1)
+        };
+
+        [unroll]
+        for (int i = 0; i < 9; ++i)
+        {
+            percentLit += shadowMap.SampleCmpLevelZero(shadowCompareSampler, lightTexcoord.xy + offsets[i] * dx, lightScreen.z - 0.00001f).r;            
+        }
+        
+        shadowFactor = percentLit / 9.0;
+
+    }
+
+    float3 radiance = light.radiance * spotFactor * att * shadowFactor;
+
+    return radiance;
+}
+
+
+//float3 LightRadiance(in Light light, in float3 posWorld, in float3 normalWorld)
+//{
+//    // Directional light
+//    float3 lightVec = light.type & LIGHT_DIRECTIONAL
+//                      ? -light.direction
+//                      : light.position - posWorld;
+        
+//    float lightDist = length(lightVec);
+//    lightVec /= lightDist;
+
+//    // Spot light
+//    float spotFator = light.type & LIGHT_SPOT
+//                     ? pow(max(-dot(lightVec, light.direction), 0.0f), light.spotPower)
+//                      : 1.0f;
+        
+//    // Distance attenuation
+//    float att = saturate((light.fallOffEnd - lightDist)
+//                         / (light.fallOffEnd - light.fallOffStart));
+
+//    // Shadow map
+//    float shadowFactor = 1.0;
+//    float3 radiance = light.radiance * spotFator * att * shadowFactor;
+
+//    return radiance;
+//}
+
 PixelShaderOutput main(PixelShaderInput input)
 {
     float3 pixelToEye = normalize(eyeWorld - input.posWorld);
     float3 normalWorld = GetNormal(input);
     
-    float3 albedo = useAlbedoMap ? albedoTex.SampleLevel(linearWrapSampler, input.texcoord, lodBias).rgb * albedoFactor
-                                 : albedoFactor;
-    float ao = useAOMap ? aoTex.SampleLevel(linearWrapSampler, input.texcoord, lodBias).r : 1.0;
-    float metallic = useMetallicMap ? metallicRoughnessTex.SampleLevel(linearWrapSampler, input.texcoord, lodBias).b * metallicFactor
-                                    : metallicFactor;
-    float roughness = useRoughnessMap ? metallicRoughnessTex.SampleLevel(linearWrapSampler, input.texcoord, lodBias).g * roughnessFactor
-                                      : roughnessFactor;
-    float3 emission = useEmissiveMap ? emissiveTex.SampleLevel(linearWrapSampler, input.texcoord, lodBias).rgb
-                                     : emissionFactor;
+    float3 albedo = useAlbedoMap ? albedoTex.Sample(linearWrapSampler, input.texcoord).rgb * albedoFactor
+                                : albedoFactor;
+    float ao = useAOMap ? aoTex.Sample(linearWrapSampler, input.texcoord).r : 1.0;
+    float metallic = useMetallicMap ? metallicRoughnessTex.Sample(linearWrapSampler, input.texcoord).b * metallicFactor
+                                  : metallicFactor;
+    float roughness = useRoughnessMap ? metallicRoughnessTex.Sample(linearWrapSampler, input.texcoord).g * roughnessFactor
+                                   : roughnessFactor;
+    float3 emission = useEmissiveMap ? emissiveTex.Sample(linearWrapSampler, input.texcoord).rgb
+                                  : emissionFactor;
 
     float3 ambientLighting = AmbientLightingByIBL(albedo, normalWorld, pixelToEye, ao, metallic, roughness) * strengthIBL;
     
     float3 directLighting = float3(0, 0, 0);
-
+    
     [unroll]
     for (int i = 0; i < MAX_LIGHTS; ++i)
     {
-        if (light[i].type == LIGHT_TYPE_POINT)
+        if (lights[i].enabled && lights[i].type)
         {
-            float3 lightVec = light[i].position - input.posWorld;
-            float lightDist = length(lightVec);
-            lightVec /= lightDist;
-            float3 halfway = normalize(pixelToEye + lightVec);
+            float3 lightVec = lights[i].position - input.posWorld;              // 픽셀위치에서 빛까지의 방향벡터
+            float lightDist = length(lightVec);                                 // 빛까지의 거리
+            lightVec /= lightDist;                                              // 정규화
+            float3 halfway = normalize(pixelToEye + lightVec);                  // 하프벡터
         
-            float NdotI = max(0.0, dot(normalWorld, lightVec));
-            float NdotH = max(0.0, dot(normalWorld, halfway));
-            float NdotO = max(0.0, dot(normalWorld, pixelToEye));
+            float NdotI = max(0.0, dot(normalWorld, lightVec));                 // 입사각
+            float NdotH = max(0.0, dot(normalWorld, halfway));                  // 출사각
+            float NdotO = max(0.0, dot(normalWorld, pixelToEye));               // 
         
-            const float3 Fdielectric = 0.04; // 비금속(Dielectric) 재질의 F0
+            const float3 Fdielectric = 0.04;                                    // 비금속(Dielectric) 재질의 F0
             float3 F0 = lerp(Fdielectric, albedo, metallic);
-            float3 F = SchlickFresnel(F0, max(0.0, dot(halfway, pixelToEye)));
+            float3 F = SchlickFresnel(F0, max(0.0, dot(halfway, pixelToEye)));  // Frenesl
             float3 kd = lerp(float3(1, 1, 1) - F, float3(0, 0, 0), metallic);
             float3 diffuseBRDF = kd * albedo;
 
-            float D = NdfGGX(NdotH, roughness);
-            float3 G = SchlickGGX(NdotI, NdotO, roughness);
+            float D = NdfGGX(NdotH, roughness);                                 // NDF
+            float3 G = SchlickGGX(NdotI, NdotO, roughness);                     // Geometry Function
             float3 specularBRDF = (F * D * G) / max(1e-5, 4.0 * NdotI * NdotO);
 
-            float att = saturate((light[i].fallOffEnd - lightDist)
-                                     / (light[i].fallOffEnd - light[i].fallOffStart));
-            float3 radiance = light[i].radiance * att;
-
+            float3 radiance = 0.0f;
+            
+            radiance = LightRadiance(lights[i], input.posWorld, normalWorld, shadowMaps[i]);
+                
             directLighting += (diffuseBRDF + specularBRDF) * radiance * NdotI;
         }
     }
     
-    
     PixelShaderOutput output;
     output.pixelColor = float4(ambientLighting + directLighting + emission, 1.0);
+    //output.pixelColor = float4(directLighting, 1.0);
     output.pixelColor = clamp(output.pixelColor, 0.0, 1000.0);
     
     return output;

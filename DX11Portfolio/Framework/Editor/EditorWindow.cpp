@@ -1,7 +1,8 @@
 #include "Framework.h"
 #include "EditorWindow.h"
 
-EditorWindow::EditorWindow()
+EditorWindow::EditorWindow() :Entity(), 
+	mFlag(ImGuiWindowFlags_None), mState(eState::Active)
 {
 }
 

@@ -11,6 +11,7 @@ Editor::~Editor()
 
 void Editor::Initialize()
 {
+	
 }
 
 void Editor::Update()

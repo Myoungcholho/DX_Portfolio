@@ -5,6 +5,11 @@
 #include "UActorComponent.h"
 #include "Transform.h"
 
+// KeppWorld : 보이는 월드 위치/회전/스케일을 그대로 유지하며 자식/부모 업데이트
+// KeepRelative : 로컬을 유지하며 부모가 바뀌므로 월드 위치/회전/스케일이 변경될 수 있음
+// SnapToTarget : 자식 로컬을 Identity로 변경해 부모의 위치를 그대로 사용
+enum class EAttachMode { KeepWorld, KeepRelative, SnapToTarget };
+
 class USceneComponent : public UActorComponent
 {
 public:
@@ -12,8 +17,8 @@ public:
 
 protected:
     // shared_ptr은 굳이? Transform은 Value타입에 가깝기 때문에 소유권 공유 필요가 없음
-	Transform m_relativeTransform;		                // 부모 기준 위치(상대 위치)
-	Transform m_worldTransform;		                    // 렌더링에 사용(절대 위치)
+	Transform m_localTransform;		                    // 부모 기준 위치(상대 위치, Local)
+	Transform m_worldTransform;		                    // 렌더링에 사용(절대 위치, World)
 
 	USceneComponent* m_parent;                          // 부모 포인터
 	std::vector<USceneComponent*> m_children;           // 자식 포인터
@@ -24,18 +29,22 @@ public:
     void SetRelativeRotation(const Vector3& rotation);
     void SetRelativeScale(const Vector3& scale);
     void SetRelativeTransform(const Transform& t);      // 부모를 기준으로 하는 로컬 트랜스폼을 설정
+    Vector3 GetRelativePosition();
+    Vector3 GetRelativeRotationEuler();
+    Vector3 GetRelativeScale();
+    Vector3 GetForwardVector();
     void UpdateWorldTransform();
-    void UpdateWorldTransformRecursive();               
+    void UpdateWorldTransformRecursive();
 
     // 월드행렬 반환
-    //const Transform& GetWorldTransform() const;
+    const Matrix& GetWorldMatrix();
 
     // 계층 구조 구성
-    void AttachTo(USceneComponent* parent);
-    void Detach();
+    bool AttachTo(USceneComponent* parent, EAttachMode mode);
+    bool Detach(EAttachMode mode);
 
 public:
-    const std::vector<USceneComponent*>& GetChildren() const;
     USceneComponent* GetParent() const;
+    const std::vector<USceneComponent*>& GetChildren() const;
     USceneComponent* GetRoot() const;
 };

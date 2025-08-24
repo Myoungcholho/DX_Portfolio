@@ -12,12 +12,12 @@ public:
 	Transform operator*(const Transform& other) const;
 
 public:
-	Vector3 GetForward();
-	Vector3 GetUp();
-	Vector3 GetRight();
+	Vector3 GetForward() const;
+	Vector3 GetUp() const;
+	Vector3 GetRight() const;
 
 public:
-	const Matrix& GetWorldMatrix();
+	const Matrix& GetWorldMatrix() const;
 	void SetWorldMatrix(const Matrix& matrix);
 
 public:
@@ -39,10 +39,10 @@ public:
 	void RotateAxisAngle(const Vector3& Axis, float AngleRad);
 
 private:
-	void UpdateWorldMatrix();
+	void UpdateWorldMatrix() const;
 
 private:
-	bool bDirty = false;
+	mutable bool bDirty = false;
 
 private:
 	Vector3 Scale = Vector3(1.f, 1.f, 1.f);
@@ -51,5 +51,5 @@ private:
 	Quaternion RotationQuat = Quaternion(0, 0, 0, 1); // 내부 누적 회전용
 
 private:
-	Matrix WorldMatrix;
+	mutable Matrix WorldMatrix;
 };

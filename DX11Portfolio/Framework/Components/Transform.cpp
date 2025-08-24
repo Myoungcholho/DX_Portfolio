@@ -42,14 +42,16 @@ Transform::Transform(Matrix* InMatrix)
 // 부모자식 관계 행렬 계산에 사용하기 위함
 Transform Transform::operator*(const Transform& other) const
 {
+	Matrix m = this->GetWorldMatrix() * other.GetWorldMatrix();
+
 	Transform result;
 
-	result.WorldMatrix = this->WorldMatrix * other.WorldMatrix;
+	result.SetWorldMatrix(m);
 
 	return result;
 }
 
-Vector3 Transform::GetForward()
+Vector3 Transform::GetForward() const
 {
 	if (bDirty)
 		UpdateWorldMatrix();
@@ -60,7 +62,7 @@ Vector3 Transform::GetForward()
 	return forward;
 }
 
-Vector3 Transform::GetUp()
+Vector3 Transform::GetUp() const
 {
 	if (bDirty)
 		UpdateWorldMatrix();
@@ -71,7 +73,7 @@ Vector3 Transform::GetUp()
 	return up;
 }
 
-Vector3 Transform::GetRight()
+Vector3 Transform::GetRight() const
 {
 	if (bDirty)
 		UpdateWorldMatrix();
@@ -85,7 +87,7 @@ Vector3 Transform::GetRight()
 /// <summary>
 /// WorldMatrix를 내부 값으로 만들어 반환
 /// </summary>
-const Matrix& Transform::GetWorldMatrix()
+const Matrix& Transform::GetWorldMatrix() const
 {
 	if (bDirty)
 		UpdateWorldMatrix();
@@ -98,15 +100,45 @@ void Transform::SetWorldMatrix(const Matrix& matrix)
 	WorldMatrix = matrix;
 
 	XMVECTOR S, R, T;
+	auto xm = XMLoadFloat4x4(&WorldMatrix);
+
+	// NaN/Inf 입력 방지
+	if (XMMatrixIsNaN(xm) || XMMatrixIsInfinite(xm)) {
+		// PRS는 건드리지 않고 반환 (튀는 것 방지)
+		return;
+	}
+
 	if (XMMatrixDecompose(&S, &R, &T, XMLoadFloat4x4(&WorldMatrix)))
 	{
-		XMStoreFloat3(&Scale, S);
-		XMStoreFloat3(&Position, T);
-		RotationQuat = Quaternion(R); // SimpleMath::Quaternion 생성자 지원됨
+		// 회전 정규화 + 쿼터니언 연속성(이전 값과 반대 부호 방지)
+		R = XMQuaternionNormalize(R);
+		Quaternion q; 
+		XMStoreFloat4(&q, R);
+		if (RotationQuat.Dot(q) < 0.0f) 
+			q = -q; // continuity
+		
+		RotationQuat = q;
 
-		// 쿼터니언 → 오일러
-		// 나중에 변경해야한다 . 튐 현상이 있으니까 근접한 값을 선택할 수 있도록 조정해야한다
+		// 스케일 0-division 보호(다음 단계에서 나눗셈이 있을 수 있으니 ε 클램프)
+		XMFLOAT3 s; 
+		XMStoreFloat3(&s, S);
+		const float EPS = 1e-6f;
+		auto clamp_eps = [EPS](float v) {
+			if (fabsf(v) < EPS) return copysignf(EPS, v == 0.0f ? 1.0f : v);
+			return v;
+			};
+
+		s.x = clamp_eps(s.x);
+		s.y = clamp_eps(s.y);
+		s.z = clamp_eps(s.z);
+		Scale = { s.x, s.y, s.z };
+
+		XMStoreFloat3(&Position, T);
+
+		// 오일러 변환은 내부에서 반드시 clamp([-1,1]) 하도록
 		RotationEuler = ToEulerClosestTo(RotationQuat, RotationEuler);
+
+		bDirty = false; // 성공시에만 클리어
 	}
 
 	bDirty = false;
@@ -165,7 +197,7 @@ void Transform::RotateAxisAngle(const Vector3& Axis, float AngleRad)
 }
 
 // 멤버로 World행렬을 생성
-void Transform::UpdateWorldMatrix()
+void Transform::UpdateWorldMatrix() const
 {
 	if (!bDirty)
 		return;

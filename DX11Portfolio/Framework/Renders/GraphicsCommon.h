@@ -5,6 +5,8 @@ namespace Graphics
 	// Samplers
 	extern ComPtr<ID3D11SamplerState> linearWrapSS;
 	extern ComPtr<ID3D11SamplerState> linearClampSS;
+	extern ComPtr<ID3D11SamplerState> shadowPointSS;
+	extern ComPtr<ID3D11SamplerState> shadowCompareSS;
 	extern vector<ID3D11SamplerState*> sampleStates;	// Sampler한번에 셰이더에 보내는용
 
 	// Rasterizer States
@@ -24,13 +26,18 @@ namespace Graphics
 	extern ComPtr<ID3D11VertexShader> skyboxVS;
 	extern ComPtr<ID3D11VertexShader> samplingVS;
 	extern ComPtr<ID3D11VertexShader> normalVS;
+	extern ComPtr<ID3D11VertexShader> depthOnlyVS;
+
 	extern ComPtr<ID3D11PixelShader> basicPS;
 	extern ComPtr<ID3D11PixelShader> skyboxPS;
 	extern ComPtr<ID3D11PixelShader> combinePS;
 	extern ComPtr<ID3D11PixelShader> bloomDownPS;
 	extern ComPtr<ID3D11PixelShader> bloomUpPS;
 	extern ComPtr<ID3D11PixelShader> normalPS;
-	extern ComPtr<ID3D11PixelShader> simplePS;
+	//extern ComPtr<ID3D11PixelShader> simplePS;				// X
+	extern ComPtr<ID3D11PixelShader> depthOnlyPS;
+	extern ComPtr<ID3D11PixelShader> postEffectsPS;
+
 	extern ComPtr<ID3D11GeometryShader> normalGS;
 
 	// Input Layouts
@@ -55,6 +62,8 @@ namespace Graphics
 	extern GraphicsPSO reflectSkyboxSolidPSO;
 	extern GraphicsPSO reflectSkyboxWirePSO;
 	extern GraphicsPSO normalsPSO;
+	extern GraphicsPSO depthOnlyPSO;
+	extern GraphicsPSO postEffectsPSO;
 	extern GraphicsPSO postProcessingPSO;
 
 	void InitCommonStates(ComPtr<ID3D11Device>& device);

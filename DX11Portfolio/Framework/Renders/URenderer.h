@@ -4,6 +4,7 @@ class URenderer
 {
 public:
 	URenderer();
+	~URenderer();
 
 public:
 	void Init();
@@ -15,28 +16,58 @@ public:
 		const Matrix& refl = Matrix());
 	void UpdateGlobalLights(const vector<LightData>& lights);
 
-	void OnGUI();
+	void OnGUI() {}
 	void RenderPostProcess();
 	void Present();
 
+public:
+	float GetBloomStrength() { return m_postProcess.m_combineFilter.m_constData.strength; }
+	float GetExposure() { return m_postProcess.m_combineFilter.m_constData.option1; }
+	float GetGamma() { return m_postProcess.m_combineFilter.m_constData.option2; }
+	float GetDepthScale() { return m_postEffectsConstsCPU.depthScale; }
+	float GetFogStrength() { return m_postEffectsConstsCPU.fogStrength; }
+	int GetPostFxMode() { return m_postEffectsConstsCPU.mode; }
+	bool GetWireRendering() { return bWireRender; }
+
+	void SetBloomStrength(float InValue) { m_postProcess.m_combineFilter.m_constData.strength = InValue; }
+	void SetExposure(float InValue){ m_postProcess.m_combineFilter.m_constData.option1 = InValue;}
+	void SetGamma(float InValue) { m_postProcess.m_combineFilter.m_constData.option2 = InValue;}
+	void SetDepthScale(float InValue) { m_postEffectsConstsCPU.depthScale = InValue;}
+	void SetFogStrength(float InValue) { m_postEffectsConstsCPU.fogStrength = InValue;}
+	void SetPostFxMode(int InValue) { m_postEffectsConstsCPU.mode = InValue;}
+	void SetWireRendering(int InValue) { bWireRender = InValue; }
+
+	void SetGlobalConsts(ComPtr<ID3D11Buffer>& globalConstsGPU);
 private:
+	void BindCommonResources();
 	void BeginFrame();
+
+	void RenderDepthOnly(const URenderQueue& queue);
+	void RenderShadowMap(const URenderQueue& queue);
+
 	void RenderOpaque(const URenderQueue& queue);
 	void RenderSkyBox(const URenderQueue& queue);
 	void RenderNormal(const URenderQueue& queue);
 	void RenderMirror(const URenderQueue& queue);
-	//void RenderPostProcess(URenderQueue* queue);
+	
 	void EndFrame();
 
+private:
+	void OnResize();
 
 private:
-	wstring path = L"../../../_CubeMapTexture/HDRI/MorningSkyHalf/";
-	wstring EnvHDR_Name = path + L"MorningSkyHalfCubeEnvHDR.dds";
-	wstring Specular_Name = path + L"MorningSkyHalfCubeSpecularHDR.dds";
-	wstring DiffuseHDR_Name = path + L"MorningSkyHalfCubeDiffuseHDR.dds";
-	wstring Brdf_Name = path + L"MorningSkyHalfCubeBrdf.dds";
+	void SetShadowViewport();
+	void BuildShadowGlobalConsts();
 
 private:
+	wstring path = L"../../../_CubeMapTexture/HDRI/FullSky/";
+	wstring EnvHDR_Name = path + L"FullSkyEnvHDR.dds";
+	wstring Specular_Name = path + L"FullSkySpecularHDR.dds";
+	wstring DiffuseHDR_Name = path + L"FullSkyDiffuseHDR.dds";
+	wstring Brdf_Name = path + L"FullSkyBrdf.dds";
+
+private:
+	PostEffects m_postEffects;
 	PostProcess m_postProcess;
 
 private:
@@ -49,12 +80,17 @@ private:
 	ComPtr<ID3D11ShaderResourceView> m_irradianceSRV;
 	ComPtr<ID3D11ShaderResourceView> m_brdfSRV;
 
+private:
 	// 공통으로 사용하는 상수 데이터	
 	GlobalConstants m_globalConstsCPU;
 	GlobalConstants m_reflectGlobalConstsCPU;
+	GlobalConstants m_shadowGlobalConstsCPU[MAX_LIGHTS];
+	PostEffectsConstants m_postEffectsConstsCPU;
+
 	ComPtr<ID3D11Buffer> m_globalConstsGPU;
 	ComPtr<ID3D11Buffer> m_reflectGlobalConstsGPU;
-
+	ComPtr<ID3D11Buffer> m_shadowGlobalConstsGPU[MAX_LIGHTS];
+	ComPtr<ID3D11Buffer> m_postEffectsConstsGPU;
 
 private:
 	// PostProcess
@@ -66,8 +102,19 @@ private:
 	ComPtr<ID3D11RenderTargetView> m_resolvedRTV;
 	ComPtr<ID3D11ShaderResourceView> m_resolvedSRV;
 
+	ComPtr<ID3D11Texture2D> m_postEffectsBuffer;
+	ComPtr<ID3D11RenderTargetView> m_postEffectsRTV;
+	ComPtr<ID3D11ShaderResourceView> m_postEffectsSRV;
+
 	ComPtr<ID3D11Texture2D> Temp_DSV_Texture;
 	ComPtr<ID3D11DepthStencilView> Temp_DepthStencilView;
+
+	// ShadowMap
+	int m_shadowWidth = 1280;
+	int m_shadowHeight = 1280;
+	ComPtr<ID3D11Texture2D> m_shadowBuffers[MAX_LIGHTS]; // No MSAA
+	ComPtr<ID3D11DepthStencilView> m_shadowDSVs[MAX_LIGHTS];
+	ComPtr<ID3D11ShaderResourceView> m_shadowSRVs[MAX_LIGHTS];
 
 private:
 	ComPtr<ID3D11Device> device = nullptr;
@@ -77,4 +124,7 @@ private:
 
 private:
 	bool bWireRender = false;
+
+private:
+	FDelegateHandle m_resizeHandle{};
 };

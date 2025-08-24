@@ -10,8 +10,13 @@ void UWorld::Initialize()
 
 void UWorld::Tick()
 {
-	for (auto actor : Actors)
-		actor->Tick();
+	auto actors = Actors;
+
+	for (auto& a : Actors)
+		if (!a->IsPendingDestroy()) 
+			a->Tick();
+	
+	FlushDestroyed();
 }
 
 void UWorld::Render()
@@ -69,3 +74,53 @@ void UWorld::StartAllActors()
 		actor->BeginPlay();
 }
 
+void UWorld::MarkActorForDestroy(AActor* actor)
+{
+	if (!actor) 
+		return;
+
+	// 삭제 대상에 없는 경우 삭제 대상으로 추가
+	if (std::find(PendingDestroy.begin(), PendingDestroy.end(), actor) == PendingDestroy.end())
+		PendingDestroy.push_back(actor);
+}
+
+void UWorld::FlushDestroyed()
+{
+	if (PendingDestroy.empty())
+		return;
+
+	// vector clear하기 위해 옮겨둠
+	auto pending = std::move(PendingDestroy);
+	PendingDestroy.clear();
+
+	for (auto* a : pending) 
+		RemoveActor(a);
+}
+
+void UWorld::RemoveActor(AActor* actor)
+{
+	if (actor == nullptr)
+		return;
+
+	UnregisterFromTick(actor);
+
+	// 컨테이너에 있는지 확인해서 가져옴
+	auto it = std::find_if(Actors.begin(), Actors.end(),
+		[actor](const AActor* a) { return a == actor; });
+
+	if (it == Actors.end()) 
+		return;
+
+	actor->SetWorld(nullptr);
+	Actors.erase(it);                   // 참조 0이면 여기서 소멸
+	return;
+}
+
+void UWorld::UnregisterFromTick(AActor* actor)
+{
+	// 예: 틱 리스트/월드 이벤트 버스/월드 타이머에서 제거
+	// mTickingActors.erase(actor);
+	// OnWorldTick.Remove(handleMap[actor]);
+	// TimerManager.CancelAllFor(actor);
+	// 필요 시 캐시/파티션에서 actor 루트 제거(월드가 직접 관리하는 경우에 한해)
+}

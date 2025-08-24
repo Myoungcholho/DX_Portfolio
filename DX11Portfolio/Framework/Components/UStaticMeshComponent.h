@@ -5,6 +5,9 @@
 class UStaticMeshComponent : public UPrimitiveComponent
 {
 public:
+    UStaticMeshComponent();
+
+public:
     void Init() override;
     void RefreshConstantsCPU() override;
     void OnGUI() override;

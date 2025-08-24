@@ -98,21 +98,39 @@ void D3D::CreateBuffers()
 {
 	ComPtr<ID3D11Texture2D> backBuffer;
 	// 1. 스왑체인으로부터 백버퍼를 얻고 텍스처에 저장
-	SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer.GetAddressOf()));
 	// 2. 백버퍼로 RTV를 만듬
-	Device->CreateRenderTargetView(backBuffer.Get(), nullptr, m_backBufferRTV.GetAddressOf());
 	// 3. 내 GPU 드라이버가 제공하는 품질 수준 가능 범위 반환 및 float텍스처 생성
+	SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer.GetAddressOf()));
+	Device->CreateRenderTargetView(backBuffer.Get(), nullptr, m_backBufferRTV.GetAddressOf());
 	Device->CheckMultisampleQualityLevels(DXGI_FORMAT_R16G16B16A16_FLOAT, 4, &m_numQualityLevels);
 	
-	/*D3D11_TEXTURE2D_DESC desc;
-	backBuffer->GetDesc(&desc);
-	desc.MipLevels = desc.ArraySize = 1;
-	desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-	desc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
-	desc.Usage = D3D11_USAGE_DEFAULT;
-	desc.MiscFlags = 0;
-	desc.CPUAccessFlags = 0;
-	if (m_useMSAA && m_numQualityLevels)
+	// Scene용 Texture 생성
+	D3D11_TEXTURE2D_DESC d = {};
+	d.Width = (UINT)D3dDesc.Width;
+	d.Height = (UINT)D3dDesc.Height;
+	d.MipLevels = 1;
+	d.ArraySize = 1;
+	d.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	d.SampleDesc.Count = 1;
+	d.Usage = D3D11_USAGE_DEFAULT;
+	d.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+
+	Device->CreateTexture2D(&d, nullptr, m_finalLDR.GetAddressOf());
+	Device->CreateRenderTargetView(m_finalLDR.Get(), nullptr, m_finalLDR_RTV.GetAddressOf());
+	Device->CreateShaderResourceView(m_finalLDR.Get(), nullptr, m_finalLDR_SRV.GetAddressOf());
+
+	CreateDepthBuffer();
+}
+
+void D3D::CreateDepthBuffer()
+{
+	D3D11_TEXTURE2D_DESC desc;
+	desc.Width = (UINT)D3dDesc.Width;
+	desc.Height = (UINT)D3dDesc.Height;
+	desc.MipLevels = 1;
+	desc.ArraySize = 1;
+	desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	if (m_numQualityLevels > 0)
 	{
 		desc.SampleDesc.Count = 4;
 		desc.SampleDesc.Quality = m_numQualityLevels - 1;
@@ -121,67 +139,43 @@ void D3D::CreateBuffers()
 	{
 		desc.SampleDesc.Count = 1;
 		desc.SampleDesc.Quality = 0;
-	}*/
-	//ThrowIfFailed(Device->CreateTexture2D(&desc, NULL, m_floatBuffer.GetAddressOf()));
-	//// 4. float Texture로 SRV 생성
-	//Device->CreateShaderResourceView(m_floatBuffer.Get(), NULL, m_floatSRV.GetAddressOf());
-	//// 5. float Texture로 RTV 생성
-	//Device->CreateRenderTargetView(m_floatBuffer.Get(), NULL, m_floatRTV.GetAddressOf());
-	// 6. DepthBuffer 생성
-	CreateDepthBuffer();
-	
-	// 7. PostProcess를 위한 MSAA 제거 SRV/RTV
-	/*desc.SampleDesc.Count = 1;
-	desc.SampleDesc.Quality = 0;
-	ThrowIfFailed(Device->CreateTexture2D(&desc, NULL, m_resolvedBuffer.GetAddressOf()));
-	ThrowIfFailed(Device->CreateShaderResourceView(m_resolvedBuffer.Get(), NULL, m_resolvedSRV.GetAddressOf()));
-	ThrowIfFailed(Device->CreateRenderTargetView(m_resolvedBuffer.Get(), NULL, m_resolvedRTV.GetAddressOf()));*/
-}
-
-void D3D::CreateDepthBuffer()
-{
-	D3D11_TEXTURE2D_DESC depthStencilBufferDesc;
-	depthStencilBufferDesc.Width = (UINT)D3dDesc.Width;
-	depthStencilBufferDesc.Height = (UINT)D3dDesc.Height;
-	depthStencilBufferDesc.MipLevels = 1;
-	depthStencilBufferDesc.ArraySize = 1;
-	depthStencilBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	if (m_numQualityLevels > 0)
-	{
-		depthStencilBufferDesc.SampleDesc.Count = 4;
-		depthStencilBufferDesc.SampleDesc.Quality = m_numQualityLevels - 1;
 	}
-	else
-	{
-		depthStencilBufferDesc.SampleDesc.Count = 1;
-		depthStencilBufferDesc.SampleDesc.Quality = 0;
-	}
-	depthStencilBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	depthStencilBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	depthStencilBufferDesc.CPUAccessFlags = 0;
-	depthStencilBufferDesc.MiscFlags = 0;
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	desc.CPUAccessFlags = 0;
+	desc.MiscFlags = 0;
 
-	Device->CreateTexture2D(&depthStencilBufferDesc, 0, DSV_Texture.GetAddressOf());
+	Device->CreateTexture2D(&desc, 0, DSV_Texture.GetAddressOf());
 	Device->CreateDepthStencilView(DSV_Texture.Get(), 0, DepthStencilView.GetAddressOf());
 
 	/*Device->CreateTexture2D(&depthStencilBufferDesc, 0, Temp_DSV_Texture.GetAddressOf());
 	Device->CreateDepthStencilView(Temp_DSV_Texture.Get(), 0, Temp_DepthStencilView.GetAddressOf());*/
+
+	// Depth Map [안개] , TYPELESS가 아니라면 SRV를 만들기 어렵기 때문
+	// 24는 실수, 8은 정수라서 따로 SRV를 만들어야할뿐더러 스텐실은 사용도 안함.
+	desc.Format = DXGI_FORMAT_R32_TYPELESS;
+	desc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+	desc.SampleDesc.Count = 1;
+	desc.SampleDesc.Quality = 0;
+
+	Device->CreateTexture2D(&desc, NULL, &m_depthOnlyBuffer);
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
+	ZeroMemory(&dsvDesc, sizeof(dsvDesc));
+	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+
+	Device->CreateDepthStencilView(m_depthOnlyBuffer.Get(), &dsvDesc, m_depthOnlyDSV.GetAddressOf());
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	ZeroMemory(&srvDesc, sizeof(srvDesc));
+	srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels = 1;
+
+	Device->CreateShaderResourceView(m_depthOnlyBuffer.Get(), &srvDesc, m_depthOnlySRV.GetAddressOf());
 }
 
-ComPtr<ID3D11RenderTargetView> D3D::GetBackBufferRTV()
-{
-	return m_backBufferRTV;
-}
-
-ComPtr<ID3D11ShaderResourceView> D3D::GetBackBufferSRV()
-{
-	return m_backBufferSRV;
-}
-
-ComPtr<ID3D11DepthStencilView> D3D::GetDepthStencilView()
-{
-	return DepthStencilView;
-}
 
 void D3D::Present()
 {
@@ -213,6 +207,9 @@ void D3D::ResizeScreen(float InWidth, float InHeight)
 	m_backBufferRTV.Reset();
 	DSV_Texture.Reset();
 	DepthStencilView.Reset();
+	m_finalLDR_RTV.Reset();
+	m_finalLDR_SRV.Reset();
+	m_finalLDR.Reset();
 
 	SwapChain->ResizeBuffers(0, (UINT)InWidth, (UINT)InHeight, DXGI_FORMAT_UNKNOWN, 0);
 
@@ -240,6 +237,9 @@ D3D::~D3D()
 	DepthStencilView.Reset();
 	DSV_Texture.Reset();
 	m_backBufferRTV.Reset();
+	m_finalLDR_RTV.Reset();
+	m_finalLDR_SRV.Reset();
+	m_finalLDR.Reset();
 	DeviceContext.Reset();
 	Device.Reset();
 	SwapChain.Reset();

@@ -175,6 +175,20 @@ copy /Y "$(SolutionDir)Debug\$(ProjectName).pdb" "$(SolutionDir)EntryPoint\"</Co
     <ClInclude Include="Core\UGameInstance.h" />
     <ClInclude Include="Core\URenderManager.h" />
     <ClInclude Include="Definitions.h" />
+    <ClInclude Include="Editor\ComponentHierarchyWindow.h" />
+    <ClInclude Include="Editor\Editor.h" />
+    <ClInclude Include="Editor\EditorApplication.h" />
+    <ClInclude Include="Editor\EditorGizmoSystem.h" />
+    <ClInclude Include="Editor\EditorSelection.h" />
+    <ClInclude Include="Editor\EditorWindow.h" />
+    <ClInclude Include="Editor\Entity.h" />
+    <ClInclude Include="Editor\ImGuiManager.h" />
+    <ClInclude Include="Editor\InspectorWindow.h" />
+    <ClInclude Include="Editor\LightEditor.h" />
+    <ClInclude Include="Editor\RendererSettingsWindow.h" />
+    <ClInclude Include="Editor\StaticMeshEditor.h" />
+    <ClInclude Include="Editor\TransformEditor.h" />
+    <ClInclude Include="Editor\WorldOutlinerWindow.h" />
     <ClInclude Include="Framework.h" />
     <ClInclude Include="ImGUI\imconfig.h" />
     <ClInclude Include="ImGUI\imgui.h" />
@@ -193,6 +207,7 @@ copy /Y "$(SolutionDir)Debug\$(ProjectName).pdb" "$(SolutionDir)EntryPoint\"</Co
     <ClInclude Include="ModelTools\GeometryFactory.h" />
     <ClInclude Include="ModelTools\ModelLoader.h" />
     <ClInclude Include="PostProcess\ImageFilter.h" />
+    <ClInclude Include="PostProcess\PostEffects.h" />
     <ClInclude Include="PostProcess\PostProcess.h" />
     <ClInclude Include="Renders\CBuffers.h" />
     <ClInclude Include="Renders\Context.h" />
@@ -211,7 +226,6 @@ copy /Y "$(SolutionDir)Debug\$(ProjectName).pdb" "$(SolutionDir)EntryPoint\"</Co
     <ClInclude Include="Systems\D3D.h" />
     <ClInclude Include="Systems\GraphicsDevice.h" />
     <ClInclude Include="Systems\IExecutable.h" />
-    <ClInclude Include="Systems\ImGuiManager.h" />
     <ClInclude Include="Systems\Keyboard.h" />
     <ClInclude Include="Systems\Mouse.h" />
     <ClInclude Include="Systems\Timer.h" />
@@ -242,6 +256,20 @@ copy /Y "$(SolutionDir)Debug\$(ProjectName).pdb" "$(SolutionDir)EntryPoint\"</Co
     <ClCompile Include="Core\Math.cpp" />
     <ClCompile Include="Core\UGameInstance.cpp" />
     <ClCompile Include="Core\URenderManager.cpp" />
+    <ClCompile Include="Editor\ComponentHierarchyWindow.cpp" />
+    <ClCompile Include="Editor\Editor.cpp" />
+    <ClCompile Include="Editor\EditorApplication.cpp" />
+    <ClCompile Include="Editor\EditorGizmoSystem.cpp" />
+    <ClCompile Include="Editor\EditorSelection.cpp" />
+    <ClCompile Include="Editor\EditorWindow.cpp" />
+    <ClCompile Include="Editor\Entity.cpp" />
+    <ClCompile Include="Editor\ImGuiManager.cpp" />
+    <ClCompile Include="Editor\InspectorWindow.cpp" />
+    <ClCompile Include="Editor\LightEditor.cpp" />
+    <ClCompile Include="Editor\RendererSettingsWindow.cpp" />
+    <ClCompile Include="Editor\StaticMeshEditor.cpp" />
+    <ClCompile Include="Editor\TransformEditor.cpp" />
+    <ClCompile Include="Editor\WorldOutlinerWindow.cpp" />
     <ClCompile Include="Framework.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -278,6 +306,7 @@ copy /Y "$(SolutionDir)Debug\$(ProjectName).pdb" "$(SolutionDir)EntryPoint\"</Co
     <ClCompile Include="ModelTools\GeometryFactory.cpp" />
     <ClCompile Include="ModelTools\ModelLoader.cpp" />
     <ClCompile Include="PostProcess\ImageFilter.cpp" />
+    <ClCompile Include="PostProcess\PostEffects.cpp" />
     <ClCompile Include="PostProcess\PostProcess.cpp" />
     <ClCompile Include="Renders\Context.cpp" />
     <ClCompile Include="Renders\GraphicsCommon.cpp" />
@@ -288,7 +317,6 @@ copy /Y "$(SolutionDir)Debug\$(ProjectName).pdb" "$(SolutionDir)EntryPoint\"</Co
     <ClCompile Include="Renders\URenderQueue.cpp" />
     <ClCompile Include="Systems\D3D.cpp" />
     <ClCompile Include="Systems\GraphicsDevice.cpp" />
-    <ClCompile Include="Systems\ImGuiManager.cpp" />
     <ClCompile Include="Systems\Keyboard.cpp" />
     <ClCompile Include="Systems\Mouse.cpp" />
     <ClCompile Include="Systems\Timer.cpp" />
@@ -352,6 +380,20 @@ copy /Y "$(SolutionDir)Debug\$(ProjectName).pdb" "$(SolutionDir)EntryPoint\"</Co
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
     </FxCompile>
+    <FxCompile Include="Shaders\DepthMap\DepthOnlyPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shaders\DepthMap\DepthOnlyVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+    </FxCompile>
     <FxCompile Include="Shaders\DrawNormal\NormalGS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Geometry</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
@@ -388,6 +430,13 @@ copy /Y "$(SolutionDir)Debug\$(ProjectName).pdb" "$(SolutionDir)EntryPoint\"</Co
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shaders\PostProcess\CombinePixelShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shaders\PostProcess\PostEffectsPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>

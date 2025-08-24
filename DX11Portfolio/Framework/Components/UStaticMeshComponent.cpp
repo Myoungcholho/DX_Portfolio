@@ -1,6 +1,11 @@
 #include "Framework.h"
 #include "UStaticMeshComponent.h"
 
+UStaticMeshComponent::UStaticMeshComponent()
+{
+    mName = "StaticMeshComponent";
+}
+
 void UStaticMeshComponent::Init()
 {
     renderProxy = make_shared<UStaticMeshRenderProxy>();

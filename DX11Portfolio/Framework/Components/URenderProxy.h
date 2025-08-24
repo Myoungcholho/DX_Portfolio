@@ -13,6 +13,7 @@ public:
 	ERenderPass renderPass = ERenderPass::Opaque;
 	bool bVisible = true;
 	bool m_drawNormal = false;
+	bool m_castShadow = true;
 
 public:
 	void SetDrawNormal(bool drawNormal) { m_drawNormal = drawNormal; }

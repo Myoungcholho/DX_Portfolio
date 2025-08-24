@@ -9,6 +9,10 @@ WindowDesc Window::Desc = {};
 // 실제 게임 Loop
 WPARAM Window::Run(UGameInstance* game)
 {
+	EditorApplication::SetWorld(game->GetWorld());
+	EditorApplication::SetRenderer(game->GetRenderer());
+	EditorApplication::Initialize();
+
 	CKeyboard::Create();
 	CTimer::Create();
 	CMouse::Create();
@@ -42,6 +46,7 @@ WPARAM Window::Run(UGameInstance* game)
 	CTimer::Destroy();
 	CKeyboard::Destroy();
 
+	EditorApplication::Release();
 	return msg.wParam;
 }
 
@@ -91,23 +96,22 @@ void Window::Destroy()
 
 LRESULT Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))	// ImGui에 들어온 입력이라면 아래 로직은 처리하지 않겠다
+		return 0;
+
 	CMouse::Get()->WndProc(message, wParam, lParam);
 	
-	if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))	// ImGui에 들어온 입력이라면 아래 로직은 처리하지 않겠다
-		return true;
-
 	switch (message)
 	{
 	case WM_SIZE:
 	{
 		float width = static_cast<float>(LOWORD(lParam));
 		float height = static_cast<float>(HIWORD(lParam));
-
+		
+		// 내부에서 0 Guard도 하고
+		// 브로드 캐스트도 하고 있음
 		if (D3D::Get() != nullptr)
 			D3D::Get()->ResizeScreen(width, height);
-
-		if (CContext::Get() != nullptr)
-			CContext::Get()->ResizeScreen();
 
 		break;
 	}
@@ -145,9 +149,9 @@ LRESULT Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 void Window::MainRender(UGameInstance* game)
 {
-	ImGuiManager::Get()->BeginFrame(); // 싱글톤 Tick에서 호출됨
+	//ImGuiManager::Get()->BeginFrame(); // 싱글톤 Tick에서 호출됨
 
-	game->OnGUI();
+	//game->OnGUI();
 
 	CTimer::Get()->Tick();
 	CMouse::Get()->Tick();
@@ -155,7 +159,8 @@ void Window::MainRender(UGameInstance* game)
 
 	game->Tick();
 
-	CContext::Get()->Render();
-	ImGuiManager::Get()->EndFrame();
+	//CContext::Get()->Render();
+	//ImGuiManager::Get()->EndFrame();
+
 	game->Render();
 }

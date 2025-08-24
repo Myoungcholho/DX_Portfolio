@@ -48,6 +48,7 @@ public:
                 return bound.Matches(static_cast<void*>(Object), MethodName);
             }), Delegates.end());
     }
+    void Remove(FDelegateHandle handle);
 
     void Broadcast();
     void Clear();

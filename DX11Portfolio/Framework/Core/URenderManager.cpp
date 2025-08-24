@@ -79,8 +79,9 @@ void URenderManager::RenderLoop()
 		Matrix view = CContext::Get()->GetViewMatrix();
 		Matrix proj = CContext::Get()->GetProjectionMatrix();
 
-		m_renderer->UpdateGlobalConstants(eye, view, proj);
+		// Renderer가 가지는 GlobalConsts 값 셋팅
 		m_renderer->UpdateGlobalLights(m_renderLightData[m_readIndex]);
+		m_renderer->UpdateGlobalConstants(eye, view, proj);
 		
 		// 렌더큐에 넣어서 내부에서 분류
 		URenderQueue renderQueue;
@@ -98,7 +99,9 @@ void URenderManager::RenderLoop()
 		// 후처리 및 출력
 		m_renderer->RenderPostProcess();
 
-		ImGuiManager::Get()->RenderDrawData(context);
+		//ImGuiManager::Get()->RenderDrawData(context);
+
+		EditorApplication::Run();
 
 		m_renderer->Present();
 		PRO_END(L"RenderFrame");
