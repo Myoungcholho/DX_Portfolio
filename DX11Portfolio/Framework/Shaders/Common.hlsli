@@ -16,7 +16,8 @@ SamplerState linearWrapSampler : register(s0);
 SamplerState linearClampSampler : register(s1);
 SamplerState shadowPointSampler : register(s2);
 SamplerComparisonState shadowCompareSampler : register(s3);
-
+SamplerState anisoWrapSampler : register(s4);
+SamplerState anisoClampSampler : register(s5);
 
 // 공용 텍스춰들 t10 부터 시작
 TextureCube envIBLTex : register(t10);

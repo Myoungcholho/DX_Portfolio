@@ -38,7 +38,7 @@ public:
         float strength;
         float option1;
         float option2;
-        float option3;
+        int filterType;
         float option4;
     };
 

@@ -44,8 +44,8 @@ float4 main(SamplingPixelShaderInput input) : SV_TARGET
         float dist = length(posView.xyz); // 눈의 위치가 원점인 좌표계
 
         float3 fogColor = float3(1, 1, 1);
-        float fogMin = 1.0;
-        float fogMax = 10.0;
+        float fogMin = 7.0;
+        float fogMax = 20.0;
         
         float distFog = saturate((dist - fogMin) / (fogMax - fogMin));
         float fogFactor = exp(-distFog * fogStrength);

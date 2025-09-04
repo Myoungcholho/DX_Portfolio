@@ -34,6 +34,9 @@ PixelShaderInput main(VertexShaderInput input)
         // VertexShader에서는 SampleLevel 사용
         // Heightmap은 보통 흑백이라서 마지막에 .r로 float 하나만 사용
         float height = g_heightTexture.SampleLevel(linearWrapSampler, input.texcoord, 0).r;
+        //float height = g_heightTexture.Sample(linearWrapSampler, input.texcoord).r;
+        // VS는 암시적 미분값(ddx/ddy)가 없어 mip을 고를 수 없음
+        
         height = height * 2.0 - 1.0;
         pos += float4(output.normalWorld * height * heightScale, 0.0);
     }

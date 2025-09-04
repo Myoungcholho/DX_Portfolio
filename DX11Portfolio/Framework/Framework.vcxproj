@@ -152,6 +152,7 @@ copy /Y "$(SolutionDir)Debug\$(ProjectName).pdb" "$(SolutionDir)EntryPoint\"</Co
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Animations\AnimationClip.h" />
     <ClInclude Include="Billboards\BillboardData.h" />
     <ClInclude Include="Billboards\BillboardPoint.h" />
     <ClInclude Include="Billboards\BillboardRenderer_GS.h" />

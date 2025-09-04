@@ -11,6 +11,14 @@ AStaticMeshActor::AStaticMeshActor()
 	m_lightComponent = make_shared<ULightComponent>();
 	AddComponent(m_lightComponent);
 
+	m_lightComponent2 = make_shared<ULightComponent>();
+	AddComponent(m_lightComponent2);
+	m_lightComponent2->SetName("Light2");
+
+	m_lightComponent3 = make_shared<ULightComponent>();
+	AddComponent(m_lightComponent3);
+	m_lightComponent3->AttachTo(m_lightComponent2.get(),EAttachMode::KeepWorld);
+	m_lightComponent3->SetName("Light3");
 }
 
 void AStaticMeshActor::Initialize()

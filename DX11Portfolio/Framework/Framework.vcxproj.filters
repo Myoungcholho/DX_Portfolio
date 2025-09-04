@@ -20,7 +20,6 @@
     <ClInclude Include="Renders\Context.h">
       <Filter>Renders</Filter>
     </ClInclude>
-    <ClInclude Include="MathHelper.h" />
     <ClInclude Include="Systems\Timer.h">
       <Filter>System</Filter>
     </ClInclude>
@@ -30,7 +29,6 @@
     <ClInclude Include="Systems\Keyboard.h">
       <Filter>System</Filter>
     </ClInclude>
-    <ClInclude Include="Definitions.h" />
     <ClInclude Include="Core\Math.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -244,6 +242,15 @@
     <ClInclude Include="Editor\StaticMeshEditor.h">
       <Filter>Editor</Filter>
     </ClInclude>
+    <ClInclude Include="MathHelper.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Definitions.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Animations\AnimationClip.h">
+      <Filter>Animations</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Framework.cpp" />
@@ -262,7 +269,6 @@
     <ClCompile Include="Renders\Context.cpp">
       <Filter>Renders</Filter>
     </ClCompile>
-    <ClCompile Include="MathHelper.cpp" />
     <ClCompile Include="Systems\Timer.cpp">
       <Filter>System</Filter>
     </ClCompile>
@@ -452,6 +458,9 @@
     <ClCompile Include="Editor\StaticMeshEditor.cpp">
       <Filter>Editor</Filter>
     </ClCompile>
+    <ClCompile Include="MathHelper.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="System">
@@ -516,6 +525,9 @@
     </Filter>
     <Filter Include="Shaders\DepthMap">
       <UniqueIdentifier>{a44a5e1e-aa9e-4b75-a2d7-4be973fd24c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Animations">
+      <UniqueIdentifier>{3ed78196-691f-4791-bb3e-86f7168e6008}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

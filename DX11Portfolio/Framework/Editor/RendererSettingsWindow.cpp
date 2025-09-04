@@ -1,5 +1,6 @@
 #include "Framework.h"
 #include "RendererSettingsWindow.h"
+#include "Renders/URenderer.h"
 
 RendererSettingsWindow::RendererSettingsWindow()
 {
@@ -54,6 +55,13 @@ void RendererSettingsWindow::OnGUI()
         if (ImGui::DragFloat("Bloom Strength", &bloom, 0.01f, 0.0f, 1.0f))
         {
             m_renderer->SetBloomStrength(bloom);
+            anyChanged = true;
+        }
+        int type = m_renderer->GetFilter();
+        const char* items[] = { "LinearToneMapping (1)", "FilmicToneMapping (2)" ,"Uncharted2ToneMapping (3)", "lumaBasedReinhardToneMapping (4)"};
+        if (ImGui::Combo("filter Mode", &type, items, IM_ARRAYSIZE(items)))
+        {
+            m_renderer->SetFilter(type);
             anyChanged = true;
         }
     }

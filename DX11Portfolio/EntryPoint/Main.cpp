@@ -114,5 +114,8 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 	D3D::Destroy();
 	Window::Destroy();
 
+	//int a = 50;
+	//cout << a;
+
 	return (int)result;
 }

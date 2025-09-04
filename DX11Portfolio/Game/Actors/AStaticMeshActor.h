@@ -15,4 +15,6 @@ public:
 private:
 	shared_ptr<UStaticMeshComponent> m_staticMeshComponent;
 	shared_ptr<ULightComponent> m_lightComponent;
+	shared_ptr<ULightComponent> m_lightComponent2;
+	shared_ptr<ULightComponent> m_lightComponent3;
 };

@@ -9,6 +9,9 @@ namespace Graphics
 	ComPtr<ID3D11SamplerState> linearClampSS;
 	ComPtr<ID3D11SamplerState> shadowPointSS;
 	ComPtr<ID3D11SamplerState> shadowCompareSS;
+	ComPtr<ID3D11SamplerState> anisoWrapSS;
+	ComPtr<ID3D11SamplerState> anisoClampSS;
+
 	vector<ID3D11SamplerState*> sampleStates;
 
 	// Rasterizer States
@@ -110,12 +113,36 @@ void Graphics::InitSamplers(ComPtr<ID3D11Device>& device)
 	sampDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT; // TODO: linear?
 	sampDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
 	device->CreateSamplerState(&sampDesc, shadowCompareSS.GetAddressOf());
+	// anisoWrap
+	{
+		D3D11_SAMPLER_DESC sd = {};
+		sd.Filter = D3D11_FILTER_ANISOTROPIC;
+		sd.MaxAnisotropy = 16;
+		sd.AddressU = sd.AddressV = sd.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+		sd.MipLODBias = 0.0f;
+		sd.ComparisonFunc = D3D11_COMPARISON_NEVER;
+		sd.MinLOD = 0.0f; sd.MaxLOD = D3D11_FLOAT32_MAX;
+		device->CreateSamplerState(&sd, anisoWrapSS.GetAddressOf());
+	}
+	// anisoClamp
+	{
+		D3D11_SAMPLER_DESC sd = {};
+		sd.Filter = D3D11_FILTER_ANISOTROPIC;
+		sd.MaxAnisotropy = 16;
+		sd.AddressU = sd.AddressV = sd.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+		sd.MipLODBias = 0.0f;
+		sd.ComparisonFunc = D3D11_COMPARISON_NEVER;
+		sd.MinLOD = 0.0f; sd.MaxLOD = D3D11_FLOAT32_MAX;
+		device->CreateSamplerState(&sd, anisoClampSS.GetAddressOf());
+	}
 
 	// 샘플러 순서 주의
 	sampleStates.push_back(linearWrapSS.Get());
 	sampleStates.push_back(linearClampSS.Get());
 	sampleStates.push_back(shadowPointSS.Get());
 	sampleStates.push_back(shadowCompareSS.Get());
+	sampleStates.push_back(anisoWrapSS.Get());
+	sampleStates.push_back(anisoClampSS.Get());
 }
 void Graphics::InitRasterizerStates(ComPtr<ID3D11Device>& device)
 {

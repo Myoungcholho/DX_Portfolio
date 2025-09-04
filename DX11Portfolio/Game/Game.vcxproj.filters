@@ -2,7 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="Pch.h" />
-    <ClInclude Include="ObjectCollection.h" />
     <ClInclude Include="Environment\CubeMapSkyRenderer.h">
       <Filter>Environment</Filter>
     </ClInclude>
@@ -27,10 +26,12 @@
     <ClInclude Include="Actors\ALight.h">
       <Filter>Actors</Filter>
     </ClInclude>
+    <ClInclude Include="ObjectCollection.h">
+      <Filter>Actors</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Pch.cpp" />
-    <ClCompile Include="ObjectCollection.cpp" />
     <ClCompile Include="Environment\CubeMapSkyRenderer.cpp">
       <Filter>Environment</Filter>
     </ClCompile>
@@ -53,6 +54,9 @@
       <Filter>Actors</Filter>
     </ClCompile>
     <ClCompile Include="Actors\ALight.cpp">
+      <Filter>Actors</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectCollection.cpp">
       <Filter>Actors</Filter>
     </ClCompile>
   </ItemGroup>

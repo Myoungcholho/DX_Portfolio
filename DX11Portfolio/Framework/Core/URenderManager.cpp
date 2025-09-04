@@ -1,5 +1,6 @@
 #include "Framework.h"
 #include "URenderManager.h"
+#include "Renders/URenderer.h"
 
 URenderManager::URenderManager()
 {

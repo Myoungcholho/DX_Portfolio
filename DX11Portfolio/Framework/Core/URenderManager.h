@@ -6,6 +6,7 @@ struct RenderFrameData
     std::vector<LightData> lights;
 };
 
+class URenderer;
 
 class URenderManager
 {

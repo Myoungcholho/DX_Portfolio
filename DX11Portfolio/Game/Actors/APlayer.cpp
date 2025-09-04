@@ -12,6 +12,9 @@ APlayer::APlayer()
 void APlayer::Initialize()
 {
 	m_staticMeshComponent->Init();
+
+	//int a = 50;
+	//cout << a;
 }
 
 shared_ptr<UStaticMeshComponent> APlayer::GetStaticMeshComponent()

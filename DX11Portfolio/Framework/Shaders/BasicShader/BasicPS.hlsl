@@ -44,7 +44,10 @@ float3 GetNormal(PixelShaderInput input)
     
     if (useNormalMap) // NormalWorld를 교체
     {
-        float3 normal = normalTex.SampleLevel(linearWrapSampler, input.texcoord, lodBias).rgb;
+        //float3 normal = normalTex.SampleLevel(linearWrapSampler, input.texcoord, lodBias).rgb;
+        //float3 normal = normalTex.Sample(linearWrapSampler, input.texcoord).rgb;
+        float3 normal = normalTex.Sample(anisoWrapSampler, input.texcoord).rgb;
+        
         normal = 2.0 * normal - 1.0; // 범위 조절 [-1.0, 1.0]
 
         // OpenGL 용 노멀맵일 경우에는 y 방향을 뒤집어줍니다.
@@ -190,45 +193,19 @@ float3 LightRadiance(Light light, float3 posWorld, float3 normalWorld, Texture2D
 }
 
 
-//float3 LightRadiance(in Light light, in float3 posWorld, in float3 normalWorld)
-//{
-//    // Directional light
-//    float3 lightVec = light.type & LIGHT_DIRECTIONAL
-//                      ? -light.direction
-//                      : light.position - posWorld;
-        
-//    float lightDist = length(lightVec);
-//    lightVec /= lightDist;
-
-//    // Spot light
-//    float spotFator = light.type & LIGHT_SPOT
-//                     ? pow(max(-dot(lightVec, light.direction), 0.0f), light.spotPower)
-//                      : 1.0f;
-        
-//    // Distance attenuation
-//    float att = saturate((light.fallOffEnd - lightDist)
-//                         / (light.fallOffEnd - light.fallOffStart));
-
-//    // Shadow map
-//    float shadowFactor = 1.0;
-//    float3 radiance = light.radiance * spotFator * att * shadowFactor;
-
-//    return radiance;
-//}
-
 PixelShaderOutput main(PixelShaderInput input)
 {
     float3 pixelToEye = normalize(eyeWorld - input.posWorld);
     float3 normalWorld = GetNormal(input);
     
-    float3 albedo = useAlbedoMap ? albedoTex.Sample(linearWrapSampler, input.texcoord).rgb * albedoFactor
+    float3 albedo = useAlbedoMap ? albedoTex.Sample(anisoWrapSampler, input.texcoord).rgb * albedoFactor
                                 : albedoFactor;
-    float ao = useAOMap ? aoTex.Sample(linearWrapSampler, input.texcoord).r : 1.0;
-    float metallic = useMetallicMap ? metallicRoughnessTex.Sample(linearWrapSampler, input.texcoord).b * metallicFactor
+    float ao = useAOMap ? aoTex.Sample(anisoWrapSampler, input.texcoord).r : 1.0;
+    float metallic = useMetallicMap ? metallicRoughnessTex.Sample(anisoWrapSampler, input.texcoord).b * metallicFactor
                                   : metallicFactor;
-    float roughness = useRoughnessMap ? metallicRoughnessTex.Sample(linearWrapSampler, input.texcoord).g * roughnessFactor
+    float roughness = useRoughnessMap ? metallicRoughnessTex.Sample(anisoWrapSampler, input.texcoord).g * roughnessFactor
                                    : roughnessFactor;
-    float3 emission = useEmissiveMap ? emissiveTex.Sample(linearWrapSampler, input.texcoord).rgb
+    float3 emission = useEmissiveMap ? emissiveTex.Sample(anisoWrapSampler, input.texcoord).rgb
                                   : emissionFactor;
 
     float3 ambientLighting = AmbientLightingByIBL(albedo, normalWorld, pixelToEye, ao, metallic, roughness) * strengthIBL;
@@ -274,3 +251,33 @@ PixelShaderOutput main(PixelShaderInput input)
     
     return output;
 }
+
+
+
+
+
+//float3 LightRadiance(in Light light, in float3 posWorld, in float3 normalWorld)
+//{
+//    // Directional light
+//    float3 lightVec = light.type & LIGHT_DIRECTIONAL
+//                      ? -light.direction
+//                      : light.position - posWorld;
+        
+//    float lightDist = length(lightVec);
+//    lightVec /= lightDist;
+
+//    // Spot light
+//    float spotFator = light.type & LIGHT_SPOT
+//                     ? pow(max(-dot(lightVec, light.direction), 0.0f), light.spotPower)
+//                      : 1.0f;
+        
+//    // Distance attenuation
+//    float att = saturate((light.fallOffEnd - lightDist)
+//                         / (light.fallOffEnd - light.fallOffStart));
+
+//    // Shadow map
+//    float shadowFactor = 1.0;
+//    float3 radiance = light.radiance * spotFator * att * shadowFactor;
+
+//    return radiance;
+//}

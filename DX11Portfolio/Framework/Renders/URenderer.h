@@ -24,6 +24,7 @@ public:
 	float GetBloomStrength() { return m_postProcess.m_combineFilter.m_constData.strength; }
 	float GetExposure() { return m_postProcess.m_combineFilter.m_constData.option1; }
 	float GetGamma() { return m_postProcess.m_combineFilter.m_constData.option2; }
+	int GetFilter() { return m_postProcess.m_combineFilter.m_constData.filterType; }
 	float GetDepthScale() { return m_postEffectsConstsCPU.depthScale; }
 	float GetFogStrength() { return m_postEffectsConstsCPU.fogStrength; }
 	int GetPostFxMode() { return m_postEffectsConstsCPU.mode; }
@@ -32,6 +33,7 @@ public:
 	void SetBloomStrength(float InValue) { m_postProcess.m_combineFilter.m_constData.strength = InValue; }
 	void SetExposure(float InValue){ m_postProcess.m_combineFilter.m_constData.option1 = InValue;}
 	void SetGamma(float InValue) { m_postProcess.m_combineFilter.m_constData.option2 = InValue;}
+	void SetFilter(int InValue) { m_postProcess.m_combineFilter.m_constData.filterType = InValue; }
 	void SetDepthScale(float InValue) { m_postEffectsConstsCPU.depthScale = InValue;}
 	void SetFogStrength(float InValue) { m_postEffectsConstsCPU.fogStrength = InValue;}
 	void SetPostFxMode(int InValue) { m_postEffectsConstsCPU.mode = InValue;}
@@ -51,6 +53,9 @@ private:
 	void RenderMirror(const URenderQueue& queue);
 	
 	void EndFrame();
+
+public:
+	void TestPrint2() {}
 
 private:
 	void OnResize();

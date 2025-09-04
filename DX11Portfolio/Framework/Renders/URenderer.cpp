@@ -466,19 +466,19 @@ void URenderer::RenderPostProcess()
 	D3D11Utils::UpdateBuffer(device,context, m_postEffectsConstsCPU, m_postEffectsConstsGPU);
 
 	// ----------------그림자맵 확인용------------------------
-	SetGlobalConsts(m_shadowGlobalConstsGPU[0]);
-	vector<ID3D11ShaderResourceView*> postEffectsSRVs = 
-	{
-		m_resolvedSRV.Get(), m_shadowSRVs[0].Get() 
-	};
-	context->PSSetShaderResources(20, UINT(postEffectsSRVs.size()),postEffectsSRVs.data());
-	context->OMSetRenderTargets(1, m_postEffectsRTV.GetAddressOf(), NULL);
-	context->PSSetConstantBuffers(3, 1,m_postEffectsConstsGPU.GetAddressOf());
-	m_postEffects.Render(context);
+	//SetGlobalConsts(m_shadowGlobalConstsGPU[0]);
+	//vector<ID3D11ShaderResourceView*> postEffectsSRVs = 
+	//{
+	//	m_resolvedSRV.Get(), m_shadowSRVs[0].Get() 
+	//};
+	//context->PSSetShaderResources(20, UINT(postEffectsSRVs.size()),postEffectsSRVs.data());
+	//context->OMSetRenderTargets(1, m_postEffectsRTV.GetAddressOf(), NULL);
+	//context->PSSetConstantBuffers(3, 1,m_postEffectsConstsGPU.GetAddressOf());
+	//m_postEffects.Render(context);
 
 	// -------------------------------------------------------
 
-	/*vector<ID3D11ShaderResourceView*> postEffectsSRVs =
+	vector<ID3D11ShaderResourceView*> postEffectsSRVs =
 	{
 		m_resolvedSRV.Get(), D3D::Get()->GetDepthOnly_SRV().Get()
 	};
@@ -487,7 +487,7 @@ void URenderer::RenderPostProcess()
 
 	context->OMSetRenderTargets(1, m_postEffectsRTV.GetAddressOf(), NULL);
 	context->PSSetConstantBuffers(3, 1, m_postEffectsConstsGPU.GetAddressOf());
-	m_postEffects.Render(context);*/
+	m_postEffects.Render(context);
 
 	// -------------------------------------------------------
 

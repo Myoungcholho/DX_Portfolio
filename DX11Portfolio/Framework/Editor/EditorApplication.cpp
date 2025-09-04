@@ -268,8 +268,6 @@ void EditorApplication::imGuiRender()
 	//	ImGui::EndDragDropTarget();
 	//}
 
-	
-
 
 	ImGui::End();																	// Scene
 	ImGui::PopStyleVar();

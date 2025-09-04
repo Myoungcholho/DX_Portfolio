@@ -140,6 +140,6 @@ using Microsoft::WRL::ComPtr;
 #include "Components/USkyboxComponent.h"
 
 
-#include "Renders/URenderer.h"
+//#include "Renders/URenderer.h"
 #include "Core/URenderManager.h"
 #include "Core/UGameInstance.h"
