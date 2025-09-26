@@ -14,6 +14,23 @@ void USkeletalMeshComponent::SetTrack(int index, bool loop, float rate)
 	Anim.PlayClip(index, loop, rate);
 }
 
+void USkeletalMeshComponent::Tick()
+{
+	float dt = CTimer::Get()->GetDeltaTime();
+
+	acctime += dt;
+
+	if (acctime >= 10.0f && time)
+	{
+		cout << "ÀüÈ¯" << "\n";
+
+		Anim.CrossFadeTo(1, 5, true);
+
+		time = false;
+	}
+
+}
+
 void USkeletalMeshComponent::FixedTick(double dt)
 {
 	if (AnimAsset->clips.empty())
@@ -35,20 +52,4 @@ void USkeletalMeshComponent::FixedTick(double dt)
 	// 3. ÆÈ·¹Æ® Á¶¸³
 	AnimAsset->ComposeSkinPalette(CSPose, bonesSnapshot);
 
-
-	// ÃÖÁ¾ ½ºÅ°´× Çà·Ä ÆÈ·¹Æ® ½º³À¼¦
-	/*const int boneCount = (int)mAni.boneParents.size();
-	if (boneCount <= 0)
-		return;
-
-	if ((int)bonesSnapshot.size() != boneCount)
-		bonesSnapshot.reserve(boneCount);
-	
-	const int clipId = Anim.GetClipIndex();
-	const int frame = Anim.GetFrame();
-
-	for (int boneID = 0; boneID < boneCount; ++boneID)
-	{
-		bonesSnapshot[boneID] = mAni.Get(clipId, boneID, frame).Transpose();
-	}*/
 }

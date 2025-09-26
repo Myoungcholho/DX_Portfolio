@@ -96,7 +96,7 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 		};*/
 		vector<string> clipNames =
 		{
-			"Idle.fbx", "Walking60.fbx"
+			"Idle.fbx", "Walking60.fbx", "Idle60.fbx"
 		};
 
 		shared_ptr<AnimationData> aniData = make_shared<AnimationData>();

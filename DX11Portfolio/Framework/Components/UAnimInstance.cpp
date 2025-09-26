@@ -1,6 +1,17 @@
 #include "Framework.h"
 #include "UAnimInstance.h"
 
+static inline Quaternion SlerpSafe(Quaternion a, Quaternion b, float t)
+{
+	if (a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w < 0.0f)
+		b = -b; 
+
+	Quaternion q = Quaternion::Slerp(a, b, t);
+
+	q.Normalize();
+	return q;
+}
+
 void UAnimInstance::PlayClip(int index, bool loop, float rate)
 {
     clipIndex = index;
@@ -24,49 +35,108 @@ void UAnimInstance::Update(double dt)
     if (bPaused || ticksPerSec <= 0.0)
         return;
 
-    frameAccum += dt * ticksPerSec * playRate;							// 델타 * 1초당 진행 속도 * 플레이 속도
-    int step = (int)floor(frameAccum);									// 정수부분 추출
+    frameAccum += dt * ticksPerSec * playRate;										// 델타 * 1초당 진행 속도 * 플레이 속도
+    int step = (int)floor(frameAccum);												// 정수부분 추출
 	if (step == 0)
 	{
 		if (localPose.empty())
-			AnimData->EvaluateLocalPose(clipIndex, frame, localPose);
-		return;
+			AnimData->EvaluateLocalPose(clipIndex, frame, localPose);				// 
 	}
-    frameAccum -= step;													// 소수점 부분은 남겨서 다음 Tick에 사용
-
-	if (bLoop)
+	else
 	{
-		if (clipNumKeys > 0)		// 키 프레임이 존재한다면
-		{
-			frame = (frame + step) % clipNumKeys;	// 키 프레임 개수로 나머지 연산을 해서 끝까지간 경우에 0번 프레임으로 복귀
+		frameAccum -= step;															// 소수점 부분은 남겨서 다음 Tick에 사용
 
-			// -1 % 10 과 같은 연산 방지, 뒤로 갚는 루프의 경우 때문에
-			if (frame < 0)
-				frame += clipNumKeys;
-		}
-		else // %0 방지용
+		if (bLoop)
 		{
-			frame += step;
-
-			if (frame < 0)
-				frame = 0;
+			if (clipNumKeys > 0)
+			{
+				frame = (frame + step) % clipNumKeys;
+				if (frame < 0) frame += clipNumKeys;
+			}
+			else
+			{
+				frame += step;
+				if (frame < 0) frame = 0;
+			}
 		}
+		else
+		{
+			if (clipNumKeys > 0) frame = clamp(frame + step, 0, clipNumKeys - 1);
+			else frame = max(0, frame + step);
+		}
+
+		AnimData->EvaluateLocalPose(clipIndex, frame, localPose);
 	}
-	else	// 한번만 재생
+
+	// 블렌딩 기능 수행
+	if (bBlending && nextClipIndex >= 0)
 	{
-		if (clipNumKeys > 0)
+		const AnimationClip& nextClip = AnimData->clips[nextClipIndex];
+		const double nextTicksPerSec = (nextClip.ticksPerSec > 0) ? nextClip.ticksPerSec : 60.0;
+		const int nextNumKeys = (nextClip.numKeys > 0) ? nextClip.numKeys : 0;
+
+		nextAccum += dt * nextTicksPerSec * nextRate;
+		int nstep = (int)floor(nextAccum);
+
+		if (nstep > 0)
 		{
-			frame = clamp(frame + step, 0, clipNumKeys - 1);
+			nextAccum -= nstep;
+
+			if (nextLoop)
+			{
+				if (nextNumKeys > 0)
+				{
+					nextFrame = (nextFrame + nstep) % nextNumKeys;
+					if (nextFrame < 0) nextFrame += nextNumKeys;
+				}
+				else
+				{
+					nextFrame += nstep;
+					if (nextFrame < 0) nextFrame = 0;
+				}
+			}
+			else
+			{
+				if (nextNumKeys > 0) nextFrame = clamp(nextFrame + nstep, 0, nextNumKeys - 1);
+				else nextFrame = max(0, nextFrame + nstep);
+			}
 		}
-		else // %0 방지용
+
+		// 두 포즈 결과를 추출하고 Blend
+		fromPose = localPose;													// 매 프레임 최신 현재 포즈
+		AnimData->EvaluateLocalPose(nextClipIndex, nextFrame, toPose);
+
+		// 시간 기반 가중치 (smoothstep)
+		blendT = min(blendT + (float)dt, blendDur);
+		float u = (blendDur > 0.0001f) ? (blendT / blendDur) : 1.0f;
+		float w = u * u * (3.f - 2.f * u);
+
+		// 보간 결과를 이번 프레임의 출력 포즈로 사용
+		BlendPose(fromPose, toPose, w, localPose);
+
+		// 전환 종료 처리
+		if (blendT >= blendDur)
 		{
-			frame = max(0, frame + step);
+			// 대상 클립으로 스위치
+			clipIndex = nextClipIndex;
+			bLoop = nextLoop;
+			playRate = nextRate;
+
+			// 대상 파이프 진행도를 현재 파이프에 이양
+			frame = nextFrame;
+			frameAccum = nextAccum;
+
+			// 블렌딩 해제 및 클린업
+			bBlending = false;
+			nextClipIndex = -1;
+			toPose.clear();
+			fromPose.clear();
 		}
+
 	}
 
-	// 로컬 포즈 
-	//AnimData->Update(clipIndex, frame);
-	AnimData->EvaluateLocalPose(clipIndex, frame, localPose);
+
+	
 }
 
 /// <summary>
@@ -105,7 +175,8 @@ void UAnimInstance::CrossFadeTo(int nextIndex, float durationSec, bool loop, flo
 /// <param name="Out">결과값 Output</param>
 void UAnimInstance::BlendPose(const vector<AnimationClip::Key>& A, const vector<AnimationClip::Key>& B, float w, vector<AnimationClip::Key>& Out)
 {
-	assert(A.size() == 52 && B.size() == 52);
+	assert(A.size() == B.size());
+
 	const size_t n = A.size();
 	if (Out.size() != n) Out.resize(n);
 
@@ -114,6 +185,7 @@ void UAnimInstance::BlendPose(const vector<AnimationClip::Key>& A, const vector<
 	{
 		Out[i].pos = Vector3::Lerp(A[i].pos, B[i].pos, w);
 		Out[i].scale = Vector3::Lerp(A[i].scale, B[i].scale, w);
-		Out[i].rot = Quaternion::Slerp(A[i].rot, B[i].rot, w);
+		//Out[i].rot = SlerpSafe(A[i].rot, B[i].rot, w);
+		Out[i].rot = Quaternion::Lerp(A[i].rot, B[i].rot, w);
 	}
 }

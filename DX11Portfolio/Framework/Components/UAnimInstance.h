@@ -2,7 +2,7 @@
 
 /// <summary>
 /// 어떤 클립을 몇 프레임 데이터를 쓸지 결정하고,
-/// 키 프레임데이터로 부모-자식간 계층 연산을 통해 본 팔레트 vector<Matrix> 정보를 구성하는 역할
+/// 키 프레임데이터로 부모-자식간 계층 연산을 통해 본 팔레트 정보를 구성하는 역할
 /// </summary>
 class UAnimInstance
 {
@@ -40,7 +40,7 @@ private:
 	double frameAccum = 0.0;
 	bool bPaused = false;
 
-	vector<AnimationClip::Key> localPose;		// 로컬 포즈
+	vector<AnimationClip::Key> localPose;
 private:
 	// 블렌딩 상태 멤버
 	bool bBlending = false;

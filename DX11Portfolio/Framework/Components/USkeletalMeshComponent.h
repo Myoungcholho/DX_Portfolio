@@ -14,14 +14,17 @@ public:
 	void SetTrack(int index, bool loop, float rate);
 
 public:
+	void Tick() override;
 	void FixedTick(double dt) override;
 
 	UAnimInstance& GetAnimInstance() { return Anim; }
-
 private:
 	UAnimInstance Anim;
 
 	vector<Matrix> CSPose;
 	Matrix accumRoot = Matrix();
 	Vector3 prevPos = Vector3(0, 0, 0);
+
+	float acctime = 0.0f;
+	bool time = true;
 };
