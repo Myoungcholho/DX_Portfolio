@@ -14,14 +14,16 @@ class USceneComponent : public UActorComponent
 {
 public:
     USceneComponent();
+    ~USceneComponent() override = default;
 
 protected:
-    // shared_ptr은 굳이? Transform은 Value타입에 가깝기 때문에 소유권 공유 필요가 없음
-	Transform m_localTransform;		                    // 부모 기준 위치(상대 위치, Local)
-	Transform m_worldTransform;		                    // 렌더링에 사용(절대 위치, World)
+    // 언리얼의 값 관리 형식 방식을 적용
+    // Transform은 Value타입에 가깝기 때문에 소유권 공유 필요가 없음
+	Transform localTransform;		                    // 부모 기준 위치(상대 위치, Local)
+	Transform worldTransform;		                    // 렌더링에 사용(절대 위치, World)
 
-	USceneComponent* m_parent;                          // 부모 포인터
-	std::vector<USceneComponent*> m_children;           // 자식 포인터
+	USceneComponent* parent;                          // 부모 포인터
+	vector<USceneComponent*> children;           // 자식 포인터
 
 public:
     void SetRelativePosition(const Vector3& position);
@@ -29,10 +31,10 @@ public:
     void SetRelativeRotation(const Vector3& rotation);
     void SetRelativeScale(const Vector3& scale);
     void SetRelativeTransform(const Transform& t);      // 부모를 기준으로 하는 로컬 트랜스폼을 설정
-    Vector3 GetRelativePosition();
-    Vector3 GetRelativeRotationEuler();
-    Vector3 GetRelativeScale();
-    Vector3 GetForwardVector();
+    Vector3 GetRelativePosition() const;
+    Vector3 GetRelativeRotationEuler() const;
+    Vector3 GetRelativeScale() const;
+    Vector3 GetForwardVector() const;
     void UpdateWorldTransform();
     void UpdateWorldTransformRecursive();
 
@@ -45,6 +47,6 @@ public:
 
 public:
     USceneComponent* GetParent() const;
-    const std::vector<USceneComponent*>& GetChildren() const;
+    const vector<USceneComponent*>& GetChildren() const;
     USceneComponent* GetRoot() const;
 };

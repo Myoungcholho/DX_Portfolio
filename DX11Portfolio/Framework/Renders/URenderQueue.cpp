@@ -19,6 +19,9 @@ void URenderQueue::AddProxy(std::shared_ptr<URenderProxy> proxy)
     case ERenderPass::Opaque:
         m_opaqueList.push_back(raw);
         break;
+    case ERenderPass::Skinned:
+        m_skinnedList.push_back(raw);
+        break;
     }
 }
 
@@ -27,4 +30,5 @@ void URenderQueue::Clear()
     m_skyboxList.clear();
     m_opaqueList.clear();
     m_transparentList.clear();
+    m_skinnedList.clear();
 }

@@ -3,7 +3,7 @@
 
 void PostEffects::Initialize(ComPtr<ID3D11Device>& device, ComPtr<ID3D11DeviceContext>& context)
 {
-	PBRMeshData meshData =  GeomtryGenerator::MakeSquare();
+	PBRMeshData meshData =  GeometryGenerator::MakeSquare();
 
 	m_mesh = make_shared<Mesh>();
 	D3D11Utils::CreateVertexBuffer(device, meshData.vertices, m_mesh->vertexBuffer);

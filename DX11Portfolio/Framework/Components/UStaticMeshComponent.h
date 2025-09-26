@@ -6,16 +6,14 @@ class UStaticMeshComponent : public UPrimitiveComponent
 {
 public:
     UStaticMeshComponent();
+    ~UStaticMeshComponent() override = default;
 
 public:
     void Init() override;
     void RefreshConstantsCPU() override;
-    void OnGUI() override;
 
 public:
     ERenderPass GetRenderPass() const override { return ERenderPass::Opaque; }
-    
-public:
     shared_ptr<URenderProxy> GetRenderProxy() override;
 
 private:

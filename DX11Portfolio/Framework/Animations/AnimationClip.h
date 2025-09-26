@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <directxtk/SimpleMath.h>
 #include <iostream>
@@ -17,6 +17,7 @@ struct AnimationClip
 {
 	struct Key
 	{
+		double timeTicks = 0.0;				// í‚¤ì˜ ì‹œê°„
 		Vector3 pos = Vector3(0.0f);
 		Vector3 scale = Vector3(1.0f);
 		Quaternion rot = Quaternion();
@@ -29,92 +30,179 @@ struct AnimationClip
 		}
 	};
 
-	string name;					// ¾Ö´Ï¸ŞÀÌ¼Ç ÀÌ¸§
+	string name;					// ì• ë‹ˆë©”ì´ì…˜ ì´ë¦„
 	vector<vector<Key>> keys;		// [Bone][Frame]
-	int numChannels;				// »À °³¼ö
-	int numKeys;					// ÇÁ·¹ÀÓ °³¼ö
-	double duration;				// ¾Ö´Ï¸ŞÀÌ¼Ç ÃÑ ±æÀÌ
-	double ticksPerSec;				// Àç»ı ¼Óµµ
+	int numChannels;				// ë¼ˆ ê°œìˆ˜
+	int numKeys;					// í”„ë ˆì„ ê°œìˆ˜
+	double duration;				// ì• ë‹ˆë©”ì´ì…˜ ì´ ê¸¸ì´
+	double ticksPerSec;				// ì¬ìƒ ì†ë„
 };
 
 struct AnimationData
 {
-	map<string, int32_t> boneNameTold;			// »À ÀÌ¸§À¸·Î ¸î¹øÂ° indexÀÎÁö È®ÀÎÇÏ±â À§ÇÔ
-	vector<string> boneIdToName;				// »À index·Î ÀÌ¸§ È®ÀÎ¿ë
-	vector<int32_t> boneParents;				// ¹è¿­·Î ºÎ¸ğÀÇ ÀÎµ¦½º¸¦ ÀúÀå
-	vector<Matrix> offsetMatrices;				// Á¤Á¡Àº ¸ğµ¨(0,0,0) Áï WorldMatrix±âÁØ¿¡ À§Ä¡¿¡ ÀÖ¾î¼­ ÀÌ Á¤Á¡À» »À ±âÁØÀ¸·Î ¹Ù²Ù±â À§ÇØ »ç¿ëÇÏ´Â inverse Çà·Ä
-	vector<Matrix> boneTransforms;				// ½ºÄÌ·¹Åæ °èÃş ±¸Á¶¿¡ µû¶ó ºÎ¸ğ-ÀÚ½Ä ´©ÀûÀÌ ¹İ¿µµÈ Çà·Ä ±×´Ï±î ³» Transform¿¡¼­ WorldMatrix¶ó°í »ı°¢ÇÏ¸é µÈ´Ù.
-	vector<AnimationClip> clips;				// ÀÌ ¸ğµ¨ÀÌ °¡Áø ¸ğµç ¾Ö´Ï¸ŞÀÌ¼Ç Å¬¸³ ¸ğÀ½(Idle, Run, ..)
+	// == ì •ì  ì—ì…‹ ë°ì´í„° ==
+	map<string, int32_t> boneNameToId;			// ë¼ˆ ì´ë¦„ìœ¼ë¡œ ëª‡ë²ˆì§¸ indexì¸ì§€ í™•ì¸í•˜ê¸° ìœ„í•¨
+	vector<string> boneIdToName;				// ë¼ˆ indexë¡œ ì´ë¦„ í™•ì¸ìš©(5ë²ˆ ë³¸ì´ ë­ì§€? mapì„ ì „ë¶€ ìˆœíšŒí•˜ëŠ”ê±´ ë¹„íš¨ìœ¨ ë”°ë¼ì„œ vectorë¥¼ í•˜ë‚˜ ë”)
+	vector<int32_t> boneParents;				// ë°°ì—´ë¡œ ë¶€ëª¨ì˜ ì¸ë±ìŠ¤ë¥¼ ì €ì¥
+	vector<Matrix> offsetMatrices;				// ì •ì ì€ ëª¨ë¸(0,0,0) ì¦‰ WorldMatrixê¸°ì¤€ì— ìœ„ì¹˜ì— ìˆì–´ì„œ ì •ì ì„ ë¼ˆ ê¸°ì¤€ìœ¼ë¡œ ë°”ê¾¸ê¸° ìœ„í•´ ì‚¬ìš©í•˜ëŠ” inverse í–‰ë ¬
+	//vector<Matrix> boneTransforms;				// ìŠ¤ì¼ˆë ˆí†¤ ê³„ì¸µ êµ¬ì¡°ì— ë”°ë¼ ë¶€ëª¨-ìì‹ ëˆ„ì ì´ ë°˜ì˜ëœ í–‰ë ¬ ê·¸ë‹ˆê¹Œ ë‚´ Transformì—ì„œ WorldMatrixë¼ê³  ìƒê°í•˜ë©´ ëœë‹¤.
+	vector<AnimationClip> clips;				// ì´ ëª¨ë¸ì´ ê°€ì§„ ëª¨ë“  ì• ë‹ˆë©”ì´ì…˜ í´ë¦½ ëª¨ìŒ(Idle, Run, ..)
+
+	// ëª¨ë¸ì„ ì½ì„ ë•Œ AABBê³„ì‚°í•˜ê³  ì¤‘ì‹¬ì ì„ centerë¡œ ì˜¤ë„ë¡ ì •ê·œí™”í•˜ëŠ”ë°
+	// ì´ë•Œ ì •ì  ë°ì´í„°ëŠ” ë³€í™˜í–ˆëŠ”ë° ê·¸ëŒ€ë¡œ ë‘ë©´ ì •ì ì€ ìŠ¤ì¼€ì¼ëœ ìƒíƒœì¸ë°
+	// ë¼ˆëŠ” ì›ë˜ í¬ê¸°ë¼ì„œ ì •ì ê³¼ ë¼ˆê°€ ì–´ê¸‹ë‚œë‹¤. ê·¸ë˜ì„œ ë³´ì • í–‰ë ¬ì´ í•„ìš”í•˜ë‹¤.
+	// ë©”ì‹œ ì •ê·œí™”ì— ì‚¬ìš©í•œ ë³´ì • ê°’ì„ ì €ì¥í•œ í–‰ë ¬.
+	Matrix defaultTransform;					// ëª¨ë¸ì„ ë¶ˆëŸ¬ì˜¬ ë•Œ ì¢Œí‘œê³„ë¥¼ ë§ì¶”ê¸° ìœ„í•œ ë³´ì • í–‰ë ¬
+	Matrix rootTransform = Matrix();			// ë£¨íŠ¸ ë¼ˆ í–‰ë ¬
 	
-	// ¸ğµ¨À» ÀĞÀ» ¶§ AABB°è»êÇÏ°í Áß½ÉÁ¡À» center·Î ¿Àµµ·Ï Á¤±ÔÈ­ÇÏ´Âµ¥
-	// ÀÌ¶§ Á¤Á¡ µ¥ÀÌÅÍ´Â º¯È¯Çß´Âµ¥ ±×´ë·Î µÎ¸é Á¤Á¡Àº ½ºÄÉÀÏµÈ »óÅÂÀÎµ¥
-	// »À´Â ¿ø·¡ Å©±â¶ó¼­ Á¤Á¡°ú »À°¡ ¾î±ß³­´Ù. ±×·¡¼­ º¸Á¤ Çà·ÄÀÌ ÇÊ¿äÇÏ´Ù.
-	// ¸Ş½Ã Á¤±ÔÈ­¿¡ »ç¿ëÇÑ º¸Á¤ °ªÀ» ÀúÀåÇÑ Çà·Ä.
-	Matrix defaultTransform;					// ¸ğµ¨À» ºÒ·¯¿Ã ¶§ ÁÂÇ¥°è¸¦ ¸ÂÃß±â À§ÇÑ º¸Á¤ Çà·Ä
-	Matrix rootTransform = Matrix();			// ·çÆ® »À Çà·Ä
-	Matrix accumulatedRootTransform = Matrix();	// ·çÆ® ¾Ö´Ï¸ŞÀÌ¼Ç¿ë ´©Àû
-	Vector3 prevPos = Vector3(0.0f);			// delta°ª ±¸ÇÏ±â À§ÇØ ÀÌÀü °ª ÀúÀå
+	//Matrix accumulatedRootTransform = Matrix();	// ë£¨íŠ¸ ì• ë‹ˆë©”ì´ì…˜ìš© ëˆ„ì 
+	//Vector3 prevPos = Vector3(0.0f);			// deltaê°’ êµ¬í•˜ê¸° ìœ„í•´ ì´ì „ ê°’ ì €ì¥
 
-	/// <summary>
-	/// ¿©±â°¡ ¾îÁö·´´Ù
-	/// ¸¸¾à Á¤Á¡ÀÌ (5,1,2)ÀÌ°í »À ÀÌµ¿ÀÌ (2,0,0)ÀÌ¶ó¸é °á°ú´Â (7,1,2)¿©¾ßÇÒ°ÍÀÌ´Ù.
-	/// ±Ùµ¥ Áö±İÀº ¸ğµ¨ Á¤Á¡ À§Ä¡¸¦ AABB·Î Á¤±ÔÈ­¸¦ °ÅÃÆ´Ù. ¸¸¾à 0.5 ÀÛ¾ÆÁ³´Ù¸é
-	/// (2.5,0.5,1)ÀÌ´Ù. ¿©±â¼­ (2,0,0)À» ÀÌµ¿ÇÏ¸é Á¤±ÔÈ­µÈ Á¤Á¡À» °í·ÁÇÏÁö ¾ÊÀºÃ¼ º»ÀÌ ÀÌµ¿½ÃÅ°´Â °ÍÀÌ´Ù.
-	/// µû¶ó¼­ (2,0,0)µµ Á¶Á¤ÀÌ ÇÊ¿äÇÏ´Ù. ±×·¡¼­ Á¤±ÔÈ­½ÃÅ°°í(defaultTransform) °è»êÇÏ°í
-	/// ´Ù½Ã ¿øº¹ÇÏ´Â °Í (defaultTransform.Invert())ÀÌ´Ù.
-	/// ¿Í row major¶ó¼­ ¿À¸¥ÂÊ ³¡ºÎÅÍ ÇØ¾ßÇÏ´Â°Ô ÇÔÁ¤ÀÌ³× ÁøÂ¥ ¾îÁö·´´Ù
-	/// </summary>
-	Matrix Get(int clipId, int boneId, int frame)
+	void ComposeSkinPalette(const vector<Matrix>& csPose, vector<Matrix>& outPalette) const
 	{
-		return defaultTransform.Invert() *
-			offsetMatrices[boneId] *
-			boneTransforms[boneId] *
-			defaultTransform;
+		const int n = (int)boneParents.size();
+		if ((int)outPalette.size() != n)
+			outPalette.assign(n, Matrix());
 
+		Matrix defaultInv = defaultTransform.Invert();
+		for (int i = 0; i < n; ++i)
+		{
+			outPalette[i] = defaultInv *
+				offsetMatrices[i] *
+				csPose[i] *
+				defaultTransform;
+
+			outPalette[i] = outPalette[i].Transpose();
+		}
 	}
 
-	void Update(int clipId, int frame)
+
+	/// <summary>
+	/// ë¡œì»¬ í¬ì¦ˆ ì¶”ì¶œ, íŠ¹ì • í´ë¦½ì˜ frameì—ì„œ ëª¨ë“  ë³¸ì˜ ë¡œì»¬ í‚¤ë¥¼ vectorë¡œ ì €ì¥
+	/// </summary>
+	void EvaluateLocalPose(int clipId, int frame, vector<AnimationClip::Key>& outLocalPose) const
 	{
-		AnimationClip& clip = clips[clipId];
+		const AnimationClip& clip = clips[clipId];
+		const int boneCount = (int)boneParents.size();
 
-		// ¸ğµç »À ¼øÈ¸
-		for (int boneId = 0; boneId < boneTransforms.size(); ++boneId)
+		if ((int)outLocalPose.size() != boneCount)
+			outLocalPose.assign(boneCount, AnimationClip::Key());
+
+		for (int boneId = 0; boneId < boneCount; ++boneId)
 		{
-			vector<AnimationClip::Key>& keys = clip.keys[boneId];				// Æ¯Á¤ ClipÀÌ °¡Áö´Â Æ¯Á¤ BoneÀÇ ¸ğµç Frameº° Transform °ª
+			const vector<AnimationClip::Key>& keys = clip.keys[boneId];
+			outLocalPose[boneId] = (keys.size() > 0) ? keys[frame % (int)keys.size()] : AnimationClip::Key();
+		}
+	}
 
-			const int parentIdx = boneParents[boneId];							// º»ÀÇ ºÎ¸ğ ÀÎµ¦½º
-			const Matrix parentMatrix = parentIdx >= 0 ? 
-				boneTransforms[parentIdx] : accumulatedRootTransform;			// ¸¸¾à ·çÆ®°¡ ¾Æ´Ï¶ó¸é ºÎ¸ğÀÇ Çà·ÄÀ», ¾Æ´Ï¶ó¸é ·çÆ®»À Çà·ÄÀ»
+	/// <summary>
+	/// ë¡œì»¬í¬ì¦ˆ -> ì»´í¬ë„ŒíŠ¸ í¬ì¦ˆë¡œ ë³€í™˜
+	/// </summary>
+	void BuildComponentPoseFromLocal(const vector<AnimationClip::Key>& localPose,
+		int frame,
+		vector<Matrix>& outCSPose,
+		Matrix& accumulatedRootTransform,  
+		Vector3& prevPos                   
+	) const
+	{
+		const int boneCount = (int)boneParents.size();
+		if (boneCount <= 0) return;
 
-			AnimationClip::Key key = keys.size() > 0 ?
-				keys[frame % keys.size()] : AnimationClip::Key();				// ÇÁ·¹ÀÓ ¼ö¸¦ ÃÊ°úÇÒ ¼ö ÀÖÀ¸¹Ç·Î %¸¦ »ç¿ëÇÏ°í Å°°¡ ¾Æ¿¹ ¾ø´Ù¸é Identity
+		if ((int)outCSPose.size() != boneCount)
+			outCSPose.assign(boneCount, Matrix());
 
-			// ·çÆ® »À´Â Æ¯º° Ã³¸®
+		for (int boneId = 0; boneId < boneCount; ++boneId)
+		{
+			const int parentIdx = boneParents[boneId];
+			const Matrix parentMatrix = (parentIdx >= 0) ? outCSPose[parentIdx] : accumulatedRootTransform;
+
+			AnimationClip::Key key = (boneId < (int)localPose.size()) ? localPose[boneId] : AnimationClip::Key();
+
+			// ë£¨íŠ¸ ì²˜ë¦¬(ë£¨íŠ¸ëª¨ì…˜ ëˆ„ì )
 			if (parentIdx < 0)
 			{
 				if (frame != 0)
 				{
-					// ·çÆ®º»Àº ¾ÕÀ¸·Î ÀÌµ¿ÇÏ´Â °ªÀ» °¡Áü. prevPos¿Í ÇöÀçÀÇ Â÷ÀÌ´Â ÀÌ¹ø ÇÁ·¹ÀÓ µ¿¾È ÀÌµ¿·®
-					// ÀÌ°É accumulatedRootTransform¿¡ ´©Àû
 					accumulatedRootTransform = Matrix::CreateTranslation(key.pos - prevPos) * accumulatedRootTransform;
 				}
-				else // Ã¹ ÇÁ·¹ÀÓÀº delta°ªÀÌ ¾ø¾î¼­ Æ¯º° Ã³¸®
+				else
 				{
-					// y°ª¸¸ Å°ÇÁ·¹ÀÓ °ªÀ¸·Î ¸ÂÃß°í ³ª¸ÓÁö´Â ±×´ë·Î
-					auto temp = accumulatedRootTransform.Translation();
-					temp.y = key.pos.y;
-					accumulatedRootTransform.Translation(temp);
+					auto t = accumulatedRootTransform.Translation();
+					t.y = key.pos.y;
+					accumulatedRootTransform.Translation(t);
 				}
 
-				// ·çÆ® º» ÀÚÃ¼¿¡¼­ ÀÌµ¿À» 0À¸·Î ¸®¼Â ¾Ö´Ï¸ŞÀÌ¼ÇÀº Á¦ÀÚ¸®¿¡¼­¸¸ Àç»ıµÇ°í
-				// ½ÇÁ¦ ÀÌµ¿Àº accumulatedRootTransformÀÌ ´ã´ç
 				prevPos = key.pos;
-				key.pos = Vector3(0.0f);
+				key.pos = Vector3(0.0f); // ë£¨íŠ¸ ë³¸ì€ ì œìë¦¬ ì¬ìƒ
 			}
 
-			// º»ÀÇ Çà·Ä, ÇöÀç Å°ÇÁ·¹ÀÓÀÇ À§Ä¡¿Í ºÎ¸ğÀÇ ¸ÅÆ®¸¯½º À§Ä¡·ÎºÎÅÍ ¾÷µ¥ÀÌÆ®
-			boneTransforms[boneId] = key.GetTransform() * parentMatrix;
+			outCSPose[boneId] = key.GetTransform() * parentMatrix;
 		}
 	}
 
 };
+
+
+/// <summary>
+	/// ì—¬ê¸°ê°€ ì–´ì§€ëŸ½ë‹¤
+	/// ë§Œì•½ ì •ì ì´ (5,1,2)ì´ê³  ë¼ˆ ì´ë™ì´ (2,0,0)ì´ë¼ë©´ ê²°ê³¼ëŠ” (7,1,2)ì—¬ì•¼í• ê²ƒì´ë‹¤.
+	/// ê·¼ë° ì§€ê¸ˆì€ ëª¨ë¸ ì •ì  ìœ„ì¹˜ë¥¼ AABBë¡œ ì •ê·œí™”ë¥¼ ê±°ì³¤ë‹¤. ë§Œì•½ 0.5 ì‘ì•„ì¡Œë‹¤ë©´
+	/// (2.5,0.5,1)ì´ë‹¤. ì—¬ê¸°ì„œ (2,0,0)ì„ ì´ë™í•˜ë©´ ì •ê·œí™”ëœ ì •ì ì„ ê³ ë ¤í•˜ì§€ ì•Šì€ì²´ ë³¸ì´ ì´ë™ì‹œí‚¤ëŠ” ê²ƒì´ë‹¤.
+	/// ë”°ë¼ì„œ (2,0,0)ë„ ì¡°ì •ì´ í•„ìš”í•˜ë‹¤. ê·¸ë˜ì„œ ì •ê·œí™”ì‹œí‚¤ê³ (defaultTransform) ê³„ì‚°í•˜ê³ 
+	/// ë‹¤ì‹œ ì›ë³µí•˜ëŠ” ê²ƒ (defaultTransform.Invert())ì´ë‹¤.
+	/// ì™€ row majorë¼ì„œ ì˜¤ë¥¸ìª½ ëë¶€í„° í•´ì•¼í•˜ëŠ”ê²Œ í•¨ì •ì´ë„¤ ì§„ì§œ ì–´ì§€ëŸ½ë‹¤
+	/// </summary>
+	//Matrix Get(int clipId, int boneId, int frame)
+	//{
+	//	return defaultTransform.Invert() *
+	//		offsetMatrices[boneId] *
+	//		boneTransforms[boneId] *
+	//		defaultTransform;
+	//}
+
+	/// <summary>
+	/// ì˜›ë‚ ì— ì»ë˜ê±° ì§€ê¸ˆì€ X
+	/// </summary>
+	//void Update(int clipId, int frame)
+	//{
+	//	AnimationClip& clip = clips[clipId];
+
+	//	// ëª¨ë“  ë¼ˆ ìˆœíšŒ
+	//	for (int boneId = 0; boneId < boneTransforms.size(); ++boneId)
+	//	{
+	//		vector<AnimationClip::Key>& keys = clip.keys[boneId];				// íŠ¹ì • Clipì´ ê°€ì§€ëŠ” íŠ¹ì • Boneì˜ ëª¨ë“  Frameë³„ Transform ê°’
+
+	//		const int parentIdx = boneParents[boneId];							// ë³¸ì˜ ë¶€ëª¨ ì¸ë±ìŠ¤
+	//		const Matrix parentMatrix = parentIdx >= 0 ? 
+	//			boneTransforms[parentIdx] : accumulatedRootTransform;			// ë§Œì•½ ë£¨íŠ¸ê°€ ì•„ë‹ˆë¼ë©´ ë¶€ëª¨ì˜ í–‰ë ¬ì„, ì•„ë‹ˆë¼ë©´ ë£¨íŠ¸ë¼ˆ í–‰ë ¬ì„
+
+	//		AnimationClip::Key key = keys.size() > 0 ?
+	//			keys[frame % keys.size()] : AnimationClip::Key();				// í”„ë ˆì„ ìˆ˜ë¥¼ ì´ˆê³¼í•  ìˆ˜ ìˆìœ¼ë¯€ë¡œ %ë¥¼ ì‚¬ìš©í•˜ê³  í‚¤ê°€ ì•„ì˜ˆ ì—†ë‹¤ë©´ Identity
+
+	//		// ë£¨íŠ¸ ë¼ˆëŠ” íŠ¹ë³„ ì²˜ë¦¬
+	//		if (parentIdx < 0)
+	//		{
+	//			if (frame != 0)
+	//			{
+	//				// ë£¨íŠ¸ë³¸ì€ ì•ìœ¼ë¡œ ì´ë™í•˜ëŠ” ê°’ì„ ê°€ì§. prevPosì™€ í˜„ì¬ì˜ ì°¨ì´ëŠ” ì´ë²ˆ í”„ë ˆì„ ë™ì•ˆ ì´ë™ëŸ‰
+	//				// ì´ê±¸ accumulatedRootTransformì— ëˆ„ì 
+	//				accumulatedRootTransform = Matrix::CreateTranslation(key.pos - prevPos) * accumulatedRootTransform;
+	//			}
+	//			else // ì²« í”„ë ˆì„ì€ deltaê°’ì´ ì—†ì–´ì„œ íŠ¹ë³„ ì²˜ë¦¬
+	//			{
+	//				// yê°’ë§Œ í‚¤í”„ë ˆì„ ê°’ìœ¼ë¡œ ë§ì¶”ê³  ë‚˜ë¨¸ì§€ëŠ” ê·¸ëŒ€ë¡œ
+	//				auto temp = accumulatedRootTransform.Translation();
+	//				temp.y = key.pos.y;
+	//				accumulatedRootTransform.Translation(temp);
+	//			}
+
+	//			// ë£¨íŠ¸ ë³¸ ìì²´ì—ì„œ ì´ë™ì„ 0ìœ¼ë¡œ ë¦¬ì…‹ ì• ë‹ˆë©”ì´ì…˜ì€ ì œìë¦¬ì—ì„œë§Œ ì¬ìƒë˜ê³ 
+	//			// ì‹¤ì œ ì´ë™ì€ accumulatedRootTransformì´ ë‹´ë‹¹
+	//			prevPos = key.pos;
+	//			key.pos = Vector3(0.0f);
+	//		}
+
+	//		// ë³¸ì˜ í–‰ë ¬, í˜„ì¬ í‚¤í”„ë ˆì„ì˜ ìœ„ì¹˜ì™€ ë¶€ëª¨ì˜ ë§¤íŠ¸ë¦­ìŠ¤ ìœ„ì¹˜ë¡œë¶€í„° ì—…ë°ì´íŠ¸
+	//		boneTransforms[boneId] = key.GetTransform() * parentMatrix;
+	//	}
+	//}

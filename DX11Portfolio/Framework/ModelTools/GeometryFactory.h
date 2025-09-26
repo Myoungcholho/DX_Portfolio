@@ -1,9 +1,13 @@
 #pragma once
 
-class GeomtryGenerator
+class GeometryGenerator
 {
 public:
-	static vector<PBRMeshData> ReadFromFileModel(string basePath, string filename);
+	static vector<PBRMeshData> ReadFromFile(string basePath, string filename, bool revertNormals = false);
+	static auto ReadAnimationFromFile(string basePath, string filename, bool revertNormals = false)
+		-> tuple<vector<PBRMeshData>, AnimationData>;
+
+	static void Normalize(const Vector3 center, const float longestLength, vector<PBRMeshData>& meshes, AnimationData& aniData);
 
 	static PBRMeshData MakeSquare(const float scale = 1.0f, const Vector2 texScale = Vector2(1.0f));
 	static PBRMeshData MakeBox(const float scale = 1.0f);

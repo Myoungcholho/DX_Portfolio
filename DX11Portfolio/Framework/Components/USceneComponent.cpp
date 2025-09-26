@@ -5,9 +5,9 @@ USceneComponent::USceneComponent()
 {
     mName = "USceneComponent";
 
-    m_localTransform = Transform();
-    m_worldTransform = Transform();
-    m_parent = nullptr;
+    localTransform = Transform();
+    worldTransform = Transform();
+    parent = nullptr;
 }
 
 /// <summary>
@@ -15,31 +15,31 @@ USceneComponent::USceneComponent()
 /// </summary>
 void USceneComponent::SetRelativeTransform(const Transform& t)
 {
-    m_localTransform = t;                                                    // 부모가 누군진 모르지만 기준으로 한 Transform
+    localTransform = t;                                                    // 부모가 누군진 모르지만 기준으로 한 Transform
     UpdateWorldTransformRecursive();                                                     // WorldMatrix에 반영, 왜냐하면 렌더링할때는 이 정보가 사용되니
 }
 
 void USceneComponent::SetRelativePosition(const Vector3& position)
 {
-    m_localTransform.SetPosition(position);
+    localTransform.SetPosition(position);
     UpdateWorldTransformRecursive();
 }
 
 void USceneComponent::SetRelativeRotation(const Quaternion& rotation)
 {
-    m_localTransform.SetRotation(rotation);
+    localTransform.SetRotation(rotation);
     UpdateWorldTransformRecursive();
 }
 
 void USceneComponent::SetRelativeRotation(const Vector3& rotation)
 {
-    m_localTransform.SetRotation(rotation);
+    localTransform.SetRotation(rotation);
     UpdateWorldTransformRecursive();
 }
 
 void USceneComponent::SetRelativeScale(const Vector3& scale)
 {
-    m_localTransform.SetScale(scale);
+    localTransform.SetScale(scale);
     UpdateWorldTransformRecursive();
 }
 
@@ -48,7 +48,7 @@ void USceneComponent::SetRelativeScale(const Vector3& scale)
 /// </summary>
 void USceneComponent::UpdateWorldTransform()
 {
-    if (m_parent)
+    if (parent)
     {
 #ifdef TransformTest
         cout << "--------------------------------------------------\n";
@@ -56,9 +56,9 @@ void USceneComponent::UpdateWorldTransform()
         cout << "Pos :" << m_parent->m_worldTransform.GetPosition().x << "," << m_parent->m_worldTransform.GetPosition().y << "," << m_parent->m_worldTransform.GetPosition().z << "\n";
         cout << "Rot :" << m_parent->m_worldTransform.GetRotation().x << "," << m_parent->m_worldTransform.GetRotation().y << "," << m_parent->m_worldTransform.GetRotation().z << "\n";
         cout << "Scale :" << m_parent->m_worldTransform.GetScale().x << "," << m_parent->m_worldTransform.GetScale().y << "," << m_parent->m_worldTransform.GetScale().z << "\n";
-#endif // 
+#endif
 
-        m_worldTransform = m_localTransform * m_parent->m_worldTransform;    // World행렬을 부모행렬과 상대행렬의 곱으로 구성
+        worldTransform = localTransform * parent->worldTransform;    // World행렬을 부모행렬과 상대행렬의 곱으로 구성
 
 #ifdef TransformTest
         cout << "Name after :" << mName << "\n";
@@ -69,20 +69,19 @@ void USceneComponent::UpdateWorldTransform()
     }
     else
     {
-        m_worldTransform = m_localTransform;                                 // 부모가 없다면 상대위치는 곧 월드위치
+        worldTransform = localTransform;                                 // 부모가 없다면 상대위치는 곧 월드위치
     }
 }
 
 
 /// <summary>
 /// 현재 컴포넌트의 WorldTransform을 갱신하고 모든 자식의 WorldTransform도 재귀적으로 갱신
-/// 1. d
 /// </summary>
 void USceneComponent::UpdateWorldTransformRecursive()
 {
     UpdateWorldTransform();
 
-    for (USceneComponent* child : m_children)
+    for (USceneComponent* child : children)
     {
         if (child)
             child->UpdateWorldTransformRecursive();
@@ -91,7 +90,7 @@ void USceneComponent::UpdateWorldTransformRecursive()
 
 bool USceneComponent::AttachTo(USceneComponent* newParent, EAttachMode mode)
 {
-    if (m_parent == newParent) return true;
+    if (parent == newParent) return true;
     if (newParent == this) return false;
 
     // 새 부모의 조상들을 위로 타고 올라가면서 검사하며
@@ -100,20 +99,20 @@ bool USceneComponent::AttachTo(USceneComponent* newParent, EAttachMode mode)
         if (p == this) return false;
 
     UpdateWorldTransform();
-    Matrix curWorld = m_worldTransform.GetWorldMatrix();
+    Matrix curWorld = worldTransform.GetWorldMatrix();
 
     // 기존 부모로부터 분리
-    if (m_parent)
+    if (parent)
     {
-        auto& s = m_parent->m_children;
-        s.erase(std::remove(s.begin(), s.end(), this), s.end());
+        auto& s = parent->children;
+        s.erase(remove(s.begin(), s.end(), this), s.end());
     }
 
     // 새 부모로 설정
-    m_parent = newParent;
-    if (m_parent)
+    parent = newParent;
+    if (parent)
     {
-        m_parent->m_children.push_back(this);
+        parent->children.push_back(this);
         //UpdateWorldTransform();
     }
 
@@ -122,9 +121,9 @@ bool USceneComponent::AttachTo(USceneComponent* newParent, EAttachMode mode)
     {
     case EAttachMode::KeepWorld:        // 화면에서 안움직이게 유지하고 싶다!
     {
-        const Matrix parentWorld = (m_parent) ? m_parent->GetWorldMatrix() : Matrix();
+        const Matrix parentWorld = (parent) ? parent->GetWorldMatrix() : Matrix();
         const Matrix newLocal = parentWorld.Invert() * curWorld;
-        m_localTransform.SetWorldMatrix(newLocal);
+        localTransform.SetWorldMatrix(newLocal);
         break;
     }
     case EAttachMode::KeepRelative:     // local값은 유지하고 싶다!
@@ -135,7 +134,7 @@ bool USceneComponent::AttachTo(USceneComponent* newParent, EAttachMode mode)
     case EAttachMode::SnapToTarget:     // 부모의 위치에 따라가고 싶다!
     {
         // relativeTransform 초기화
-        m_localTransform = Transform{};
+        localTransform = Transform{};
         break;
     }
     }
@@ -147,13 +146,13 @@ bool USceneComponent::AttachTo(USceneComponent* newParent, EAttachMode mode)
 bool USceneComponent::Detach(EAttachMode mode)
 {
     UpdateWorldTransform();
-    const Matrix curWorld = m_worldTransform.GetWorldMatrix();
+    const Matrix curWorld = worldTransform.GetWorldMatrix();
 
-    if (m_parent)
+    if (parent)
     {
-        vector<USceneComponent*>& s = m_parent->m_children;
+        vector<USceneComponent*>& s = parent->children;
         s.erase(remove(s.begin(), s.end(), this), s.end());
-        m_parent = nullptr;
+        parent = nullptr;
     }
     else
     {
@@ -164,7 +163,7 @@ bool USceneComponent::Detach(EAttachMode mode)
     {
     case EAttachMode::KeepWorld:
         // 부모 없음이면 World=Local → 현재 월드를 로컬에 굳힘
-        m_localTransform.SetWorldMatrix(curWorld);
+        localTransform.SetWorldMatrix(curWorld);
         break;
 
     case EAttachMode::KeepRelative:
@@ -173,7 +172,7 @@ bool USceneComponent::Detach(EAttachMode mode)
 
     case EAttachMode::SnapToTarget:
         // 월드 원점으로 스냅하고 싶으면 Identity, 아니면 정책에 맞춰 조정
-        m_localTransform = Transform{};
+        localTransform = Transform{};
         break;
     }
 
@@ -181,46 +180,46 @@ bool USceneComponent::Detach(EAttachMode mode)
     return true;
 }
 
-Vector3 USceneComponent::GetRelativePosition()
+Vector3 USceneComponent::GetRelativePosition() const
 {
-    return m_localTransform.GetPosition();
+    return localTransform.GetPosition();
 }
 
-Vector3 USceneComponent::GetRelativeRotationEuler()
+Vector3 USceneComponent::GetRelativeRotationEuler() const
 {
-    return m_localTransform.GetRotation();
+    return localTransform.GetRotation();
 }
 
-Vector3 USceneComponent::GetRelativeScale()
+Vector3 USceneComponent::GetRelativeScale() const
 {
-    return m_localTransform.GetScale();
+    return localTransform.GetScale();
 }
 
-const std::vector<USceneComponent*>& USceneComponent::GetChildren() const
+const vector<USceneComponent*>& USceneComponent::GetChildren() const
 {
-    return m_children;
+    return children;
 }
 
 
 USceneComponent* USceneComponent::GetParent() const
 {
-    return m_parent;
+    return parent;
 }
 
-Vector3 USceneComponent::GetForwardVector()
+Vector3 USceneComponent::GetForwardVector() const
 {
-    return m_localTransform.GetForward();
+    return localTransform.GetForward();
 }
 
 USceneComponent* USceneComponent::GetRoot() const
 {
-    if (m_parent == nullptr)
+    if (parent == nullptr)
         return const_cast<USceneComponent*>(this);
-    return m_parent->GetRoot();
+    return parent->GetRoot();
 }
 
 const Matrix& USceneComponent::GetWorldMatrix()
 {
     UpdateWorldTransform();
-    return m_worldTransform.GetWorldMatrix();
+    return worldTransform.GetWorldMatrix();
 }

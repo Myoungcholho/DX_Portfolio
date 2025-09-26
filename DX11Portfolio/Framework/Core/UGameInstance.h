@@ -12,18 +12,22 @@ public:
     UGameInstance();
 
 public:
-    UWorld* GetWorld(){ return m_world.get(); }
-    URenderer* GetRenderer() { return m_renderManager->GerRenderer(); }
+    UWorld* GetWorld(){ return world.get(); }
+    URenderer* GetRenderer() { return renderManager->GetRenderer(); }
 
 public:
     void Init();
     void Tick();
     void Render();
-    void Destroy();
+    void Shotdown();
 
     void OnGUI();
 
 private:
-    unique_ptr<UWorld> m_world;
-    unique_ptr<URenderManager> m_renderManager;
+    double fixedDt = 1.0 / 60.0;
+    double fixedAcc = 0.0;
+
+private:
+    unique_ptr<UWorld> world;
+    unique_ptr<URenderManager> renderManager;
 };

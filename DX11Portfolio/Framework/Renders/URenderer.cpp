@@ -1,4 +1,4 @@
-#include "Framework.h"
+ï»¿#include "Framework.h"
 #include "URenderer.h"
 
 URenderer::URenderer()
@@ -11,13 +11,12 @@ URenderer::URenderer()
 	float width = D3D::GetDesc().Width;
 	float height = D3D::GetDesc().Height;
 
-	Viewport = std::make_unique<D3D11_VIEWPORT>();
-	Viewport->TopLeftX = 0;
-	Viewport->TopLeftY = 0;
-	Viewport->Width = width;
-	Viewport->Height = height;
-	Viewport->MinDepth = 0;
-	Viewport->MaxDepth = 1;
+	Viewport.TopLeftX = 0;
+	Viewport.TopLeftY = 0;
+	Viewport.Width = width;
+	Viewport.Height = height;
+	Viewport.MinDepth = 0;
+	Viewport.MaxDepth = 1;
 
 
 	D3D11_TEXTURE2D_DESC desc = {};
@@ -31,7 +30,7 @@ URenderer::URenderer()
 	desc.CPUAccessFlags = 0;
 	desc.MiscFlags = 0;
 
-	// MSAA ¼³Á¤
+	// MSAA ì„¤ì •
 	if (useMSAA && numQualityLevels > 0)
 	{
 		desc.SampleDesc.Count = 4;
@@ -43,31 +42,31 @@ URenderer::URenderer()
 		desc.SampleDesc.Quality = 0;
 	}
 
-	// 1. HDR¿ë Float RenderTarget
-	device->CreateTexture2D(&desc, NULL, m_floatBuffer.GetAddressOf());
-	device->CreateShaderResourceView(m_floatBuffer.Get(), NULL, m_floatSRV.GetAddressOf());
-	device->CreateRenderTargetView(m_floatBuffer.Get(), NULL, m_floatRTV.GetAddressOf());
+	// 1. HDRìš© Float RenderTarget
+	ThrowIfFailed(device->CreateTexture2D(&desc, NULL, m_floatBuffer.GetAddressOf()));
+	ThrowIfFailed(device->CreateShaderResourceView(m_floatBuffer.Get(), NULL, m_floatSRV.GetAddressOf()));
+	ThrowIfFailed(device->CreateRenderTargetView(m_floatBuffer.Get(), NULL, m_floatRTV.GetAddressOf()));
 
-	// 2. Resolve¿ë ´ÜÀÏ»ùÇÃ ÅØ½ºÃ³
+	// 2. Resolveìš© ë‹¨ì¼ìƒ˜í”Œ í…ìŠ¤ì²˜
 	desc.SampleDesc.Count = 1;
 	desc.SampleDesc.Quality = 0;
 
-	device->CreateTexture2D(&desc, NULL, m_resolvedBuffer.GetAddressOf());
-	device->CreateShaderResourceView(m_resolvedBuffer.Get(), NULL, m_resolvedSRV.GetAddressOf());
-	device->CreateRenderTargetView(m_resolvedBuffer.Get(), NULL, m_resolvedRTV.GetAddressOf());
+	ThrowIfFailed(device->CreateTexture2D(&desc, NULL, m_resolvedBuffer.GetAddressOf()));
+	ThrowIfFailed(device->CreateShaderResourceView(m_resolvedBuffer.Get(), NULL, m_resolvedSRV.GetAddressOf()));
+	ThrowIfFailed(device->CreateRenderTargetView(m_resolvedBuffer.Get(), NULL, m_resolvedRTV.GetAddressOf()));
 
-	// 3. PostEffect¿ë
-	device->CreateTexture2D(&desc, NULL, m_postEffectsBuffer.GetAddressOf());
-	device->CreateShaderResourceView(m_postEffectsBuffer.Get(), NULL, m_postEffectsSRV.GetAddressOf());
-	device->CreateRenderTargetView(m_postEffectsBuffer.Get(), NULL, m_postEffectsRTV.GetAddressOf());
+	// 3. PostEffectìš©
+	ThrowIfFailed(device->CreateTexture2D(&desc, NULL, m_postEffectsBuffer.GetAddressOf()));
+	ThrowIfFailed(device->CreateShaderResourceView(m_postEffectsBuffer.Get(), NULL, m_postEffectsSRV.GetAddressOf()));
+	ThrowIfFailed(device->CreateRenderTargetView(m_postEffectsBuffer.Get(), NULL, m_postEffectsRTV.GetAddressOf()));
 
-	// 4. Shadow¿ë
+	// 4. Shadowìš©
 	desc.Format = DXGI_FORMAT_R32_TYPELESS;
 	desc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 	desc.Width = m_shadowWidth;
 	desc.Height = m_shadowHeight;
 	for (int i = 0; i < MAX_LIGHTS; ++i)
-		device->CreateTexture2D(&desc, NULL, m_shadowBuffers[i].GetAddressOf());
+		ThrowIfFailed(device->CreateTexture2D(&desc, NULL, m_shadowBuffers[i].GetAddressOf()));
 	
 	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
 	ZeroMemory(&dsvDesc, sizeof(dsvDesc));
@@ -75,7 +74,7 @@ URenderer::URenderer()
 	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	
 	for (int i = 0; i < MAX_LIGHTS; ++i)
-		device->CreateDepthStencilView(m_shadowBuffers[i].Get(), &dsvDesc, m_shadowDSVs[i].GetAddressOf());
+		ThrowIfFailed(device->CreateDepthStencilView(m_shadowBuffers[i].Get(), &dsvDesc, m_shadowDSVs[i].GetAddressOf()));
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 	ZeroMemory(&srvDesc, sizeof(srvDesc));
@@ -84,12 +83,13 @@ URenderer::URenderer()
 	srvDesc.Texture2D.MipLevels = 1;
 
 	for (int i = 0; i < MAX_LIGHTS; ++i)
-		device->CreateShaderResourceView(m_shadowBuffers[i].Get(), &srvDesc, m_shadowSRVs[i].GetAddressOf());
+		ThrowIfFailed(device->CreateShaderResourceView(m_shadowBuffers[i].Get(), &srvDesc, m_shadowSRVs[i].GetAddressOf()));
 }
 
 URenderer::~URenderer()
 {
-	if (m_resizeHandle.IsValid()) {
+	if (m_resizeHandle.IsValid()) 
+	{
 		D3D::Get()->OnReSizeDelegate.Remove(m_resizeHandle);
 		m_resizeHandle = FDelegateHandle{};
 	}
@@ -100,10 +100,10 @@ void URenderer::Init()
 	D3D11Utils::CreateConstBuffer(device, m_globalConstsCPU, m_globalConstsGPU);
 	D3D11Utils::CreateConstBuffer(device, m_reflectGlobalConstsCPU, m_reflectGlobalConstsGPU);
 	D3D11Utils::CreateConstBuffer(device, m_postEffectsConstsCPU, m_postEffectsConstsGPU);
-	for (int i = 0; i < MAX_LIGHTS; i++) {
+	for (int i = 0; i < MAX_LIGHTS; i++) 
+	{
 		D3D11Utils::CreateConstBuffer(device, m_shadowGlobalConstsCPU[i], m_shadowGlobalConstsGPU[i]);
 	}
-
 
 	D3D11Utils::CreateDDSTexture(device, EnvHDR_Name.c_str(),true, m_envSRV);
 	D3D11Utils::CreateDDSTexture(device, Specular_Name.c_str(), true, m_specularSRV);
@@ -125,15 +125,17 @@ void URenderer::Init()
 	m_resizeHandle = D3D::Get()->OnReSizeDelegate.AddDynamic(this, &URenderer::OnResize, "URenderer::OnResize");
 }
 
-//RenderLoop¿¡¼­ È£Ãâ
+//RenderLoopì—ì„œ í˜¸ì¶œ, cbufferë¡œ ë³´ë‚¼ ë°ì´í„° ìˆ˜ì§‘
 void URenderer::UpdateGlobalLights(const vector<LightData>& lights)
 {
-	for (int i = 0; i < lights.size(); ++i)
-	{
-		if (i >= MAX_LIGHTS)
-			break;
+	const size_t n = min(lights.size(), size_t(MAX_LIGHTS));
+
+	for (size_t i = 0; i < n; ++i) 
 		m_globalConstsCPU.lights[i] = lights[i];
-	}
+
+	// ì”ì—¬ ì‚­ì œ
+	for (size_t i = n; i < MAX_LIGHTS; ++i) 
+		m_globalConstsCPU.lights[i] = {};
 }
 
 void URenderer::UpdateGlobalConstants(const Vector3& eyeWorld, const Matrix& viewRow, const Matrix& projRow, const Matrix& refl)
@@ -153,42 +155,41 @@ void URenderer::UpdateGlobalConstants(const Vector3& eyeWorld, const Matrix& vie
 	D3D11Utils::UpdateBuffer(device, context, m_reflectGlobalConstsCPU, m_reflectGlobalConstsGPU);
 }
 
-
-void URenderer::SetGlobalConsts(ComPtr<ID3D11Buffer>& globalConstsGPU)
+void URenderer::SetGlobalConsts(ID3D11Buffer* globalConstsGPU)
 {
-	context->VSSetConstantBuffers(1, 1, globalConstsGPU.GetAddressOf());
-	context->PSSetConstantBuffers(1, 1, globalConstsGPU.GetAddressOf());
-	context->GSSetConstantBuffers(1, 1, globalConstsGPU.GetAddressOf());
+	context->VSSetConstantBuffers(1, 1, &globalConstsGPU);
+	context->PSSetConstantBuffers(1, 1, &globalConstsGPU);
+	context->GSSetConstantBuffers(1, 1, &globalConstsGPU);
 }
 
 void URenderer::RenderFrame(const URenderQueue& queue)
 {
-	BindCommonResources();					// Viewport, Sampler, °øÅë »ó¼ö ¹ÙÀÎµù
+	BindCommonResources();					// Viewport, Sampler, ê³µí†µ ìƒìˆ˜ ë°”ì¸ë”©
 
-	RenderDepthOnly(queue);					// ¾È°³Ã³¸®¿ë DepthMap ±¸¼º
-	RenderShadowMap(queue);					// ±×¸²ÀÚ¿ë ShadowMap ±¸¼º
+	RenderDepthOnly(queue);					// ì•ˆê°œì²˜ë¦¬ìš© DepthMap êµ¬ì„±
+	RenderShadowMap(queue);					// ê·¸ë¦¼ììš© ShadowMap êµ¬ì„±
 
-	BeginFrame();							// MainPASS) OM ¹ÙÀÎµù
+	BeginFrame();							// MainPASS) OM ë°”ì¸ë”©
 
-	RenderSkyBox(queue);					// MainPASS) ¹°Ã¼·»´õ¸µ
-	RenderOpaque(queue);					// MainPASS) ¹°Ã¼·»´õ¸µ
-	RenderNormal(queue);					// MainPASS) ¹°Ã¼·»´õ¸µ
+	RenderSkyBox(queue);					// MainPASS) ë¬¼ì²´ë Œë”ë§
+	RenderOpaque(queue);					// MainPASS) ë¬¼ì²´ë Œë”ë§
+	RenderNormal(queue);					// MainPASS) ë¬¼ì²´ë Œë”ë§
+	RenderSkinned(queue);					// MainPASS) ë¬¼ì²´ë Œë”ë§
 
-
-	EndFrame();								// ÇöÀç ÀÛ¾÷ X
+	EndFrame();								// í˜„ì¬ ì‘ì—… X
 }
 
 
 void URenderer::BindCommonResources()
 {
-	// Viewport¼³Á¤
-	D3D::Get()->GetDeviceContext()->RSSetViewports(1, Viewport.get());
+	// Viewportì„¤ì •
+	D3D::Get()->GetDeviceContext()->RSSetViewports(1, &Viewport);
 
-	// ¸ğµç »ùÇÃ·¯¸¦ °øÅëÀ¸·Î »ç¿ë
+	// ëª¨ë“  ìƒ˜í”ŒëŸ¬ë¥¼ ê³µí†µìœ¼ë¡œ ì‚¬ìš©
 	context->VSSetSamplers(0, UINT(Graphics::sampleStates.size()), Graphics::sampleStates.data());
 	context->PSSetSamplers(0, UINT(Graphics::sampleStates.size()), Graphics::sampleStates.data());
 
-	// °øÅë ÅØ½ºÃ³ »ó¼ö¹öÆÛ·Î Push
+	// ê³µí†µ í…ìŠ¤ì²˜ ìƒìˆ˜ë²„í¼ë¡œ Push
 	vector<ID3D11ShaderResourceView*> commonSRVs =
 	{
 		m_envSRV.Get(),
@@ -200,11 +201,14 @@ void URenderer::BindCommonResources()
 }
 
 /// <summary>
-/// ±íÀÌ ¸Ê »ı¼º [¾È°³]
+/// ê¹Šì´ ë§µ ìƒì„± [ì•ˆê°œ]
 /// </summary>
 void URenderer::RenderDepthOnly(const URenderQueue& queue)
 {
-	SetGlobalConsts(m_globalConstsGPU);
+	SetGlobalConsts(m_globalConstsGPU.Get());
+
+	// Harzard ë°©ì§€ PSì—ì„œ ì–¸ë°”ì¸ë”©
+	D3D11Utils::UnbindIfBoundPS(context.Get(), D3D::Get()->GetDepthOnly_SRV().Get());
 
 	context->OMSetRenderTargets(0, NULL ,D3D::Get()->GetDepthOnly_DSV().Get());
 	context->ClearDepthStencilView(D3D::Get()->GetDepthOnly_DSV().Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
@@ -222,18 +226,26 @@ void URenderer::RenderDepthOnly(const URenderQueue& queue)
 		comp->UpdateConstantBuffers(device, context);
 		comp->Draw(context.Get());
 	}
+
+	for (auto* comp : queue.GetSkinnedList())
+	{
+		comp->UpdateConstantBuffers(device, context);
+		comp->Draw(context.Get());
+	}
 }
 
 /// <summary>
-/// ±×¸²ÀÚ ¸Ê »ı¼º
+/// ê·¸ë¦¼ì ë§µ ìƒì„±
 /// </summary>
 void URenderer::RenderShadowMap(const URenderQueue& queue)
 {
-	SetShadowViewport();													// ±×¸²ÀÚ¿ë viewport º¯°æ
+	SetShadowViewport();													// ê·¸ë¦¼ììš© viewport ë³€ê²½
 
-	BuildShadowGlobalConsts();
+	BuildShadowGlobalConsts();												// Lightìš© view proj ë°ì´í„° ì €ì¥
 
 	Graphics::depthOnlyPSO.Apply(context.Get());
+
+	D3D11Utils::UnbindPSRange(context.Get(), 15, MAX_LIGHTS);
 
 	for (int i = 0; i < MAX_LIGHTS; i++)
 	{
@@ -242,11 +254,11 @@ void URenderer::RenderShadowMap(const URenderQueue& queue)
 			context->OMSetRenderTargets(0, NULL, m_shadowDSVs[i].Get());
 			context->ClearDepthStencilView(m_shadowDSVs[i].Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-			SetGlobalConsts(m_shadowGlobalConstsGPU[i]);
+			SetGlobalConsts(m_shadowGlobalConstsGPU[i].Get());
 			
 			for (URenderProxy* comp : queue.GetOpaqueList())
 			{
-				if (comp->bVisible && comp->m_castShadow)
+				if (comp->bVisible && comp->castShadow)
 				{
 					comp->UpdateConstantBuffers(device, context);
 					comp->Draw(context.Get());
@@ -258,15 +270,21 @@ void URenderer::RenderShadowMap(const URenderQueue& queue)
 				comp->UpdateConstantBuffers(device, context);
 				comp->Draw(context.Get());
 			}
+
+			for (auto* comp : queue.GetSkinnedList())
+			{
+				comp->UpdateConstantBuffers(device, context);
+				comp->Draw(context.Get());
+			}
 		}
 	}
 
-	D3D::Get()->GetDeviceContext()->RSSetViewports(1, Viewport.get());		// viewport º¹±¸
+	D3D::Get()->GetDeviceContext()->RSSetViewports(1, &Viewport);		// viewport ë³µêµ¬
 }
 
 void URenderer::BeginFrame()
 {
-	// ¸ŞÀÎ ·»´õ¸µ ¼ÂÆÃ
+	// ë©”ì¸ ë Œë”ë§ ì…‹íŒ…
 	const float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 	vector<ID3D11RenderTargetView*> rtvs = { m_floatRTV.Get() };
 
@@ -275,16 +293,20 @@ void URenderer::BeginFrame()
 		context->ClearRenderTargetView(rtvs[i], clearColor);
 	}
 
+	D3D11Utils::UnbindIfBoundPS(context.Get(), m_floatSRV.Get());
+
 	context->OMSetRenderTargets(UINT(rtvs.size()), rtvs.data(), D3D::Get()->GetDepthStencilView().Get());
 	context->ClearDepthStencilView(D3D::Get()->GetDepthStencilView().Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	
-	// ShadowMap Àü´Ş
+	// ShadowMap ì „ë‹¬
 	vector<ID3D11ShaderResourceView*> shadowSRVs;
+
 	for (int i = 0; i < MAX_LIGHTS; ++i)
 		shadowSRVs.push_back(m_shadowSRVs[i].Get());
+
 	context->PSSetShaderResources(15, UINT(shadowSRVs.size()), shadowSRVs.data());
 
-	SetGlobalConsts(m_globalConstsGPU);
+	SetGlobalConsts(m_globalConstsGPU.Get());
 }
 
 void URenderer::RenderSkyBox(const URenderQueue& queue)
@@ -309,12 +331,23 @@ void URenderer::RenderOpaque(const URenderQueue& queue)
 	}
 }
 
+void URenderer::RenderSkinned(const URenderQueue& queue)
+{
+	bWireRender ? Graphics::skinnedWirePSO.Apply(context.Get()) : Graphics::skinnedSolidPSO.Apply(context.Get());
+
+	for (auto* comp : queue.GetSkinnedList())
+	{
+		comp->UpdateConstantBuffers(device, context);
+		comp->Draw(context.Get());
+	}
+}
+
 void URenderer::RenderNormal(const URenderQueue& queue)
 {
 	Graphics::normalsPSO.Apply(context.Get());
 	for (auto* comp : queue.GetOpaqueList())
 	{
-		if (comp->m_drawNormal)
+		if (comp->drawNormal)
 			comp->DrawNormal(context.Get());
 	}
 
@@ -335,18 +368,22 @@ void URenderer::OnResize()
 	numQualityLevels = D3D::Get()->m_numQualityLevels;
 	useMSAA = D3D::Get()->m_useMSAA;
 
-	// width, height º¯°æµÈ°Å Àç¼³Á¤ÇÏ°í
-	// QualityLevels°¡ 1ÀÌ»óÀÌ¶ó¸é Count´Â 4·Î °íÁ¤»ç¿ëÁß
-	Viewport->TopLeftX = 0; Viewport->TopLeftY = 0;
-	Viewport->Width = float(D3D::Get()->GetDesc().Width);
-	Viewport->Height = float(D3D::Get()->GetDesc().Height);
-	Viewport->MinDepth = 0.0f; Viewport->MaxDepth = 1.0f;
-	context->RSSetViewports(1, Viewport.get());
+	// width, height ë³€ê²½ëœê±° ì¬ì„¤ì •í•˜ê³ 
+	// QualityLevelsê°€ 1ì´ìƒì´ë¼ë©´ CountëŠ” 4ë¡œ ê³ ì •ì‚¬ìš©ì¤‘
+	Viewport.TopLeftX = 0; Viewport.TopLeftY = 0;
+	Viewport.Width = float(D3D::Get()->GetDesc().Width);
+	Viewport.Height = float(D3D::Get()->GetDesc().Height);
+	Viewport.MinDepth = 0.0f; Viewport.MaxDepth = 1.0f;
+	context->RSSetViewports(1, &Viewport);
+
+	// Harzard ì˜ˆë°©
+	D3D11Utils::UnbindPSRange(context.Get(), 0, 32);
+	context->OMSetRenderTargets(0, nullptr, nullptr);
 
 	m_floatSRV.Reset();   m_floatRTV.Reset();   m_floatBuffer.Reset();
 	m_resolvedSRV.Reset(); m_resolvedRTV.Reset(); m_resolvedBuffer.Reset();
 	m_postEffectsSRV.Reset(); m_postEffectsRTV.Reset(); m_postEffectsBuffer.Reset();
-	// postprocess resize È£Ãâ
+	
 
 	D3D11_TEXTURE2D_DESC desc = {};
 	desc.Width = D3D::Get()->GetDesc().Width; desc.Height = D3D::Get()->GetDesc().Height;
@@ -356,7 +393,7 @@ void URenderer::OnResize()
 	desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 	desc.CPUAccessFlags = 0;
 	desc.MiscFlags = 0;
-	// MSAA ¼³Á¤
+	// MSAA ì„¤ì •
 	if (useMSAA && numQualityLevels > 0)
 	{
 		desc.SampleDesc.Count = 4;
@@ -368,24 +405,24 @@ void URenderer::OnResize()
 		desc.SampleDesc.Quality = 0;
 	}
 
-	// 1. HDR Àç»ı¼º
-	device->CreateTexture2D(&desc, nullptr, m_floatBuffer.GetAddressOf());
-	device->CreateRenderTargetView(m_floatBuffer.Get(), nullptr, m_floatRTV.GetAddressOf());
-	device->CreateShaderResourceView(m_floatBuffer.Get(), nullptr, m_floatSRV.GetAddressOf());
+	// 1. HDR ì¬ìƒì„±
+	ThrowIfFailed(device->CreateTexture2D(&desc, nullptr, m_floatBuffer.GetAddressOf()));
+	ThrowIfFailed(device->CreateRenderTargetView(m_floatBuffer.Get(), nullptr, m_floatRTV.GetAddressOf()));
+	ThrowIfFailed(device->CreateShaderResourceView(m_floatBuffer.Get(), nullptr, m_floatSRV.GetAddressOf()));
 
-	// 2. ¸®Á¹ºê¿ë
+	// 2. ë¦¬ì¡¸ë¸Œìš©
 	desc.SampleDesc.Count = 1;
 	desc.SampleDesc.Quality = 0;
-	device->CreateTexture2D(&desc, nullptr, m_resolvedBuffer.GetAddressOf());
-	device->CreateRenderTargetView(m_resolvedBuffer.Get(), nullptr, m_resolvedRTV.GetAddressOf());
-	device->CreateShaderResourceView(m_resolvedBuffer.Get(), nullptr, m_resolvedSRV.GetAddressOf());
+	ThrowIfFailed(device->CreateTexture2D(&desc, nullptr, m_resolvedBuffer.GetAddressOf()));
+	ThrowIfFailed(device->CreateRenderTargetView(m_resolvedBuffer.Get(), nullptr, m_resolvedRTV.GetAddressOf()));
+	ThrowIfFailed(device->CreateShaderResourceView(m_resolvedBuffer.Get(), nullptr, m_resolvedSRV.GetAddressOf()));
 
-	// 3. posteffects¿ë
-	device->CreateTexture2D(&desc, nullptr, m_postEffectsBuffer.GetAddressOf());
-	device->CreateRenderTargetView(m_postEffectsBuffer.Get(), nullptr, m_postEffectsRTV.GetAddressOf());
-	device->CreateShaderResourceView(m_postEffectsBuffer.Get(), nullptr, m_postEffectsSRV.GetAddressOf());
+	// 3. posteffectsìš©
+	ThrowIfFailed(device->CreateTexture2D(&desc, nullptr, m_postEffectsBuffer.GetAddressOf()));
+	ThrowIfFailed(device->CreateRenderTargetView(m_postEffectsBuffer.Get(), nullptr, m_postEffectsRTV.GetAddressOf()));
+	ThrowIfFailed(device->CreateShaderResourceView(m_postEffectsBuffer.Get(), nullptr, m_postEffectsSRV.GetAddressOf()));
 
-	// Æ÷½ºÆ®ÇÁ·Î¼¼½º Àç¼³Á¤
+	// í¬ìŠ¤íŠ¸í”„ë¡œì„¸ìŠ¤ ì¬ì„¤ì •
 	m_postProcess.OnResize
 	(device, context,
 		{ m_postEffectsSRV }, { D3D::Get()->GetFinalLDR_RTV() },
@@ -410,7 +447,7 @@ void URenderer::SetShadowViewport()
 }
 
 /// <summary>
-/// LightDataµé·Î LightÀÇ View, Projµ¥ÀÌÅÍ ¸¸µé¾î ÀúÀå
+/// LightDataë“¤ë¡œ Lightì˜ View, Projë°ì´í„° ë§Œë“¤ì–´ ì €ì¥
 /// </summary>
 void URenderer::BuildShadowGlobalConsts()
 {
@@ -449,23 +486,26 @@ void URenderer::RenderPostProcess()
 {
 	const float clearColor[4] = { 0, 0, 0, 1 };
 
-	// Clear ¹é¹öÆÛ (¾È ÇÏ¸é °ãÄ§ »ı±æ ¼ö ÀÖÀ½)
+	// Clear ë°±ë²„í¼ (ì•ˆ í•˜ë©´ ê²¹ì¹¨ ìƒê¸¸ ìˆ˜ ìˆìŒ)
 	context->ClearRenderTargetView(D3D::Get()->GetBackBufferRTV().Get(), clearColor);
+
+	// Harzardë°©ì§€, Resolveì „ SRVê°€ ë°”ì¸ë”© ë˜ì–´ìˆë‹¤ë©´ í•´ì œ
+	D3D11Utils::UnbindIfBoundPS(context.Get(), m_resolvedSRV.Get());
 
 	context->ResolveSubresource
 	(
-		m_resolvedBuffer.Get(),				 // ´ë»ó (½Ì±Û»ùÇÃ ÅØ½ºÃ³)
-		0,									 // ´ë»ó ¼­ºê¸®¼Ò½º index
-		m_floatBuffer.Get(),				 // ¼Ò½º (MSAA ÅØ½ºÃ³)
-		0,									 // ¼Ò½º ¼­ºê¸®¼Ò½º index
-		DXGI_FORMAT_R16G16B16A16_FLOAT		 // Æ÷¸Ë ÀÏÄ¡ÇØ¾ß ÇÔ
+		m_resolvedBuffer.Get(),				 // ëŒ€ìƒ (ì‹±ê¸€ìƒ˜í”Œ í…ìŠ¤ì²˜)
+		0,									 // ëŒ€ìƒ ì„œë¸Œë¦¬ì†ŒìŠ¤ index
+		m_floatBuffer.Get(),				 // ì†ŒìŠ¤ (MSAA í…ìŠ¤ì²˜)
+		0,									 // ì†ŒìŠ¤ ì„œë¸Œë¦¬ì†ŒìŠ¤ index
+		DXGI_FORMAT_R16G16B16A16_FLOAT		 // í¬ë§· ì¼ì¹˜í•´ì•¼ í•¨
 	);
 
 	// PostEffects
 	Graphics::postEffectsPSO.Apply(context.Get());
 	D3D11Utils::UpdateBuffer(device,context, m_postEffectsConstsCPU, m_postEffectsConstsGPU);
 
-	// ----------------±×¸²ÀÚ¸Ê È®ÀÎ¿ë------------------------
+	// ----------------ê·¸ë¦¼ì ë§µ í™•ì¸------------------------
 	//SetGlobalConsts(m_shadowGlobalConstsGPU[0]);
 	//vector<ID3D11ShaderResourceView*> postEffectsSRVs = 
 	//{
@@ -477,6 +517,9 @@ void URenderer::RenderPostProcess()
 	//m_postEffects.Render(context);
 
 	// -------------------------------------------------------
+		
+	D3D11Utils::UnbindPSRange(context.Get(), 20, 8);
+	D3D11Utils::UnbindIfBoundPS(context.Get(), m_postEffectsSRV.Get());
 
 	vector<ID3D11ShaderResourceView*> postEffectsSRVs =
 	{

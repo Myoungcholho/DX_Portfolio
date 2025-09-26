@@ -4,6 +4,7 @@ class AStaticMeshActor : public AActor
 {
 public:
 	AStaticMeshActor();
+	AStaticMeshActor(const vector<PBRMeshData>& InData);
 
 public:
 	void Initialize() override;

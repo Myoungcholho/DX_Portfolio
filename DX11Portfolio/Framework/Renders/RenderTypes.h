@@ -9,6 +9,7 @@ enum은 강제 암시적 int 캐스팅이지만 enum class는 그렇지 않다.
 enum class ERenderPass
 {
     Opaque,
+    Skinned,
     Transparent,
     Skybox,
     Shadow,

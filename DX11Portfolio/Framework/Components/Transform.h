@@ -22,15 +22,15 @@ public:
 
 public:
 	// Position
-	const Vector3& GetPosition() { return Position; }
+	const Vector3& GetPosition() const { return Position; }
 	void SetPosition(const Vector3& InValue);
 
 	// Scale
-	const Vector3& GetScale() { return Scale; }
+	const Vector3& GetScale() const { return Scale; }
 	void SetScale(const Vector3& InValue);
 
 	// Rotation
-	Vector3 GetRotation() { return RotationEuler; }
+	Vector3 GetRotation() const { return RotationEuler; }
 	void SetRotation(const Vector3& InValue);
 	void SetRotation(const Quaternion& quat);
 

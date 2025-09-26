@@ -1,5 +1,6 @@
 #pragma once
 
+#define NOMINMAX
 #include <Windows.h>
 #include <assert.h>
 
@@ -126,6 +127,7 @@ using Microsoft::WRL::ComPtr;
 #include "Components/URenderProxy.h"
 #include "Components/UStaticMeshRenderProxy.h"
 #include "Components/USkyboxRenderProxy.h"
+#include "Components/USkinnedMeshRenderProxy.h"
 
 // Component
 #include "Components/UObject.h"
@@ -135,10 +137,11 @@ using Microsoft::WRL::ComPtr;
 #include "Components/UPrimitiveComponent.h"
 #include "Renders/URenderQueue.h"
 #include "Components/UStaticMeshComponent.h"
+#include "Components/USkinnedMeshComponent.h"
 #include "Components/ULightComponent.h"
 #include "Components/UWorld.h"
 #include "Components/USkyboxComponent.h"
-
+#include "Components/USkeletalMeshComponent.h"
 
 //#include "Renders/URenderer.h"
 #include "Core/URenderManager.h"

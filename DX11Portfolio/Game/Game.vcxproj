@@ -137,6 +137,7 @@
   <ItemGroup>
     <ClInclude Include="Actors\ALight.h" />
     <ClInclude Include="Actors\APlayer.h" />
+    <ClInclude Include="Actors\ASkinnedTestActor.h" />
     <ClInclude Include="Actors\ASkyboxActor.h" />
     <ClInclude Include="Actors\AStaticMeshActor.h" />
     <ClInclude Include="Environment\BillboardSystem.h" />
@@ -149,6 +150,7 @@
   <ItemGroup>
     <ClCompile Include="Actors\ALight.cpp" />
     <ClCompile Include="Actors\APlayer.cpp" />
+    <ClCompile Include="Actors\ASkinnedTestActor.cpp" />
     <ClCompile Include="Actors\ASkyboxActor.cpp" />
     <ClCompile Include="Actors\AStaticMeshActor.cpp" />
     <ClCompile Include="Environment\BillboardSystem.cpp" />

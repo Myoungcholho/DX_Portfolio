@@ -9,14 +9,6 @@ WindowDesc Window::Desc = {};
 // 실제 게임 Loop
 WPARAM Window::Run(UGameInstance* game)
 {
-	EditorApplication::SetWorld(game->GetWorld());
-	EditorApplication::SetRenderer(game->GetRenderer());
-	EditorApplication::Initialize();
-
-	CKeyboard::Create();
-	CTimer::Create();
-	CMouse::Create();
-	CContext::Create();
 	Engine::Create();
 
 	MSG msg;
@@ -38,15 +30,11 @@ WPARAM Window::Run(UGameInstance* game)
 		}
 	}
 
-	game->Destroy();
+	// 액터 정리
+	game->Shotdown();
 
 	Engine::Destory();
-	CContext::Destroy();
-	CMouse::Destroy();
-	CTimer::Destroy();
-	CKeyboard::Destroy();
 
-	EditorApplication::Release();
 	return msg.wParam;
 }
 

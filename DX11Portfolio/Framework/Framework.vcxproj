@@ -160,11 +160,15 @@ copy /Y "$(SolutionDir)Debug\$(ProjectName).pdb" "$(SolutionDir)EntryPoint\"</Co
     <ClInclude Include="Components\AActor.h" />
     <ClInclude Include="Components\Transform.h" />
     <ClInclude Include="Components\UActorComponent.h" />
+    <ClInclude Include="Components\UAnimInstance.h" />
     <ClInclude Include="Components\ULightComponent.h" />
     <ClInclude Include="Components\UObject.h" />
     <ClInclude Include="Components\UPrimitiveComponent.h" />
     <ClInclude Include="Components\URenderProxy.h" />
     <ClInclude Include="Components\USceneComponent.h" />
+    <ClInclude Include="Components\USkeletalMeshComponent.h" />
+    <ClInclude Include="Components\USkinnedMeshComponent.h" />
+    <ClInclude Include="Components\USkinnedMeshRenderProxy.h" />
     <ClInclude Include="Components\USkyboxComponent.h" />
     <ClInclude Include="Components\USkyboxRenderProxy.h" />
     <ClInclude Include="Components\UStaticMeshComponent.h" />
@@ -235,6 +239,7 @@ copy /Y "$(SolutionDir)Debug\$(ProjectName).pdb" "$(SolutionDir)EntryPoint\"</Co
     <ClInclude Include="Utilities\Path.h" />
     <ClInclude Include="Utilities\Profiler.h" />
     <ClInclude Include="Utilities\String.h" />
+    <ClInclude Include="Utilities\StructuredBuffer.h" />
     <ClInclude Include="Viewer\Camera.h" />
   </ItemGroup>
   <ItemGroup>
@@ -243,10 +248,14 @@ copy /Y "$(SolutionDir)Debug\$(ProjectName).pdb" "$(SolutionDir)EntryPoint\"</Co
     <ClCompile Include="Components\AActor.cpp" />
     <ClCompile Include="Components\Transform.cpp" />
     <ClCompile Include="Components\UActorComponent.cpp" />
+    <ClCompile Include="Components\UAnimInstance.cpp" />
     <ClCompile Include="Components\ULightComponent.cpp" />
     <ClCompile Include="Components\UPrimitiveComponent.cpp" />
     <ClCompile Include="Components\URenderProxy.cpp" />
     <ClCompile Include="Components\USceneComponent.cpp" />
+    <ClCompile Include="Components\USkeletalMeshComponent.cpp" />
+    <ClCompile Include="Components\USkinnedMeshComponent.cpp" />
+    <ClCompile Include="Components\USkinnedMeshRenderProxy.cpp" />
     <ClCompile Include="Components\USkyboxComponent.cpp" />
     <ClCompile Include="Components\USkyboxRenderProxy.cpp" />
     <ClCompile Include="Components\UStaticMeshComponent.cpp" />

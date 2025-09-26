@@ -126,9 +126,11 @@ void WorldOutlinerWindow::DrawActorFlat(AActor* a)
 
 	bool selected = (EditorSelection::GetActor() == a);													// 현재 선택 상태 여부
 
+	ImGui::PushID(a);
 	if (ImGui::Selectable(name.c_str(), selected)) {												// 한 줄짜리 선택 항목으로 클릭 시 true
 		EditorSelection::SetActor(a);																	// 이 액터를 현재 선택으로 설정
 	}
+	ImGui::PopID();
 
 	if (ImGui::BeginPopupContextItem()) 
 	{

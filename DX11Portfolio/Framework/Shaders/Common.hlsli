@@ -64,12 +64,23 @@ cbuffer GlobalConstants : register(b1)
     Light lights[MAX_LIGHTS];
 };
 
+#ifdef SKINNED
+StructuredBuffer<float4x4> boneTransforms : register(t9);
+#endif
+
 struct VertexShaderInput
 {
     float3 posModel : POSITION; //¸ðµ¨ ÁÂÇ¥°èÀÇ À§Ä¡ position
     float3 normalModel : NORMAL0; // ¸ðµ¨ ÁÂÇ¥°èÀÇ normal    
     float2 texcoord : TEXCOORD0;
     float3 tangentModel : TANGENT0;
+    
+#ifdef SKINNED
+    float4 boneWeights0 : BLENDWEIGHT0;
+    float4 boneWeights1 : BLENDWEIGHT1;
+    uint4 boneIndices0 : BLENDINDICES0;
+    uint4 boneIndices1 : BLENDINDICES1;
+#endif
 };
 
 struct PixelShaderInput

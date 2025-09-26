@@ -161,15 +161,6 @@
     <ClInclude Include="Utilities\Profiler.h">
       <Filter>Utilities</Filter>
     </ClInclude>
-    <ClInclude Include="Components\URenderProxy.h">
-      <Filter>Components</Filter>
-    </ClInclude>
-    <ClInclude Include="Components\UStaticMeshRenderProxy.h">
-      <Filter>Components</Filter>
-    </ClInclude>
-    <ClInclude Include="Components\USkyboxRenderProxy.h">
-      <Filter>Components</Filter>
-    </ClInclude>
     <ClInclude Include="ImGUI\imconfig.h">
       <Filter>ImGUI</Filter>
     </ClInclude>
@@ -250,6 +241,30 @@
     </ClInclude>
     <ClInclude Include="Animations\AnimationClip.h">
       <Filter>Animations</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\StructuredBuffer.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\USkinnedMeshComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\UStaticMeshRenderProxy.h">
+      <Filter>Components\Proxy</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\USkyboxRenderProxy.h">
+      <Filter>Components\Proxy</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\URenderProxy.h">
+      <Filter>Components\Proxy</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\USkinnedMeshRenderProxy.h">
+      <Filter>Components\Proxy</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\UAnimInstance.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\USkeletalMeshComponent.h">
+      <Filter>Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -380,15 +395,6 @@
     <ClCompile Include="Utilities\profiler.cpp">
       <Filter>Utilities</Filter>
     </ClCompile>
-    <ClCompile Include="Components\URenderProxy.cpp">
-      <Filter>Components</Filter>
-    </ClCompile>
-    <ClCompile Include="Components\UStaticMeshRenderProxy.cpp">
-      <Filter>Components</Filter>
-    </ClCompile>
-    <ClCompile Include="Components\USkyboxRenderProxy.cpp">
-      <Filter>Components</Filter>
-    </ClCompile>
     <ClCompile Include="ImGUI\imgui.cpp">
       <Filter>ImGUI</Filter>
     </ClCompile>
@@ -461,6 +467,27 @@
     <ClCompile Include="MathHelper.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Components\USkinnedMeshComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\UStaticMeshRenderProxy.cpp">
+      <Filter>Components\Proxy</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\USkyboxRenderProxy.cpp">
+      <Filter>Components\Proxy</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\URenderProxy.cpp">
+      <Filter>Components\Proxy</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\USkinnedMeshRenderProxy.cpp">
+      <Filter>Components\Proxy</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\UAnimInstance.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\USkeletalMeshComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="System">
@@ -528,6 +555,9 @@
     </Filter>
     <Filter Include="Animations">
       <UniqueIdentifier>{3ed78196-691f-4791-bb3e-86f7168e6008}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components\Proxy">
+      <UniqueIdentifier>{4b5f7c61-5d31-4350-9b31-3db4ff4e87bc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

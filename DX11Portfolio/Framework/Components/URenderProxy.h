@@ -12,32 +12,33 @@ public:
 
 	ERenderPass renderPass = ERenderPass::Opaque;
 	bool bVisible = true;
-	bool m_drawNormal = false;
-	bool m_castShadow = true;
+	bool drawNormal = false;
+	bool castShadow = true;
 
 public:
-	void SetDrawNormal(bool drawNormal) { m_drawNormal = drawNormal; }
+	void SetDrawNormal(bool drawNormal) { drawNormal = drawNormal; }
 
 public:
 	virtual void Init(const vector<PBRMeshData>& meshData) { }
-	void SetMeshConstants(const WorldInvConstantBuffer& data) { m_meshConstsCPU = data; }
-	void SetMaterialConstants(const MaterialConstants& data) { m_materialConstsCPU = data; }
+	//virtual void Init(const vector<PBRMeshData>& meshData, const AnimationData& aniData) {}
+	void SetMeshConstants(const WorldInvConstantBuffer& data) { meshConstsCPU = data; }
+	void SetMaterialConstants(const MaterialConstants& data) { materialConstsCPU = data; }
 	virtual void UpdateConstantBuffers(				// Primitive는 World, InVTransfom만 관리
 		ComPtr<ID3D11Device>& device,
 		ComPtr<ID3D11DeviceContext>& context) {}
 
-	MaterialConstants GetMaterialConstants() { return m_materialConstsCPU; }
+	MaterialConstants GetMaterialConstants() const { return materialConstsCPU; }
 
 protected:
-	vector<shared_ptr<Mesh>> m_meshes;				// 그릴 Mesh GPU 정보
+	vector<shared_ptr<Mesh>> meshes;				// 그릴 Mesh GPU 정보
 
 protected:
-	WorldInvConstantBuffer m_meshConstsCPU;
-	MaterialConstants m_materialConstsCPU;
+	WorldInvConstantBuffer meshConstsCPU;
+	MaterialConstants materialConstsCPU;
 
 protected:
-	ComPtr<ID3D11Buffer> m_meshConstsGPU;
-	ComPtr<ID3D11Buffer> m_materialConstsGPU;
+	ComPtr<ID3D11Buffer> meshConstsGPU;
+	ComPtr<ID3D11Buffer> materialConstsGPU;
 
 protected:
 	ComPtr<ID3D11Device> device;

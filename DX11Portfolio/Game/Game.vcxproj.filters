@@ -29,6 +29,9 @@
     <ClInclude Include="ObjectCollection.h">
       <Filter>Actors</Filter>
     </ClInclude>
+    <ClInclude Include="Actors\ASkinnedTestActor.h">
+      <Filter>Actors</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Pch.cpp" />
@@ -57,6 +60,9 @@
       <Filter>Actors</Filter>
     </ClCompile>
     <ClCompile Include="ObjectCollection.cpp">
+      <Filter>Actors</Filter>
+    </ClCompile>
+    <ClCompile Include="Actors\ASkinnedTestActor.cpp">
       <Filter>Actors</Filter>
     </ClCompile>
   </ItemGroup>

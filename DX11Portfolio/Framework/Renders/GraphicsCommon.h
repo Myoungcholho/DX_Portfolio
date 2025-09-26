@@ -23,10 +23,12 @@ namespace Graphics
 
 	// Shaders
 	extern ComPtr<ID3D11VertexShader> basicVS;
+	extern ComPtr<ID3D11VertexShader> skinnedVS;
 	extern ComPtr<ID3D11VertexShader> skyboxVS;
 	extern ComPtr<ID3D11VertexShader> samplingVS;
 	extern ComPtr<ID3D11VertexShader> normalVS;
 	extern ComPtr<ID3D11VertexShader> depthOnlyVS;
+	extern ComPtr<ID3D11VertexShader> depthOnlySkinnedVS;
 
 	extern ComPtr<ID3D11PixelShader> basicPS;
 	extern ComPtr<ID3D11PixelShader> skyboxPS;
@@ -42,6 +44,7 @@ namespace Graphics
 
 	// Input Layouts
 	extern ComPtr<ID3D11InputLayout> basicIL;
+	extern ComPtr<ID3D11InputLayout> skinnedIL;
 	extern ComPtr<ID3D11InputLayout> samplingIL;
 	extern ComPtr<ID3D11InputLayout> skyboxIL;
 	extern ComPtr<ID3D11InputLayout> postProcessingIL;
@@ -51,10 +54,14 @@ namespace Graphics
 
 	// Graphics Pipeline States
 	extern GraphicsPSO defaultSolidPSO;
+	extern GraphicsPSO skinnedSolidPSO;					// 애니메이션
 	extern GraphicsPSO defaultWirePSO;
+	extern GraphicsPSO skinnedWirePSO;					// 애니메이션
 	extern GraphicsPSO stencilMaskPSO;
 	extern GraphicsPSO reflectSolidPSO;
+	extern GraphicsPSO reflectSkinnedSolidPSO;			// 애니메이션
 	extern GraphicsPSO reflectWirePSO;
+	extern GraphicsPSO reflectSkinnedWirePSO;			// 애니메이션
 	extern GraphicsPSO mirrorBlendSolidPSO;
 	extern GraphicsPSO mirrorBlendWirePSO;
 	extern GraphicsPSO skyboxSolidPSO;
@@ -63,8 +70,10 @@ namespace Graphics
 	extern GraphicsPSO reflectSkyboxWirePSO;
 	extern GraphicsPSO normalsPSO;
 	extern GraphicsPSO depthOnlyPSO;
+	extern GraphicsPSO depthOnlySkinnedPSO;				// 애니메이션
 	extern GraphicsPSO postEffectsPSO;
 	extern GraphicsPSO postProcessingPSO;
+
 
 	void InitCommonStates(ComPtr<ID3D11Device>& device);
 

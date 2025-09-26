@@ -75,6 +75,7 @@ void ComponentHierarchyWindow::OnGUI()
 
 	UActorComponent* selectedComp = EditorSelection::GetActorComponent();
 
+
 	// 1) 루트 씬 컴포넌트부터 트리표시
 	auto rootSP = actor->GetRootComponent();
 	if (rootSP) 

@@ -5,6 +5,10 @@ class URenderer
 public:
 	URenderer();
 	~URenderer();
+	URenderer(const URenderer&) = delete;				// 복사 생성 금지
+	URenderer& operator=(const URenderer&) = delete;	// 복사 대입 금지
+	URenderer(URenderer&&) = delete;					// 이동 생성 금지
+	URenderer& operator=(URenderer&&) = delete;			// 이동 대입 금지
 
 public:
 	void Init();
@@ -39,7 +43,7 @@ public:
 	void SetPostFxMode(int InValue) { m_postEffectsConstsCPU.mode = InValue;}
 	void SetWireRendering(int InValue) { bWireRender = InValue; }
 
-	void SetGlobalConsts(ComPtr<ID3D11Buffer>& globalConstsGPU);
+	void SetGlobalConsts(ID3D11Buffer* globalConstsGPU);
 private:
 	void BindCommonResources();
 	void BeginFrame();
@@ -48,14 +52,12 @@ private:
 	void RenderShadowMap(const URenderQueue& queue);
 
 	void RenderOpaque(const URenderQueue& queue);
+	void RenderSkinned(const URenderQueue& queue);
 	void RenderSkyBox(const URenderQueue& queue);
 	void RenderNormal(const URenderQueue& queue);
 	void RenderMirror(const URenderQueue& queue);
 	
 	void EndFrame();
-
-public:
-	void TestPrint2() {}
 
 private:
 	void OnResize();
@@ -76,7 +78,7 @@ private:
 	PostProcess m_postProcess;
 
 private:
-	std::unique_ptr<D3D11_VIEWPORT> Viewport;
+	D3D11_VIEWPORT Viewport;
 
 private:
 	// 공통으로 사용하는 텍스처들

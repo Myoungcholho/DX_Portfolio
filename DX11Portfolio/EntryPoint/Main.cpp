@@ -24,17 +24,6 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 	D3D::Create();
 	D3D::Get()->GraphicsInit();
 
-	// ImGUI 초기화
-	/*ImGUIDesc imguiDesc = {};
-	imguiDesc.Device = D3D::Get()->GetDeviceCom();
-	imguiDesc.DeviceContext = D3D::Get()->GetDeviceContextCom();
-	imguiDesc.Width = winDesc.Width;
-	imguiDesc.Height = winDesc.Height;
-	imguiDesc.Hwnd = hwnd;
-	ImGuiManager::SetDesc(imguiDesc);
-	ImGuiManager::Create();*/
-
-
 	// Game Run
 	UGameInstance* game = new UGameInstance();
 	game->Init();
@@ -48,7 +37,7 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 	{
 		ASkyboxActor* skyboxActor = world->SpawnActor<ASkyboxActor>();
 
-		PBRMeshData skyboxMesh = GeomtryGenerator::MakeBox(50.0f);
+		PBRMeshData skyboxMesh = GeometryGenerator::MakeBox(50.0f);
 		std::reverse(skyboxMesh.indices.begin(), skyboxMesh.indices.end());
 
 		skyboxActor->GetSkyboxComponent()->SetPBRMeshData(vector{ skyboxMesh });	
@@ -56,9 +45,7 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 
 	// 바닥
 	{
-		AStaticMeshActor* staticActor = world->SpawnActor<AStaticMeshActor>();
-
-		PBRMeshData ground = GeomtryGenerator::MakeSquareGrid(2048, 2048, 20.f, { 40.0f,40.0f });
+		PBRMeshData ground = GeometryGenerator::MakeSquareGrid(2048, 2048, 20.f, { 40.0f,40.0f });
 		string path = "../../../_Textures/PBR/rock-wall-mortar-ue/";
 		ground.albedoTextureFilename = path + "rock-wall-mortar_albedo.png";
 		ground.normalTextureFilename = path+ "rock-wall-mortar_normal-dx.png";
@@ -67,17 +54,19 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 		ground.metallicTextureFilename = path + "rock-wall-mortar_metallic.png";
 		ground.roughnessTextureFilename = path + "rock-wall-mortar_roughness.png";
 
-		staticActor->GetStaticMeshComponent()->SetPBRMeshData(vector{ ground });
+		AStaticMeshActor* staticActor = world->SpawnActor<AStaticMeshActor>(vector{ ground });
+
+		//staticActor->GetStaticMeshComponent()->SetPBRMeshData(vector{ ground });
 		staticActor->GetStaticMeshComponent()->SetRelativePosition(Vector3(0, -1, 0));
 		staticActor->GetStaticMeshComponent()->SetRelativeRotation(Vector3(90.0f, 0.0f, 0.0f));  // 단위: 도 (Euler)
 	}
 
-	// 플레이어
+	// 모델
 	{
 		APlayer* player = world->SpawnActor<APlayer>();
 
+		vector<PBRMeshData> meshes = GeometryGenerator::ReadFromFile("stan_lee/", "scene.gltf");
 		//vector<PBRMeshData> meshes = GeomtryGenerator::ReadFromFileModel("medieval_vagrant_knights/", "scene.gltf");
-		vector<PBRMeshData> meshes = GeomtryGenerator::ReadFromFileModel("stan_lee/", "scene.gltf");
 
 		player->GetStaticMeshComponent()->SetPBRMeshData(meshes);
 		player->GetStaticMeshComponent()->SetRelativePosition(Vector3(0, -0.5f, -9.5f));
@@ -86,36 +75,98 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 
 	// 조명
 	{
-		ALight* light = world->SpawnActor<ALight>();
-
-		light->GetLightComponent()->SetRelativePosition(Vector3(0, 3, -14));
-		light->GetLightComponent()->SetRelativeRotation(Vector3(-25, 0, 0));
-		light->GetLightComponent()->SetLightType((uint32_t)LIGHT_DIRECTIONAL | LIGHT_SHADOW);
-		light->SetName("SpotLight");
-	}
-
-	{
 		//ALight* light = world->SpawnActor<ALight>();
 
-		//light->GetLightComponent()->SetRelativePosition(Vector3(-10, 10, -10));
-		//light->GetLightComponent()->SetRelativeRotation(Vector3(-90, -90, 0));
+		//light->GetLightComponent()->SetRelativePosition(Vector3(0, 3, -14));
+		//light->GetLightComponent()->SetRelativeRotation(Vector3(-25, 0, 0));
 		//light->GetLightComponent()->SetLightType((uint32_t)LIGHT_DIRECTIONAL | LIGHT_SHADOW);
-		//light->SetName("DirectionLight");
+		//light->SetName("SpotLight");
+	}
+
+	// SkinnedMesh(1),(2)
+	{
+		
+
+		string path = "Mixamo/Rumy/";
+		/*vector<string> clipNames =
+		{
+			"CatwalkIdle.fbx", "CatwalkIdleToWalkForward.fbx",
+			"CatwalkWalkForward.fbx", "CatwalkWalkForward03.fbx", "CatwalkWalkStop.fbx",
+			"BreakdanceFreezeVar2.fbx"
+		};*/
+		vector<string> clipNames =
+		{
+			"Idle.fbx", "Walking60.fbx"
+		};
+
+		shared_ptr<AnimationData> aniData = make_shared<AnimationData>();
+
+		// 캐릭터의 정점을 1회 읽음
+		auto [meshes, _] = GeometryGenerator::ReadAnimationFromFile(path, "character.fbx");
+
+		for (auto& name : clipNames)
+		{
+			// 애니메이션 정보만 읽음
+			auto [_, ani] = GeometryGenerator::ReadAnimationFromFile(path, name);
+
+			// 골격같은 데이터는 여러번 초기화할 필요 없으므로 1회만
+			// 바인드 포즈같은 데이터는 이후에 들어올 클립도 전부 같은 정보다.
+			// 그래서 이후에는 추가만 해준다
+			if (aniData->clips.empty()) {
+				*aniData = move(ani);
+			}
+			else {
+				// fbx에 클립이 하나만 있지 않다. 현재는 하나만 있지만.
+				// 아무튼 맨 앞에 첫번째 클립만 사용하겠다는 것
+				aniData->clips.push_back(ani.clips.front());
+			}
+		}
+
+		ASkinnedTestActor* skinned[100];
+
+		for (int i = 0; i < 2; ++i)
+		{
+			skinned[i] = world->SpawnActor<ASkinnedTestActor>();
+
+			skinned[i]->GetSkeletalMeshComponent()->SetAssets(meshes, aniData);
+			skinned[i]->GetSkeletalMeshComponent()->SetMaterialFactors(Vector3(1.0f), 0.8f, 0.0f);
+			skinned[i]->GetSkeletalMeshComponent()->SetRelativePosition(Vector3(i, 0.0f, 0.0f));
+			skinned[i]->GetSkeletalMeshComponent()->SetTrack(i, true, 1.0f);
+		}
+
+		/*skinned_02->GetSkeletalMeshComponent()->SetAssets(meshes, aniData);
+		skinned_02->GetSkeletalMeshComponent()->SetMaterialFactors(Vector3(1.0f), 0.8f, 0.0f);
+		skinned_02->GetSkeletalMeshComponent()->SetRelativePosition(Vector3(1.0f, 0.0f, 0.0f));
+		skinned_02->GetSkeletalMeshComponent()->SetTrack(1, true, 1.0f);*/
 	}
 
 	// 모든 액터 배치가 끝났다면
 	world->StartAllActors();
 
+	CKeyboard::Create();
+	CTimer::Create();
+	CMouse::Create();
+	CContext::Create();
+
+	EditorApplication::SetWorld(game->GetWorld());
+	EditorApplication::SetRenderer(game->GetRenderer());
+	EditorApplication::Initialize();
+
 	WPARAM result = Window::Run(game);
 
 	delete game;
 
-	//ImGuiManager::Destroy();
+	EditorApplication::Release();
+
+	CContext::Destroy();
+	CMouse::Destroy();
+	CTimer::Destroy();
+	CKeyboard::Destroy();
+
 	D3D::Destroy();
 	Window::Destroy();
 
-	//int a = 50;
-	//cout << a;
+	DisableConsole();
 
 	return (int)result;
 }

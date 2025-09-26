@@ -3,10 +3,10 @@
 
 void UStaticMeshRenderProxy::Init(const vector<PBRMeshData>& m_meshData)
 {
-    m_meshConstsCPU.World = Matrix();
+    meshConstsCPU.World = Matrix();
 
-    D3D11Utils::CreateConstBuffer(device, m_meshConstsCPU, m_meshConstsGPU);
-    D3D11Utils::CreateConstBuffer(device, m_materialConstsCPU, m_materialConstsGPU);
+    D3D11Utils::CreateConstBuffer(device, meshConstsCPU, meshConstsGPU);
+    D3D11Utils::CreateConstBuffer(device, materialConstsCPU, materialConstsGPU);
 
     // CPU정보로 GPU데이터 생성
     for (const auto& meshData : m_meshData)
@@ -25,7 +25,7 @@ void UStaticMeshRenderProxy::Init(const vector<PBRMeshData>& m_meshData)
             D3D11Utils::CreateTexture(
                 device, context, meshData.albedoTextureFilename, true,
                 newMesh->albedoTexture, newMesh->albedoSRV);
-            m_materialConstsCPU.useAlbedoMap = true;
+            materialConstsCPU.useAlbedoMap = true;
         }
 
         if (!meshData.emissiveTextureFilename.empty())
@@ -33,7 +33,7 @@ void UStaticMeshRenderProxy::Init(const vector<PBRMeshData>& m_meshData)
             D3D11Utils::CreateTexture(
                 device, context, meshData.emissiveTextureFilename, true,
                 newMesh->emissiveTexture, newMesh->emissiveSRV);
-            m_materialConstsCPU.useEmissiveMap = true;
+            materialConstsCPU.useEmissiveMap = true;
         }
 
         if (!meshData.normalTextureFilename.empty())
@@ -41,7 +41,7 @@ void UStaticMeshRenderProxy::Init(const vector<PBRMeshData>& m_meshData)
             D3D11Utils::CreateTexture(
                 device, context, meshData.normalTextureFilename, false,
                 newMesh->normalTexture, newMesh->normalSRV);
-            m_materialConstsCPU.useNormalMap = true;
+            materialConstsCPU.useNormalMap = true;
         }
 
         if (!meshData.heightTextureFilename.empty())
@@ -49,7 +49,7 @@ void UStaticMeshRenderProxy::Init(const vector<PBRMeshData>& m_meshData)
             D3D11Utils::CreateTexture(
                 device, context, meshData.heightTextureFilename, false,
                 newMesh->heightTexture, newMesh->heightSRV);
-            m_meshConstsCPU.useHeightMap = true;
+            meshConstsCPU.useHeightMap = true;
         }
 
         if (!meshData.aoTextureFilename.empty())
@@ -57,7 +57,7 @@ void UStaticMeshRenderProxy::Init(const vector<PBRMeshData>& m_meshData)
             D3D11Utils::CreateTexture(device, context,
                 meshData.aoTextureFilename, false,
                 newMesh->aoTexture, newMesh->aoSRV);
-            m_materialConstsCPU.useAOMap = true;
+            materialConstsCPU.useAOMap = true;
         }
 
         // metalic과 Roughness
@@ -75,32 +75,32 @@ void UStaticMeshRenderProxy::Init(const vector<PBRMeshData>& m_meshData)
         // 메탈릭 이름이 있었다면
         if (!meshData.metallicTextureFilename.empty())
         {
-            m_materialConstsCPU.useMetallicMap = true;
+            materialConstsCPU.useMetallicMap = true;
         }
 
         // 러프니스 이름이 있었다면
         if (!meshData.roughnessTextureFilename.empty())
         {
-            m_materialConstsCPU.useRoughnessMap = true;
+            materialConstsCPU.useRoughnessMap = true;
         }
 
         // 공용으로 사용,음.. 괜찮나 괜찮은거 같기도 하고
-        newMesh->vertexConstBuffer = m_meshConstsGPU;
-        newMesh->pixelConstBuffer = m_materialConstsGPU;
+        newMesh->vertexConstBuffer = meshConstsGPU;
+        newMesh->pixelConstBuffer = materialConstsGPU;
 
-        this->m_meshes.push_back(newMesh);
+        this->meshes.push_back(newMesh);
     }
 }
 
 void UStaticMeshRenderProxy::UpdateConstantBuffers(ComPtr<ID3D11Device>& device, ComPtr<ID3D11DeviceContext>& context)
 {
-    D3D11Utils::UpdateBuffer(device, context, m_meshConstsCPU, m_meshConstsGPU);
-    D3D11Utils::UpdateBuffer(device, context ,m_materialConstsCPU, m_materialConstsGPU);
+    D3D11Utils::UpdateBuffer(device, context, meshConstsCPU, meshConstsGPU);
+    D3D11Utils::UpdateBuffer(device, context ,materialConstsCPU, materialConstsGPU);
 }
 
 void UStaticMeshRenderProxy::Draw(ID3D11DeviceContext* context)
 {
-    for (const auto& mesh : m_meshes)
+    for (const auto& mesh : meshes)
     {
         // Const
         context->VSSetConstantBuffers(0, 1, mesh->vertexConstBuffer.GetAddressOf());
@@ -127,9 +127,9 @@ void UStaticMeshRenderProxy::Draw(ID3D11DeviceContext* context)
 
 void UStaticMeshRenderProxy::DrawNormal(ID3D11DeviceContext* context)
 {
-    for (const auto& mesh : m_meshes)
+    for (const auto& mesh : meshes)
     {
-        context->GSSetConstantBuffers(0, 1, m_meshConstsGPU.GetAddressOf());
+        context->GSSetConstantBuffers(0, 1, meshConstsGPU.GetAddressOf());
         context->IASetVertexBuffers(0, 1, mesh->vertexBuffer.GetAddressOf(), &mesh->stride, &mesh->offset);
         context->Draw(mesh->vertexCount, 0);
     }

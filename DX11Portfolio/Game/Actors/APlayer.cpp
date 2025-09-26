@@ -17,6 +17,27 @@ void APlayer::Initialize()
 	//cout << a;
 }
 
+void APlayer::Tick()
+{
+	//static int tick = 0;
+
+	//++tick;
+	////cout << tick << "\n";
+	//if (tick >= 50000 && bData == false)
+	//{
+	//	bData = true;
+	//	vector<AActor*> actors = m_world->GetActorsOf();
+	//	
+	//	for (AActor* actor : actors)
+	//	{
+	//		if (actor->GetName() == "Plane")
+	//		{
+	//			actor->Destroy();
+	//		}
+	//	}
+	//}
+}
+
 shared_ptr<UStaticMeshComponent> APlayer::GetStaticMeshComponent()
 {
 	return m_staticMeshComponent;

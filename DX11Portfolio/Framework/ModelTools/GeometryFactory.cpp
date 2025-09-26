@@ -1,23 +1,42 @@
 #include "Framework.h"
 #include "GeometryFactory.h"
 
-vector<PBRMeshData> GeomtryGenerator::ReadFromFileModel(string basePath, string filename)
+
+vector<PBRMeshData> GeometryGenerator::ReadFromFile(string basePath, string filename, bool revertNormals)
 {
     basePath = "C:/DirectX/Portfolio/_Model/" + basePath;
 
-    // 1. 모델 로드 및 메쉬 확보
     ModelLoader modelLoader;
-    modelLoader.Load(basePath, filename);
-    vector<PBRMeshData>& meshes = modelLoader.meshes;
+    modelLoader.Load(basePath, filename, revertNormals);
 
-    // 2. AABB 최소 최대 계산을 위한 초기값 설정
+    GeometryGenerator::Normalize(Vector3(0.0f), 1.0f, modelLoader.m_meshes, modelLoader.m_aniData);
+
+    return modelLoader.m_meshes;
+}
+
+auto GeometryGenerator::ReadAnimationFromFile(string basePath, string filename, bool revertNormals) 
+-> tuple<vector<PBRMeshData>, AnimationData>
+{
+    basePath = "C:/DirectX/Portfolio/_Model/" + basePath;
+
+    ModelLoader modelLoader;
+    modelLoader.Load(basePath, filename, revertNormals);
+
+    GeometryGenerator::Normalize(Vector3(0.0f), 1.0f, modelLoader.m_meshes, modelLoader.m_aniData);
+
+    return { modelLoader.m_meshes, modelLoader.m_aniData };
+}
+
+void GeometryGenerator::Normalize(const Vector3 center, const float longestLength, vector<PBRMeshData>& meshes, AnimationData& aniData)
+{
+    using namespace DirectX;
+
+    // Normalize vertices
     Vector3 vmin(1000, 1000, 1000);
     Vector3 vmax(-1000, -1000, -1000);
-
-    // 3. 전체 모델의 바운딩 박스 계산
-    for (auto& mesh : meshes)
+    for (auto& mesh : meshes) 
     {
-        for (auto& v : mesh.vertices)
+        for (auto& v : mesh.vertices) 
         {
             vmin.x = XMMin(vmin.x, v.position.x);
             vmin.y = XMMin(vmin.y, v.position.y);
@@ -28,35 +47,30 @@ vector<PBRMeshData> GeomtryGenerator::ReadFromFileModel(string basePath, string 
         }
     }
 
-    // 박스 크기
     float dx = vmax.x - vmin.x;
-    float dy = vmax.y - vmin.y;
+    float dy = vmax.y - vmin.y; 
     float dz = vmax.z - vmin.z;
     
-    // 바운딩 박스 중 가장 긴 변의 길이
-    float dl = XMMax(XMMax(dx, dy), dz);
-    
-    // 모델의 중심 좌표
-    float cx = (vmax.x + vmin.x) * 0.5f;
-    float cy = (vmax.y + vmin.y) * 0.5f;
-    float cz = (vmax.z + vmin.z) * 0.5f;
+    float scale = longestLength / XMMax(XMMax(dx, dy), dz);
+    Vector3 translation = -(vmin + vmax) * 0.5f + center;
 
-    // 모든 정점을 중심 기준 정렬 후, 최대 길이로 정규화
     for (auto& mesh : meshes) 
     {
         for (auto& v : mesh.vertices) 
         {
-            // 크기 정규화 / 가장 큰 값
-            v.position.x = (v.position.x - cx) / dl;
-            v.position.y = (v.position.y - cy) / dl;
-            v.position.z = (v.position.z - cz) / dl;
+            v.position = (v.position + translation) * scale;
+        }
+
+        for (auto& v : mesh.skinnedVertices) 
+        {
+            v.position = (v.position + translation) * scale;
         }
     }
 
-    return meshes;
+    aniData.defaultTransform = Matrix::CreateTranslation(translation) * Matrix::CreateScale(scale);
 }
 
-PBRMeshData GeomtryGenerator::MakeSquare(const float scale, const Vector2 texScale)
+PBRMeshData GeometryGenerator::MakeSquare(const float scale, const Vector2 texScale)
 {
     vector<Vector3> positions;
     vector<Vector3> colors;
@@ -102,7 +116,7 @@ PBRMeshData GeomtryGenerator::MakeSquare(const float scale, const Vector2 texSca
 }
 
 // 현재 정점 데이터에 Color 사용 안함!
-PBRMeshData GeomtryGenerator::MakeBox(const float scale)
+PBRMeshData GeometryGenerator::MakeBox(const float scale)
 {
     vector<Vector3> positions;
     vector<Vector3> colors;
@@ -240,7 +254,7 @@ PBRMeshData GeomtryGenerator::MakeBox(const float scale)
     return meshData;
 }
 
-PBRMeshData GeomtryGenerator::MakeSphere(const float radius, const int numSlices, const int numStacks, const Vector2 texScale)
+PBRMeshData GeometryGenerator::MakeSphere(const float radius, const int numSlices, const int numStacks, const Vector2 texScale)
 {
     const float dTheta = -XM_2PI / float(numSlices);
     const float dPhi = -XM_PI / float(numStacks);
@@ -311,7 +325,7 @@ PBRMeshData GeomtryGenerator::MakeSphere(const float radius, const int numSlices
     return meshData;
 }
 
-PBRMeshData GeomtryGenerator::MakeSquareGrid(const int numSlices, const int numStacks, const float scale, const Vector2 texScale)
+PBRMeshData GeometryGenerator::MakeSquareGrid(const int numSlices, const int numStacks, const float scale, const Vector2 texScale)
 {
     PBRMeshData meshData;
 

@@ -2,12 +2,8 @@
 #include "URenderManager.h"
 #include "Renders/URenderer.h"
 
-URenderManager::URenderManager()
-{
-	context = D3D::Get()->GetDeviceContext();
-}
-
-URenderManager::~URenderManager()
+URenderManager::URenderManager() { }
+URenderManager::~URenderManager() 
 {
 	Stop();
 }
@@ -17,7 +13,7 @@ void URenderManager::Init()
 	m_renderer = make_unique<URenderer>();
 	m_renderer->Init();
 
-	m_shouldExit = false;												// 렌더링 종료 플래그 기본값 설정
+	m_shouldExit.store(false,memory_order_relaxed);						// 렌더링 종료 플래그 기본값 설정
 	m_renderThread = thread(&URenderManager::RenderLoop, this);			// 새로운 스레드로 메서드 실행
 }
 
@@ -25,8 +21,8 @@ void URenderManager::Stop()
 {
 	// 스레드 안전하게 종료
 	{
-		std::lock_guard<std::mutex> lock(m_mutex);
-		m_shouldExit = true;
+		lock_guard<mutex> lock(m_mutex);
+		m_shouldExit.store(true, memory_order_release);
 		m_renderReady = true;
 	}
 
@@ -38,15 +34,15 @@ void URenderManager::Stop()
 		m_renderThread.join();
 }
 
-void URenderManager::EnqueueProxies(vector<shared_ptr<URenderProxy>> proxies, vector<LightData> lights)
+void URenderManager::EnqueueProxies(vector<shared_ptr<URenderProxy>>&& proxies, vector<LightData>&& lights)
 {
 	// 쓰기 인덱스에 렌더링 리스트 저장하고 읽기 인덱스와 교체
 	{
-		std::lock_guard<std::mutex> lock(m_mutex);
-		m_renderQueues[m_writeIndex] = std::move(proxies);
-		m_renderLightData[m_writeIndex] = lights;
+		lock_guard<mutex> lock(m_mutex);
+		m_renderQueues[m_writeIndex] = move(proxies);
+		m_renderLightData[m_writeIndex] = move(lights);
 
-		std::swap(m_writeIndex, m_readIndex);
+		swap(m_writeIndex, m_readIndex);
 		m_renderReady = true;
 	}
 
@@ -57,41 +53,42 @@ void URenderManager::EnqueueProxies(vector<shared_ptr<URenderProxy>> proxies, ve
 void URenderManager::RenderLoop()
 {
 	// 종료플레그가 있다면 돌지 않음
-	while (!m_shouldExit)
+	while(!m_shouldExit.load(memory_order_acquire))
 	{
 		PRO_BEGIN(L"RenderFrame");
-		std::vector<std::shared_ptr<URenderProxy>> proxiesToRender;
 
+		vector<shared_ptr<URenderProxy>> proxiesToRender;
+		vector<LightData> lightsToRender;
+		
+		// 대기하다가 렌더링이 준비되거나 종료 플래그가 true일때 탈출
 		{
-			// 대기하다가 렌더링이 준비되거나 종료 플래그가 true일때 탈출
-			std::unique_lock<std::mutex> lock(m_mutex);	
-			m_condition.wait(lock, [&]() { return m_renderReady || m_shouldExit; });
+			unique_lock<mutex> lock(m_mutex);	
+			m_condition.wait(lock, [&]() { return m_renderReady || m_shouldExit.load(memory_order_relaxed); });
 
-			if (m_shouldExit)
+			if (m_shouldExit.load(memory_order_acquire))
 				break;
 			
 			// 읽기 인덱스의 렌더 큐를 가져와 렌더링할 목록으로 복사
-			proxiesToRender = std::move(m_renderQueues[m_readIndex]);
+			proxiesToRender = move(m_renderQueues[m_readIndex]);
+			lightsToRender = move(m_renderLightData[m_readIndex]);
+
 			m_renderReady = false;
 		}
 
-		// 전역 상수 설정
+		// 전역 상수 설정[리펙토링) 카메라 컨트롤러 제작 후 코드 변경]
 		Vector3 eye = CContext::Get()->GetCamera()->GetPosition();
 		Matrix view = CContext::Get()->GetViewMatrix();
 		Matrix proj = CContext::Get()->GetProjectionMatrix();
 
 		// Renderer가 가지는 GlobalConsts 값 셋팅
-		m_renderer->UpdateGlobalLights(m_renderLightData[m_readIndex]);
+		m_renderer->UpdateGlobalLights(lightsToRender);
 		m_renderer->UpdateGlobalConstants(eye, view, proj);
 		
 		// 렌더큐에 넣어서 내부에서 분류
 		URenderQueue renderQueue;
 		for (auto& proxy : proxiesToRender)
 		{
-			// 넣기전에 CPU 데이터 얻어서 복사해서 프록시로 넘겨주기
-
-
-			renderQueue.AddProxy(std::move(proxy));  // 내부에서 분류
+			renderQueue.AddProxy(move(proxy));
 		}
 
 		// 인자로 렌더큐를 전달해서 렌더링 시작
@@ -100,11 +97,10 @@ void URenderManager::RenderLoop()
 		// 후처리 및 출력
 		m_renderer->RenderPostProcess();
 
-		//ImGuiManager::Get()->RenderDrawData(context);
-
 		EditorApplication::Run();
 
 		m_renderer->Present();
+
 		PRO_END(L"RenderFrame");
 	}
 }

@@ -30,7 +30,8 @@ public:
         ComPtr<ID3D11Device>& device, const wstring& filename,
         const vector<D3D11_INPUT_ELEMENT_DESC>& inputElements,
         ComPtr<ID3D11VertexShader>& m_vertexShader,
-        ComPtr<ID3D11InputLayout>& m_inputLayout
+        ComPtr<ID3D11InputLayout>& m_inputLayout,
+        const vector<D3D_SHADER_MACRO> shaderMacros = {}
     );
 
     static void CreateHullShader
@@ -164,4 +165,33 @@ public:
         ComPtr<ID3D11DeviceContext>& context,
         ComPtr<ID3D11Texture2D>& textureToWrite,
         const std::string filename);
+
+    // 애니메이션때문에 추가
+    static void CreateStagingBuffer(ID3D11Device* device,
+        const UINT numElements,
+        const UINT sizeElement,
+        const void* initData,
+        ComPtr<ID3D11Buffer>& buffer);
+
+    // 애니메이션때문에 추가
+    static void CreateStructuredBuffer(ID3D11Device* device,
+        const UINT numElements,
+        const UINT sizeElement,
+        const void* initData,
+        ComPtr<ID3D11Buffer>& buffer,
+        ComPtr<ID3D11ShaderResourceView>& srv,
+        ComPtr<ID3D11UnorderedAccessView>& uav);
+
+    // 애니메이션때문에 추가
+    static void CopyToStagingBuffer(ID3D11DeviceContext* context,
+        ComPtr<ID3D11Buffer>& buffer, UINT size,
+        void* src) {
+        D3D11_MAPPED_SUBRESOURCE ms;
+        context->Map(buffer.Get(), NULL, D3D11_MAP_WRITE, NULL, &ms);
+        memcpy(ms.pData, src, size);
+        context->Unmap(buffer.Get(), NULL);
+    }
+
+    static void UnbindPSRange(ID3D11DeviceContext* context, UINT start, UINT count);
+    static void UnbindIfBoundPS(ID3D11DeviceContext* context, ID3D11ShaderResourceView* target);
 };

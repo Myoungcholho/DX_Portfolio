@@ -8,7 +8,7 @@ void PostProcess::Initialize(
     const std::vector<ComPtr<ID3D11RenderTargetView>>& targets, 
     const int width, const int height, const int bloomLevels)
 {
-	PBRMeshData meshData = GeomtryGenerator::MakeSquare();
+	PBRMeshData meshData = GeometryGenerator::MakeSquare();
 
 	m_mesh = std::make_shared<Mesh>();
     D3D11Utils::CreateVertexBuffer(device, meshData.vertices, m_mesh->vertexBuffer);

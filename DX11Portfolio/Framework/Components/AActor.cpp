@@ -5,7 +5,7 @@ static int s_actorID = 0;
 
 AActor::AActor()
 {
-	m_name = "Actor_" + std::to_string(s_actorID++);
+	m_name = "Actor_" + to_string(s_actorID++);
 }
 
 shared_ptr<UActorComponent> AActor::AddComponent(shared_ptr<UActorComponent> comp)
@@ -38,11 +38,6 @@ void AActor::SetRootComponent(shared_ptr<USceneComponent> comp)
 	}
 }
 
-std::shared_ptr<Transform> AActor::GetTransform() const
-{
-	return nullptr;
-}
-
 void AActor::SetWorld(UWorld* world)
 {
 	m_world = world;
@@ -53,33 +48,23 @@ UWorld* AActor::GetWorld() const
 	return m_world;
 }
 
-void AActor::BeginPlay()
-{
-
-}
-
 void AActor::Tick()
 {
-	for (auto comp : Components)
+	// auto comp 쓰고 있었는데 이는 포인터 주소를 복사해 약간의 오버헤드가 있음.
+	// const auto& 로 변경
+	for (auto& comp : Components)
 		comp->Tick();
 }
 
-// Proxy 도입후 하는 일 없음
-void AActor::Render()
+void AActor::FixedTick(double dt)
 {
-	// 렌더링 가능한 컴포넌트의 Type을 보고 Queue에 넣기
-	/*for (auto comp : Components)
-	{
-		if (auto prim = dynamic_cast<UPrimitiveComponent*>(comp.get()))
-			GetWorld()->GetRenderQueue()->Add(prim);
-	}*/
-
-	// 이제 UWorld에서 직접 얻어서 돌림
+	for (auto& comp : Components)
+		comp->FixedTick(dt);
 }
 
 void AActor::OnGUI()
 {
-	for (auto comp : Components)
+	for (auto& comp : Components)
 		comp->OnGUI();
 }
 
@@ -128,17 +113,23 @@ static void DetachForeignDescendants(USceneComponent* node, AActor* self)
 	if (!node) return;
 	auto list = node->GetChildren();              // 반드시 '복사본'
 
-	for (auto* c : list) {
+	for (auto* c : list) 
+	{
 		if (!c) continue;
-		if (c->GetOwner() != self) {
+		if (c->GetOwner() != self) 
+		{
 			c->Detach(EAttachMode::KeepWorld);    // 손자/증손도 포함해 끊김
 		}
-		else {
+		else 
+		{
 			DetachForeignDescendants(c, self);    // 내 소유면 더 내려가서 검사
 		}
 	}
 }
 
+/// <summary>
+/// 
+/// </summary>
 void AActor::Destroy()
 {
 	if (bPendingDestroy) return;
@@ -151,11 +142,8 @@ void AActor::Destroy()
 			root->Detach(EAttachMode::KeepWorld);
 	}
 
-	// 내가 구독한 외부 델리게이트/타이머 해제
-	// todo
-
 	// 소유한 컴포넌트들 정리
-	auto comps = std::move(Components);
+	auto comps = move(Components);
 	Components.clear();
 
 	for (auto& comp : comps)
@@ -165,7 +153,6 @@ void AActor::Destroy()
 
 	if (m_world) 
 		m_world->MarkActorForDestroy(this);
-	UObject::Destroy();
 }
 
 /// <summary>
