@@ -8,7 +8,7 @@
 class USkinnedMeshRenderProxy : public URenderProxy
 {
 public:
-	void Init(const vector<PBRMeshData>& meshData) override;
+	void Init(shared_ptr<const CPUMeshAsset> asset) override;
 
 	void UpdateConstantBuffers(
 		ComPtr<ID3D11Device>& device,

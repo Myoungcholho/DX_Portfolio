@@ -18,7 +18,7 @@ void UGameInstance::Init()
 
 void UGameInstance::Tick()
 {
-	PRO_BEGIN(L"Game_Tick");
+	//PRO_BEGIN(L"Game_Tick");
 	
 	const double dt = CTimer::Get()->GetDeltaTime();
 	fixedAcc += dt;
@@ -39,7 +39,7 @@ void UGameInstance::Tick()
 	if(world)
 		world->FlushDestroyed();
 
-	PRO_END(L"Game_Tick");
+	//PRO_END(L"Game_Tick");
 }
 
 void UGameInstance::Render()
@@ -47,12 +47,12 @@ void UGameInstance::Render()
 	if (world == nullptr && renderManager == nullptr)
 		return;
 
-	PRO_BEGIN(L"Game_Render");
+	//PRO_BEGIN(L"Game_Render");
 	
 	if (world)
 		world->Render();					// 프록시 생성 → 렌더 매니저에 제출
 
-	PRO_END(L"Game_Render");
+	//PRO_END(L"Game_Render");
 
 }
 

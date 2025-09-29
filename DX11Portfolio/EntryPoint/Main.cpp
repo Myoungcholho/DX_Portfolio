@@ -38,9 +38,11 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 		ASkyboxActor* skyboxActor = world->SpawnActor<ASkyboxActor>();
 
 		PBRMeshData skyboxMesh = GeometryGenerator::MakeBox(50.0f);
-		std::reverse(skyboxMesh.indices.begin(), skyboxMesh.indices.end());
+		reverse(skyboxMesh.indices.begin(), skyboxMesh.indices.end());
 
-		skyboxActor->GetSkyboxComponent()->SetPBRMeshData(vector{ skyboxMesh });	
+		shared_ptr<const CPUMeshAsset> asset = CPUAssetManager::CreateProcedural("Procedural:Skybox:Box50", vector{ skyboxMesh });
+		
+		skyboxActor->GetSkyboxComponent()->SetPBRMeshData(asset);
 	}
 
 	// 바닥
@@ -54,7 +56,9 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 		ground.metallicTextureFilename = path + "rock-wall-mortar_metallic.png";
 		ground.roughnessTextureFilename = path + "rock-wall-mortar_roughness.png";
 
-		AStaticMeshActor* staticActor = world->SpawnActor<AStaticMeshActor>(vector{ ground });
+		shared_ptr<const CPUMeshAsset> asset = CPUAssetManager::CreateProcedural("Procedural:Ground:2048", vector{ ground });
+
+		AStaticMeshActor* staticActor = world->SpawnActor<AStaticMeshActor>(asset);
 
 		//staticActor->GetStaticMeshComponent()->SetPBRMeshData(vector{ ground });
 		staticActor->GetStaticMeshComponent()->SetRelativePosition(Vector3(0, -1, 0));
@@ -65,12 +69,26 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 	{
 		APlayer* player = world->SpawnActor<APlayer>();
 
-		vector<PBRMeshData> meshes = GeometryGenerator::ReadFromFile("stan_lee/", "scene.gltf");
-		//vector<PBRMeshData> meshes = GeomtryGenerator::ReadFromFileModel("medieval_vagrant_knights/", "scene.gltf");
+		//vector<PBRMeshData> meshes = GeometryGenerator::ReadFromFile("stan_lee/", "scene.gltf");
 
-		player->GetStaticMeshComponent()->SetPBRMeshData(meshes);
+		shared_ptr<const CPUMeshAsset> cpu1 = CPUAssetManager::LoadCPUMesh("stan_lee/", "scene.gltf");
+
+		//player->GetStaticMeshComponent()->SetPBRMeshData(meshes);
+		player->GetStaticMeshComponent()->SetPBRMeshData(cpu1);
 		player->GetStaticMeshComponent()->SetRelativePosition(Vector3(0, -0.5f, -9.5f));
 		player->GetStaticMeshComponent()->SetRelativeRotation(Vector3(0.0f, 0.0f, 0.0f));  // 단위: 도 (Euler)
+
+		APlayer* play[100];
+
+		for (int i = 0; i < 100; ++i)
+		{
+			play[i] = world->SpawnActor<APlayer>();
+
+			//play[i]->GetStaticMeshComponent()->SetPBRMeshData(meshes);
+			play[i]->GetStaticMeshComponent()->SetPBRMeshData(cpu1);
+			play[i]->GetStaticMeshComponent()->SetRelativePosition(Vector3(i, -0.5f, -9.5f));
+			play[i]->GetStaticMeshComponent()->SetRelativeRotation(Vector3(0.0f, 0.0f, 0.0f));  // 단위: 도 (Euler)
+		}
 	}
 
 	// 조명
@@ -85,8 +103,6 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 
 	// SkinnedMesh(1),(2)
 	{
-		
-
 		string path = "Mixamo/Rumy/";
 		/*vector<string> clipNames =
 		{
@@ -96,13 +112,15 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 		};*/
 		vector<string> clipNames =
 		{
-			"Idle.fbx", "Walking60.fbx", "Idle60.fbx"
+			"Idle.fbx", "Walking60.fbx"//, "Idle60.fbx"
 		};
 
 		shared_ptr<AnimationData> aniData = make_shared<AnimationData>();
 
 		// 캐릭터의 정점을 1회 읽음
 		auto [meshes, _] = GeometryGenerator::ReadAnimationFromFile(path, "character.fbx");
+
+		shared_ptr<const CPUMeshAsset> asset = CPUAssetManager::CreateProcedural("Rumy:character", meshes);
 
 		for (auto& name : clipNames)
 		{
@@ -128,16 +146,12 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 		{
 			skinned[i] = world->SpawnActor<ASkinnedTestActor>();
 
-			skinned[i]->GetSkeletalMeshComponent()->SetAssets(meshes, aniData);
+			skinned[i]->GetSkeletalMeshComponent()->SetAssets(asset, aniData);
 			skinned[i]->GetSkeletalMeshComponent()->SetMaterialFactors(Vector3(1.0f), 0.8f, 0.0f);
 			skinned[i]->GetSkeletalMeshComponent()->SetRelativePosition(Vector3(i, 0.0f, 0.0f));
-			skinned[i]->GetSkeletalMeshComponent()->SetTrack(i, true, 1.0f);
+			skinned[i]->GetSkeletalMeshComponent()->SetTrack(i % 2, true, 1.0f);
 		}
 
-		/*skinned_02->GetSkeletalMeshComponent()->SetAssets(meshes, aniData);
-		skinned_02->GetSkeletalMeshComponent()->SetMaterialFactors(Vector3(1.0f), 0.8f, 0.0f);
-		skinned_02->GetSkeletalMeshComponent()->SetRelativePosition(Vector3(1.0f, 0.0f, 0.0f));
-		skinned_02->GetSkeletalMeshComponent()->SetTrack(1, true, 1.0f);*/
 	}
 
 	// 모든 액터 배치가 끝났다면

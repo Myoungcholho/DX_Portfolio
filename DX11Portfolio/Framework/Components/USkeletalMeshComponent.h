@@ -10,7 +10,7 @@ class USkeletalMeshComponent : public USkinnedMeshComponent
 public:
 	USkeletalMeshComponent() = default;
 
-	void SetAssets(const vector<PBRMeshData>& meshes, shared_ptr<const AnimationData> anim);
+	void SetAssets(shared_ptr<const CPUMeshAsset> meshes, shared_ptr<const AnimationData> anim);
 	void SetTrack(int index, bool loop, float rate);
 
 public:

@@ -6,14 +6,6 @@
 
 #include "VertexLayout.h"
 
-//struct MeshData
-//{
-//	vector<GrassVertex> vertices;
-//	vector<uint32_t> indices;
-//	string textureFilename;
-//	string fullFilename;
-//};
-
 struct PBRMeshData
 {
 	vector<Vertex> vertices;

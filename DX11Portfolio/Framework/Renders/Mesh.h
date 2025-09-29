@@ -30,8 +30,8 @@ struct Mesh
     UINT offset = 0;
 
     // ConstantBuffer -> 현재는 하나로 통합했지만 나중에 분리할 것
-    ComPtr<ID3D11Buffer> vertexConstBuffer;
-    ComPtr<ID3D11Buffer> pixelConstBuffer;
+    //ComPtr<ID3D11Buffer> vertexConstBuffer;
+    //ComPtr<ID3D11Buffer> pixelConstBuffer;
 
     // Texturing
     ComPtr<ID3D11Texture2D> albedoTexture;

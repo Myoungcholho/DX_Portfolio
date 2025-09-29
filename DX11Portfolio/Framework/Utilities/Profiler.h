@@ -44,17 +44,18 @@ private:
 
 };
 
+extern Profile g_profile;
 
-//#define PROFILE
+#define PROFILE
 
 #ifdef PROFILE
-void PRO_BEGIN(const WCHAR* s)
+inline void PRO_BEGIN(const WCHAR* s)
 {
 	g_profile.ProfileBegin(s);
 }
 
 // 여기부터 하기
-void PRO_END(const WCHAR* s)
+inline void PRO_END(const WCHAR* s)
 {
 	g_profile.ProfileEnd(s);
 }

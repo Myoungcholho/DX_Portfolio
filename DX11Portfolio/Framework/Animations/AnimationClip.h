@@ -80,18 +80,41 @@ struct AnimationData
 	/// <summary>
 	/// 로컬 포즈 추출, 특정 클립의 frame에서 모든 본의 로컬 키를 vector로 저장
 	/// </summary>
-	void EvaluateLocalPose(int clipId, int frame, vector<AnimationClip::Key>& outLocalPose) const
+	void EvaluateLocalPose(int clipId, int frame, double accum, vector<AnimationClip::Key>& outLocalPose) const
 	{
 		const AnimationClip& clip = clips[clipId];
 		const int boneCount = (int)boneParents.size();
 
+		// 출력 버퍼 크기 보장용
 		if ((int)outLocalPose.size() != boneCount)
 			outLocalPose.assign(boneCount, AnimationClip::Key());
+
+		const float t = (float)clamp(accum, 0.0, 1.0);
 
 		for (int boneId = 0; boneId < boneCount; ++boneId)
 		{
 			const vector<AnimationClip::Key>& keys = clip.keys[boneId];
-			outLocalPose[boneId] = (keys.size() > 0) ? keys[frame % (int)keys.size()] : AnimationClip::Key();
+			const int keyCount = (int)keys.size();
+
+			if (keyCount == 0) {
+				outLocalPose[boneId] = AnimationClip::Key(); // 바인드/아이덴티티 기본값
+				continue;
+			}
+
+			// f0: 현재 프레임, f1: 다음 프레임
+			// (non-loop을 안전하게 처리하기 위해 마지막에선 f1=f0로 고정)
+			const int f0 = clamp(frame, 0, keyCount - 1);
+			const int f1 = (f0 + 1 < keyCount) ? (f0 + 1) : f0;
+
+			const AnimationClip::Key& k0 = keys[f0];
+			const AnimationClip::Key& k1 = keys[f1];
+
+			AnimationClip::Key out;
+			out.pos = Vector3::Lerp(k0.pos, k1.pos, t);
+			out.scale = Vector3::Lerp(k0.scale, k1.scale, t);
+			out.rot = MathHelper::SlerpSafe(k0.rot, k1.rot, t);
+
+			outLocalPose[boneId] = out;
 		}
 	}
 

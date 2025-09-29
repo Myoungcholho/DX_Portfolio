@@ -116,6 +116,8 @@ using Microsoft::WRL::ComPtr;
 #include "Manager/LightManager.h"
 #include "Manager/TextureManager.h"
 #include "Manager/Engine.h"
+#include "Manager/CPUAssetManager.h"
+#include "Manager/GPUAssetManager.h"
 
 // Billboards
 #include "Billboards/BillboardPoint.h"

@@ -21,13 +21,13 @@ AStaticMeshActor::AStaticMeshActor()
 	m_lightComponent3->SetName("Light3");
 }
 
-AStaticMeshActor::AStaticMeshActor(const vector<PBRMeshData>& InData)
+AStaticMeshActor::AStaticMeshActor(shared_ptr<const CPUMeshAsset> InAsset)
 {
 	m_name = "Plane";
 	m_staticMeshComponent = make_shared<UStaticMeshComponent>();
 	SetRootComponent(m_staticMeshComponent);
 	AddComponent(m_staticMeshComponent);
-	m_staticMeshComponent->SetPBRMeshData(InData);
+	m_staticMeshComponent->SetPBRMeshData(InAsset);
 
 	m_lightComponent = make_shared<ULightComponent>();
 	AddComponent(m_lightComponent);

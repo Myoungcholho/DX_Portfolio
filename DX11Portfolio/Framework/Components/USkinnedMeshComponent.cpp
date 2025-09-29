@@ -32,7 +32,13 @@ void USkinnedMeshComponent::RefreshConstantsCPU()
 	UPrimitiveComponent::RefreshConstantsCPU();
 }
 
-void USkinnedMeshComponent::SetAssets(const vector<PBRMeshData>& meshes, shared_ptr<const AnimationData> anim)
+//void USkinnedMeshComponent::SetAssets(const vector<PBRMeshData>& meshes, shared_ptr<const AnimationData> anim)
+//{
+//	meshData = meshes;
+//	AnimAsset = anim;
+//}
+
+void USkinnedMeshComponent::SetAssets(shared_ptr<const CPUMeshAsset> meshes, shared_ptr<const AnimationData> anim)
 {
 	meshData = meshes;
 	AnimAsset = anim;

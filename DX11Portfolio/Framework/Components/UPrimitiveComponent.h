@@ -42,12 +42,13 @@ public:
 	virtual void RefreshConstantsCPU();
 	virtual void RenderNormal(ComPtr<ID3D11DeviceContext>& context) {}
 
-public:
-	void SetPBRMeshData(const vector<PBRMeshData>& mesh) { meshData = mesh; }
 
 public:
 	shared_ptr<URenderProxy> virtual GetRenderProxy() = 0;
 
+public:
+	void SetPBRMeshData(shared_ptr<const CPUMeshAsset>  mesh) { meshData = mesh; }
+	shared_ptr<const CPUMeshAsset> GetPBRMeshData() const { return meshData; }
 protected:
-	vector<PBRMeshData> meshData;
+	shared_ptr<const CPUMeshAsset> meshData;
 };

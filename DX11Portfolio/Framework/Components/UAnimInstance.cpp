@@ -1,17 +1,6 @@
 #include "Framework.h"
 #include "UAnimInstance.h"
 
-static inline Quaternion SlerpSafe(Quaternion a, Quaternion b, float t)
-{
-	if (a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w < 0.0f)
-		b = -b; 
-
-	Quaternion q = Quaternion::Slerp(a, b, t);
-
-	q.Normalize();
-	return q;
-}
-
 void UAnimInstance::PlayClip(int index, bool loop, float rate)
 {
     clipIndex = index;
@@ -37,24 +26,16 @@ void UAnimInstance::Update(double dt)
 
     frameAccum += dt * ticksPerSec * playRate;										// 델타 * 1초당 진행 속도 * 플레이 속도
     int step = (int)floor(frameAccum);												// 정수부분 추출
-	if (step == 0)
+	if (step > 0)
 	{
-		if (localPose.empty())
-			AnimData->EvaluateLocalPose(clipIndex, frame, localPose);				// 
-	}
-	else
-	{
-		frameAccum -= step;															// 소수점 부분은 남겨서 다음 Tick에 사용
-
+		frameAccum -= step;
 		if (bLoop)
 		{
-			if (clipNumKeys > 0)
-			{
+			if (clipNumKeys > 0) {
 				frame = (frame + step) % clipNumKeys;
 				if (frame < 0) frame += clipNumKeys;
 			}
-			else
-			{
+			else {
 				frame += step;
 				if (frame < 0) frame = 0;
 			}
@@ -62,11 +43,11 @@ void UAnimInstance::Update(double dt)
 		else
 		{
 			if (clipNumKeys > 0) frame = clamp(frame + step, 0, clipNumKeys - 1);
-			else frame = max(0, frame + step);
+			else                 frame = max(0, frame + step);
 		}
-
-		AnimData->EvaluateLocalPose(clipIndex, frame, localPose);
 	}
+
+	AnimData->EvaluateLocalPose(clipIndex, frame, frameAccum, localPose);
 
 	// 블렌딩 기능 수행
 	if (bBlending && nextClipIndex >= 0)
@@ -104,7 +85,7 @@ void UAnimInstance::Update(double dt)
 
 		// 두 포즈 결과를 추출하고 Blend
 		fromPose = localPose;													// 매 프레임 최신 현재 포즈
-		AnimData->EvaluateLocalPose(nextClipIndex, nextFrame, toPose);
+		AnimData->EvaluateLocalPose(nextClipIndex, nextFrame, nextAccum, toPose);
 
 		// 시간 기반 가중치 (smoothstep)
 		blendT = min(blendT + (float)dt, blendDur);
@@ -134,9 +115,6 @@ void UAnimInstance::Update(double dt)
 		}
 
 	}
-
-
-	
 }
 
 /// <summary>
@@ -159,7 +137,7 @@ void UAnimInstance::CrossFadeTo(int nextIndex, float durationSec, bool loop, flo
 	// 대상 포즈 1회 로컬 포즈 생성
 	toPose.clear();
 	if (AnimData)
-		AnimData->EvaluateLocalPose(nextClipIndex, 0, toPose);
+		AnimData->EvaluateLocalPose(nextClipIndex, 0, nextAccum, toPose);
 
 	blendDur = max(0.0001f, durationSec);
 	blendT = 0.0f;
@@ -185,7 +163,7 @@ void UAnimInstance::BlendPose(const vector<AnimationClip::Key>& A, const vector<
 	{
 		Out[i].pos = Vector3::Lerp(A[i].pos, B[i].pos, w);
 		Out[i].scale = Vector3::Lerp(A[i].scale, B[i].scale, w);
-		//Out[i].rot = SlerpSafe(A[i].rot, B[i].rot, w);
-		Out[i].rot = Quaternion::Lerp(A[i].rot, B[i].rot, w);
+		Out[i].rot = MathHelper::SlerpSafe(A[i].rot, B[i].rot, w);
+		//Out[i].rot = Quaternion::Lerp(A[i].rot, B[i].rot, w);
 	}
 }

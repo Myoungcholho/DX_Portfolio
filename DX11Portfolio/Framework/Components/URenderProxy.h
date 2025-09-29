@@ -19,7 +19,7 @@ public:
 	void SetDrawNormal(bool drawNormal) { drawNormal = drawNormal; }
 
 public:
-	virtual void Init(const vector<PBRMeshData>& meshData) { }
+	virtual void Init(shared_ptr<const CPUMeshAsset> asset) { }
 	//virtual void Init(const vector<PBRMeshData>& meshData, const AnimationData& aniData) {}
 	void SetMeshConstants(const WorldInvConstantBuffer& data) { meshConstsCPU = data; }
 	void SetMaterialConstants(const MaterialConstants& data) { materialConstsCPU = data; }
@@ -30,7 +30,8 @@ public:
 	MaterialConstants GetMaterialConstants() const { return materialConstsCPU; }
 
 protected:
-	vector<shared_ptr<Mesh>> meshes;				// 그릴 Mesh GPU 정보
+	//vector<shared_ptr<Mesh>> meshes;				// 그릴 Mesh GPU 정보
+	shared_ptr<const GPUMeshAsset> gpuAsset;
 
 protected:
 	WorldInvConstantBuffer meshConstsCPU;

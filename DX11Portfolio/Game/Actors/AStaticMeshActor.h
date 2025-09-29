@@ -4,7 +4,7 @@ class AStaticMeshActor : public AActor
 {
 public:
 	AStaticMeshActor();
-	AStaticMeshActor(const vector<PBRMeshData>& InData);
+	AStaticMeshActor(shared_ptr<const CPUMeshAsset> InAsset);
 
 public:
 	void Initialize() override;

@@ -53,15 +53,14 @@ void Profile::SaveLogFile()
 	{
 		if (_profile[i].lFlag != 0)
 		{
-			_profile[i].iTotalTime = _profile[i].iTotalTime - _profile[i].iMax - _profile[i].iMin;
-			_profile[i].iCall -= 2;
+			//_profile[i].iTotalTime = _profile[i].iTotalTime - _profile[i].iMax - _profile[i].iMin;
 
-			fprintf(pfile, "%-20ls | %10.4f㎲ | %10.4f㎲ | %10.4f㎲ | %8lld\n",
-				_profile[i].szName,
-				(double)(_profile[i].iTotalTime / _profile[i].iCall) / 10000.0,
-				(double)_profile[i].iMin / 10000.0,
-				(double)_profile[i].iMax / 10000.0,
-				_profile[i].iCall);
+			fprintf(pfile, "%-20ls | %10.0f㎲ | %10.0f㎲ | %10.0f㎲ | %8lld\n",
+				_profile[i].szName,																		// 파일 이름
+				(double)_profile[i].iTotalTime / (double)_profile[i].iCall,							// 평균
+				(double)_profile[i].iMin ,														// 최소
+				(double)_profile[i].iMax ,														// 최대
+				_profile[i].iCall);																		// 콜 횟수
 		}
 	}
 
@@ -137,7 +136,7 @@ void Profile::ProfileEnd(const WCHAR* szName)
 	{
 		if (wcscmp(_profile[i].szName, szName) == 0)
 		{
-			// 이게 0의 값일수가없음
+			// Begin없이 End가 들어온 경우 
 			if (_profile[i].lStartTime.QuadPart == 0)
 			{
 				break;
@@ -145,8 +144,8 @@ void Profile::ProfileEnd(const WCHAR* szName)
 			LARGE_INTEGER end;
 
 			QueryPerformanceCounter(&end);
-			demi = ((end.QuadPart - _profile[i].lStartTime.QuadPart) * 1000000) / (double)baseTime.QuadPart;
-			demi = demi * 10000;
+			demi = ((end.QuadPart - _profile[i].lStartTime.QuadPart) * 1000000.0) / (double)baseTime.QuadPart;
+			//demi = demi * 10000;
 
 			// begin- begin 예방차원 초기화, 쓸모도 없어짐
 			_profile[i].lStartTime.QuadPart = 0;

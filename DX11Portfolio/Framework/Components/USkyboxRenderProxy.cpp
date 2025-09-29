@@ -1,95 +1,20 @@
 #include "Framework.h"
 #include "USkyboxRenderProxy.h"
 
-void USkyboxRenderProxy::Init(const vector<PBRMeshData>& m_meshData)
+void USkyboxRenderProxy::Init(shared_ptr<const CPUMeshAsset> asset)
 {
 	meshConstsCPU.World = Matrix();
 
 	D3D11Utils::CreateConstBuffer(device, meshConstsCPU, meshConstsGPU);
 	D3D11Utils::CreateConstBuffer(device, materialConstsCPU, materialConstsGPU);
 
-    // CPU정보로 GPU데이터 생성
-    for (const auto& meshData : m_meshData)
+    gpuAsset = GPUAssetManager::LoadGPUMesh(asset);
+
+    /*for (auto& mesh : gpuAsset->meshes)
     {
-        auto newMesh = std::make_shared<Mesh>();
-        D3D11Utils::CreateVertexBuffer(device, meshData.vertices, newMesh->vertexBuffer);
-        D3D11Utils::CreateIndexBuffer(device, meshData.indices, newMesh->indexBuffer);
-
-        newMesh->indexCount = UINT(meshData.indices.size());
-        newMesh->vertexCount = UINT(meshData.vertices.size());
-        newMesh->stride = UINT(sizeof(Vertex));
-
-        // 텍스쳐 파일이름 있다면 Texture, SRV 만들기
-        if (!meshData.albedoTextureFilename.empty())
-        {
-            D3D11Utils::CreateTexture(
-                device, context, meshData.albedoTextureFilename, true,
-                newMesh->albedoTexture, newMesh->albedoSRV);
-            materialConstsCPU.useAlbedoMap = true;
-        }
-
-        if (!meshData.emissiveTextureFilename.empty())
-        {
-            D3D11Utils::CreateTexture(
-                device, context, meshData.emissiveTextureFilename, true,
-                newMesh->emissiveTexture, newMesh->emissiveSRV);
-            materialConstsCPU.useEmissiveMap = true;
-        }
-
-        if (!meshData.normalTextureFilename.empty())
-        {
-            D3D11Utils::CreateTexture(
-                device, context, meshData.normalTextureFilename, false,
-                newMesh->normalTexture, newMesh->normalSRV);
-            materialConstsCPU.useNormalMap = true;
-        }
-
-        if (!meshData.heightTextureFilename.empty())
-        {
-            D3D11Utils::CreateTexture(
-                device, context, meshData.heightTextureFilename, false,
-                newMesh->heightTexture, newMesh->heightSRV);
-            meshConstsCPU.useHeightMap = true;
-        }
-
-        if (!meshData.aoTextureFilename.empty())
-        {
-            D3D11Utils::CreateTexture(device, context,
-                meshData.aoTextureFilename, false,
-                newMesh->aoTexture, newMesh->aoSRV);
-            materialConstsCPU.useAOMap = true;
-        }
-
-        // metalic과 Roughness
-        // Green : Roughness, Blue : Metallic(Metalness)
-        if (!meshData.metallicTextureFilename.empty() ||
-            !meshData.roughnessTextureFilename.empty())
-        {
-            D3D11Utils::CreateMetallicRoughnessTexture(
-                device, context, meshData.metallicTextureFilename,
-                meshData.roughnessTextureFilename,
-                newMesh->metallicRoughnessTexture,
-                newMesh->metallicRoughnessSRV);
-        }
-
-        // 메탈릭 이름이 있었다면
-        if (!meshData.metallicTextureFilename.empty())
-        {
-            materialConstsCPU.useMetallicMap = true;
-        }
-
-        // 러프니스 이름이 있었다면
-        if (!meshData.roughnessTextureFilename.empty())
-        {
-            materialConstsCPU.useRoughnessMap = true;
-        }
-
-        // 공용으로 사용,음.. 괜찮나 괜찮은거 같기도 하고
-        newMesh->vertexConstBuffer = meshConstsGPU;
-        newMesh->pixelConstBuffer = materialConstsGPU;
-
-        this->meshes.push_back(newMesh);
-    }
+        mesh->vertexConstBuffer = meshConstsGPU;
+        mesh->pixelConstBuffer = materialConstsGPU;
+    }*/
 }
 
 void USkyboxRenderProxy::UpdateConstantBuffers(ComPtr<ID3D11Device>& device, ComPtr<ID3D11DeviceContext>& context)
@@ -102,11 +27,11 @@ void USkyboxRenderProxy::UpdateConstantBuffers(ComPtr<ID3D11Device>& device, Com
 
 void USkyboxRenderProxy::Draw(ID3D11DeviceContext* context)
 {
-    for (const auto& mesh : meshes)
+    for (const auto& mesh : gpuAsset->meshes)
     {
         // Const
-        context->VSSetConstantBuffers(0, 1, mesh->vertexConstBuffer.GetAddressOf());
-        context->PSSetConstantBuffers(0, 1, mesh->pixelConstBuffer.GetAddressOf());
+        context->VSSetConstantBuffers(0, 1, meshConstsGPU.GetAddressOf());
+        context->PSSetConstantBuffers(0, 1, materialConstsGPU.GetAddressOf());
 
         // SRV
         // 물체 렌더링할 때 여러가지 텍스춰 사용 (t0 부터시작)

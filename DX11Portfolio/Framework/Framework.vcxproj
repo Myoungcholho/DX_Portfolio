@@ -204,7 +204,9 @@ copy /Y "$(SolutionDir)Debug\$(ProjectName).pdb" "$(SolutionDir)EntryPoint\"</Co
     <ClInclude Include="ImGUI\imstb_rectpack.h" />
     <ClInclude Include="ImGUI\imstb_textedit.h" />
     <ClInclude Include="ImGUI\imstb_truetype.h" />
+    <ClInclude Include="Manager\CPUAssetManager.h" />
     <ClInclude Include="Manager\Engine.h" />
+    <ClInclude Include="Manager\GPUAssetManager.h" />
     <ClInclude Include="Manager\LightManager.h" />
     <ClInclude Include="Manager\ShaderManager.h" />
     <ClInclude Include="Manager\TextureManager.h" />
@@ -308,7 +310,9 @@ copy /Y "$(SolutionDir)Debug\$(ProjectName).pdb" "$(SolutionDir)EntryPoint\"</Co
     <ClCompile Include="ImGUI\imgui_widgets.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Manager\CPUAssetManager.cpp" />
     <ClCompile Include="Manager\Engine.cpp" />
+    <ClCompile Include="Manager\GPUAssetManager.cpp" />
     <ClCompile Include="Manager\LightManager.cpp" />
     <ClCompile Include="Manager\ShaderManager.cpp" />
     <ClCompile Include="Manager\TextureManager.cpp" />

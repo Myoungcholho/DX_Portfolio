@@ -99,8 +99,8 @@ void Model::Initialize(ComPtr<ID3D11Device>& device,
             m_materialConstsCPU.useRoughnessMap = true;
         }
 
-        newMesh->vertexConstBuffer = m_meshConstsGPU;
-        newMesh->pixelConstBuffer = m_materialConstsGPU;
+        //newMesh->vertexConstBuffer = m_meshConstsGPU;
+        //newMesh->pixelConstBuffer = m_materialConstsGPU;
 
         this->m_meshes.push_back(newMesh);
     }
@@ -120,10 +120,10 @@ void Model::UpdateConstantBuffers(ComPtr<ID3D11Device>& device,
 void Model::Render(ComPtr<ID3D11DeviceContext>& context) {
     if (m_isVisible) {
         for (const auto& mesh : m_meshes) {
-            context->VSSetConstantBuffers(
+            /*context->VSSetConstantBuffers(
                 0, 1, mesh->vertexConstBuffer.GetAddressOf());
             context->PSSetConstantBuffers(
-                0, 1, mesh->pixelConstBuffer.GetAddressOf());
+                0, 1, mesh->pixelConstBuffer.GetAddressOf());*/
 
             context->VSSetShaderResources(0, 1, mesh->heightSRV.GetAddressOf());
 

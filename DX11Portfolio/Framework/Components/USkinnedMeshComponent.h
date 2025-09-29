@@ -23,7 +23,8 @@ public:
     void RefreshConstantsCPU() override;
 
     // 스키닝 데이터 세팅
-    void SetAssets(const vector<PBRMeshData>& meshes, shared_ptr<const AnimationData> anim);
+    //void SetAssets(const vector<PBRMeshData>& meshes, shared_ptr<const AnimationData> anim);
+    void SetAssets(shared_ptr<const CPUMeshAsset> meshes, shared_ptr<const AnimationData> anim);
 
     // 렌더러가 프록시를 가져갈 때
     shared_ptr<URenderProxy> GetRenderProxy() override;

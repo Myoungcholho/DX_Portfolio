@@ -1,7 +1,7 @@
 #include "Framework.h"
 #include "USkeletalMeshComponent.h"
 
-void USkeletalMeshComponent::SetAssets(const vector<PBRMeshData>& meshes, shared_ptr<const AnimationData> anim)
+void USkeletalMeshComponent::SetAssets(shared_ptr<const CPUMeshAsset> meshes, shared_ptr<const AnimationData> anim)
 {
 	USkinnedMeshComponent::SetAssets(meshes, anim);
 

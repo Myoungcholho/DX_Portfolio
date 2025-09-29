@@ -55,7 +55,7 @@ void URenderManager::RenderLoop()
 	// 종료플레그가 있다면 돌지 않음
 	while(!m_shouldExit.load(memory_order_acquire))
 	{
-		PRO_BEGIN(L"RenderFrame");
+		//PRO_BEGIN(L"RenderFrame");
 
 		vector<shared_ptr<URenderProxy>> proxiesToRender;
 		vector<LightData> lightsToRender;
@@ -101,7 +101,7 @@ void URenderManager::RenderLoop()
 
 		m_renderer->Present();
 
-		PRO_END(L"RenderFrame");
+		//PRO_END(L"RenderFrame");
 	}
 }
 
