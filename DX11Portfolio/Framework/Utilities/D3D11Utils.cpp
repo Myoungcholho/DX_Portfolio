@@ -571,7 +571,7 @@ void D3D11Utils::CreateStructuredBuffer(ID3D11Device* device, const UINT numElem
 	bufferDesc.ByteWidth = numElements * sizeElement;
 	bufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | // Compute Shader
 		D3D11_BIND_SHADER_RESOURCE;   // Vertex Shader
-	bufferDesc.StructureByteStride = sizeElement;
+	bufferDesc.StructureByteStride = sizeElement;								// 요소 1개의 바이트 크기
 	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 
 	// 참고: Structured는 D3D11_BIND_VERTEX_BUFFER로 사용 불가

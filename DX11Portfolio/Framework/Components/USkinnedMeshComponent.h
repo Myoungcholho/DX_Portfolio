@@ -16,11 +16,8 @@ public:
     ~USkinnedMeshComponent() override = default;
 
 public:
-    // 프록시 생성
-    void Init() override;
-
-    // 월드/InvTransform갱신
-    void RefreshConstantsCPU() override;
+    void Init() override;                           // 월드/InvTransform갱신
+    void RefreshConstantsCPU() override;            // 월드/InvTransform갱신
 
     // 스키닝 데이터 세팅
     //void SetAssets(const vector<PBRMeshData>& meshes, shared_ptr<const AnimationData> anim);

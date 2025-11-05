@@ -103,7 +103,7 @@ public:
 
         D3D11_BUFFER_DESC desc;
         ZeroMemory(&desc, sizeof(desc));
-        desc.ByteWidth = sizeof(constantBufferData);        // GPU 공간 144 확보
+        desc.ByteWidth = sizeof(constantBufferData);        // CPU구조체 크기로 GPU 공간 확보
         desc.Usage = D3D11_USAGE_DYNAMIC;                   // CPU가 계속 갱신할꺼고 GPU는 읽기용
         desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
         desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;

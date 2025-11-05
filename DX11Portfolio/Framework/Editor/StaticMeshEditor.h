@@ -1,14 +1,14 @@
 #pragma once
 
-class UStaticMeshComponent;
+class UPrimitiveComponent;
 struct MaterialConstants;
 
-class StaticMeshEditor : public Editor
+class PrimitiveEditor : public Editor
 {
 public:
-	explicit StaticMeshEditor(UStaticMeshComponent* target = nullptr);
+	explicit PrimitiveEditor(UPrimitiveComponent* target = nullptr);
 
-	void SetTarget(UStaticMeshComponent* target);
+	void SetTarget(UPrimitiveComponent* target);
 	void OnGUI() override;
 
 private:
@@ -16,7 +16,7 @@ private:
 	void ApplyBuffersToTarget();			 // UI ¹öÆÛ ¡æ Å¸°Ù °ª
 
 private:
-	UStaticMeshComponent* mTarget = nullptr;
+	UPrimitiveComponent* mTarget = nullptr;
 
 	// Data
 	float metallicFactor;

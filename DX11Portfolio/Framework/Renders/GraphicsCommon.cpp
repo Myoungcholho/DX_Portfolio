@@ -25,6 +25,7 @@ namespace Graphics
 	ComPtr<ID3D11DepthStencilState> drawDSS;       // 일반적으로 그리기
 	ComPtr<ID3D11DepthStencilState> maskDSS;       // 스텐실버퍼에 표시
 	ComPtr<ID3D11DepthStencilState> drawMaskedDSS; // 스텐실 표시된 곳만
+	ComPtr<ID3D11DepthStencilState> depthEqualState;
 
 	// Blend States
 	ComPtr<ID3D11BlendState> mirrorBS;
@@ -36,7 +37,11 @@ namespace Graphics
 	ComPtr<ID3D11VertexShader> samplingVS;
 	ComPtr<ID3D11VertexShader> normalVS;
 	ComPtr<ID3D11VertexShader> depthOnlyVS;
+	ComPtr<ID3D11VertexShader> depthOnlyInstanceVS;
 	ComPtr<ID3D11VertexShader> depthOnlySkinnedVS;
+	ComPtr<ID3D11VertexShader> depthOnlySkinnedInstanceVS;
+	ComPtr<ID3D11VertexShader> basicInstanceVS;				// 인스턴스용
+	ComPtr<ID3D11VertexShader> skinnedInstanceVS;
 
 	ComPtr<ID3D11PixelShader> basicPS;
 	ComPtr<ID3D11PixelShader> skyboxPS;
@@ -47,6 +52,7 @@ namespace Graphics
 	//ComPtr<ID3D11PixelShader> simplePS;
 	ComPtr<ID3D11PixelShader> depthOnlyPS;
 	ComPtr<ID3D11PixelShader> postEffectsPS;
+	ComPtr<ID3D11PixelShader> basicInstancePS;
 
 	ComPtr<ID3D11GeometryShader> normalGS;
 
@@ -75,9 +81,16 @@ namespace Graphics
 	GraphicsPSO reflectSkyboxWirePSO;
 	GraphicsPSO normalsPSO;
 	GraphicsPSO depthOnlyPSO;
+	GraphicsPSO depthOnlyInstancePSO;
 	GraphicsPSO depthOnlySkinnedPSO;
+	GraphicsPSO depthOnlySkinnedInstancePSO;
 	GraphicsPSO postEffectsPSO;
 	GraphicsPSO postProcessingPSO;
+	// 인스턴싱용 PSO
+	GraphicsPSO defaultSolidInstancePSO;
+	GraphicsPSO defaultWireInstancePSO;
+	GraphicsPSO skinnedSolidInstancePSO;
+	GraphicsPSO skinnedWireInstancePSO;
 }
 
 void Graphics::InitCommonStates(ComPtr<ID3D11Device>& device)
@@ -244,6 +257,13 @@ void Graphics::InitDepthStencilStates(ComPtr<ID3D11Device>& device)
 	dsDesc.FrontFace.StencilFunc = D3D11_COMPARISON_EQUAL;
 
 	ThrowIfFailed(device->CreateDepthStencilState(&dsDesc, drawMaskedDSS.GetAddressOf()));
+
+	D3D11_DEPTH_STENCIL_DESC mainDesc = {};
+	mainDesc.DepthEnable = TRUE;
+	mainDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO; // 더 이상 기록 안 함
+	mainDesc.DepthFunc = D3D11_COMPARISON_EQUAL;           // Prepass에서 기록된 깊이와 같을 때만
+	mainDesc.StencilEnable = FALSE;
+	ThrowIfFailed(device->CreateDepthStencilState(&mainDesc, &depthEqualState));
 }
 void Graphics::InitShaders(ComPtr<ID3D11Device>& device)
 {
@@ -304,18 +324,28 @@ void Graphics::InitShaders(ComPtr<ID3D11Device>& device)
 	D3D11Utils::CreateVertexShaderAndInputLayout(
 		device, L"BasicShader/BasicVS.hlsl", skinnedIEs, skinnedVS, skinnedIL,
 		vector<D3D_SHADER_MACRO>{{"SKINNED", "1"}, { NULL, NULL }});
+	
+	D3D11Utils::CreateVertexShaderAndInputLayout(device, L"BasicShader/BasicInstancedVS.hlsl", basicIEs, basicInstanceVS, basicIL);
+	D3D11Utils::CreateVertexShaderAndInputLayout(
+		device, L"BasicShader/BasicInstancedVS.hlsl", skinnedIEs, skinnedInstanceVS, skinnedIL,
+		vector<D3D_SHADER_MACRO>{{"SKINNED", "1"}, { NULL, NULL }});
 
 	D3D11Utils::CreateVertexShaderAndInputLayout(device, L"DrawNormal/NormalVS.hlsl", basicIEs, normalVS, basicIL);
 	D3D11Utils::CreateVertexShaderAndInputLayout(device, L"PostProcess/SamplingVS.hlsl", samplingIED, samplingVS, samplingIL);
 	D3D11Utils::CreateVertexShaderAndInputLayout(device, L"CubeMapping/SkyboxVS.hlsl", skyboxIE, skyboxVS, skyboxIL);
 	D3D11Utils::CreateVertexShaderAndInputLayout(device, L"DepthMap/DepthOnlyVS.hlsl", basicIEs, depthOnlyVS, skyboxIL);
+	D3D11Utils::CreateVertexShaderAndInputLayout(device, L"DepthMap/DepthOnlyInstanceVS.hlsl", basicIEs, depthOnlyInstanceVS, skyboxIL);
+
 	D3D11Utils::CreateVertexShaderAndInputLayout(
 		device, L"DepthMap/DepthOnlyVS.hlsl", skinnedIEs, depthOnlySkinnedVS, skinnedIL,
 		vector<D3D_SHADER_MACRO>{{"SKINNED", "1"}, { NULL, NULL }});
-
+	D3D11Utils::CreateVertexShaderAndInputLayout(
+		device, L"DepthMap/DepthOnlyInstanceVS.hlsl", skinnedIEs, depthOnlySkinnedInstanceVS, skinnedIL, 
+		vector<D3D_SHADER_MACRO>{{"SKINNED", "1"}, { NULL, NULL }});
 
 	// PS
 	D3D11Utils::CreatePixelShader(device, L"BasicShader/BasicPS.hlsl", basicPS);
+	D3D11Utils::CreatePixelShader(device, L"BasicShader/BasicInstancedPS.hlsl", basicInstancePS);
 	D3D11Utils::CreatePixelShader(device, L"DrawNormal/NormalPS.hlsl", normalPS);
 	D3D11Utils::CreatePixelShader(device, L"CubeMapping/SkyboxPS.hlsl", skyboxPS);
 	D3D11Utils::CreatePixelShader(device, L"PostProcess/CombinePixelShader.hlsl", combinePS);		
@@ -324,6 +354,7 @@ void Graphics::InitShaders(ComPtr<ID3D11Device>& device)
 	//D3D11Utils::CreatePixelShader(device, L"PostProcess/SimplePS.hlsl", simplePS);
 	D3D11Utils::CreatePixelShader(device, L"DepthMap//DepthOnlyPS.hlsl", depthOnlyPS);
 	D3D11Utils::CreatePixelShader(device, L"PostProcess/PostEffectsPS.hlsl", postEffectsPS);
+
 
 	// GS
 	D3D11Utils::CreateGeometryShader(device, L"DrawNormal/NormalGS.hlsl", normalGS);
@@ -336,11 +367,34 @@ void Graphics::InitPipelineStates(ComPtr<ID3D11Device>& device)
 	defaultSolidPSO.m_pixelShader = basicPS;
 	defaultSolidPSO.m_rasterizerState = solidRS;
 	defaultSolidPSO.m_primitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	//defaultSolidPSO.m_depthStencilState = depthEqualState;
+
+	// defaultSolidInstancePSO;
+	defaultSolidInstancePSO = defaultSolidPSO;
+	defaultSolidInstancePSO.m_vertexShader = basicInstanceVS;
+	defaultSolidInstancePSO.m_pixelShader = basicInstancePS;
+	//defaultSolidInstancePSO.m_depthStencilState = depthEqualState;
+
+	// defaultWireInstancePSO;
+	defaultWireInstancePSO = defaultSolidInstancePSO;
+	defaultWireInstancePSO.m_rasterizerState = wireRS;
 
 	// Skinned mesh solid
 	skinnedSolidPSO = defaultSolidPSO;
 	skinnedSolidPSO.m_vertexShader = skinnedVS;
 	skinnedSolidPSO.m_inputLayout = skinnedIL;
+	//skinnedSolidPSO.m_depthStencilState = depthEqualState;
+
+	// Skinned mesh Instacne Solid
+	skinnedSolidInstancePSO = defaultSolidPSO;
+	skinnedSolidInstancePSO.m_vertexShader = skinnedInstanceVS;
+	skinnedSolidInstancePSO.m_pixelShader = basicInstancePS;
+	skinnedSolidInstancePSO.m_inputLayout = skinnedIL;
+	//skinnedSolidInstancePSO.m_depthStencilState = depthEqualState;
+
+	// Skinned mesh Instance Wire
+	skinnedWireInstancePSO = skinnedSolidInstancePSO;
+	skinnedWireInstancePSO.m_rasterizerState = wireRS;
 
 	// defaultWirePSO
 	defaultWirePSO = defaultSolidPSO;
@@ -349,6 +403,7 @@ void Graphics::InitPipelineStates(ComPtr<ID3D11Device>& device)
 	// Skinned mesh wire
 	skinnedWirePSO = skinnedSolidPSO;
 	skinnedWirePSO.m_rasterizerState = wireRS;
+
 
 	// stencilMarkPSO;
 	stencilMaskPSO = defaultSolidPSO;
@@ -422,9 +477,16 @@ void Graphics::InitPipelineStates(ComPtr<ID3D11Device>& device)
 	depthOnlyPSO.m_vertexShader = depthOnlyVS;
 	depthOnlyPSO.m_pixelShader = depthOnlyPS;
 
+	depthOnlyInstancePSO = depthOnlyPSO;
+	depthOnlyInstancePSO.m_vertexShader = depthOnlyInstanceVS;
+
 	depthOnlySkinnedPSO = depthOnlyPSO;
 	depthOnlySkinnedPSO.m_vertexShader = depthOnlySkinnedVS;
 	depthOnlySkinnedPSO.m_inputLayout = skinnedIL;
+
+	depthOnlySkinnedInstancePSO = depthOnlyPSO;
+	depthOnlySkinnedInstancePSO.m_vertexShader = depthOnlySkinnedInstanceVS;
+	depthOnlySkinnedInstancePSO.m_inputLayout = skinnedIL;
 
 	// postEffectsPSO
 	postEffectsPSO.m_vertexShader = samplingVS;

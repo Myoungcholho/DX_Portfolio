@@ -16,6 +16,7 @@ void UGameInstance::Init()
 	renderManager->Init();
 }
 
+/**/
 void UGameInstance::Tick()
 {
 	//PRO_BEGIN(L"Game_Tick");
@@ -47,12 +48,12 @@ void UGameInstance::Render()
 	if (world == nullptr && renderManager == nullptr)
 		return;
 
-	//PRO_BEGIN(L"Game_Render");
+	PRO_BEGIN(L"Game_ProxySnapshot");
 	
 	if (world)
-		world->Render();					// 프록시 생성 → 렌더 매니저에 제출
+		world->ProxySnapshot();					// 프록시 생성 → 렌더 매니저에 제출
 
-	//PRO_END(L"Game_Render");
+	PRO_END(L"Game_ProxySnapshot");
 
 }
 

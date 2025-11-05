@@ -1,8 +1,11 @@
-#include "Pch.h"
+ï»¿#include "Pch.h"
 #include "Main.h"
 #include "Systems/Window.h"
 #include <memory>
 #include "ExecutionManager.h"
+
+#pragma comment(lib, "Game.lib")
+#pragma comment(linker, "/INCLUDE:AMyController_Anchor")
 
 int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam, int command)
 {
@@ -15,10 +18,10 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 	winDesc.Height = 1080;
 	winDesc.Background = Color(0.2f, 0.2f, 0.2f, 1.0f);
 
-	// À©µµ¿ì »ı¼º
+	// ìœˆë„ìš° ìƒì„±
 	HWND hwnd = Window::Create(winDesc);
 
-	// D3D ÃÊ±âÈ­
+	// D3D ì´ˆê¸°í™”
 	D3DDesc d3dDesc = { hwnd, winDesc.Width, winDesc.Height, true };
 	D3D::SetDesc(d3dDesc);
 	D3D::Create();
@@ -45,7 +48,7 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 		skyboxActor->GetSkyboxComponent()->SetPBRMeshData(asset);
 	}
 
-	// ¹Ù´Ú
+	// ë°”ë‹¥
 	{
 		PBRMeshData ground = GeometryGenerator::MakeSquareGrid(2048, 2048, 20.f, { 40.0f,40.0f });
 		string path = "../../../_Textures/PBR/rock-wall-mortar-ue/";
@@ -62,109 +65,217 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 
 		//staticActor->GetStaticMeshComponent()->SetPBRMeshData(vector{ ground });
 		staticActor->GetStaticMeshComponent()->SetRelativePosition(Vector3(0, -1, 0));
-		staticActor->GetStaticMeshComponent()->SetRelativeRotation(Vector3(90.0f, 0.0f, 0.0f));  // ´ÜÀ§: µµ (Euler)
+		staticActor->GetStaticMeshComponent()->SetRelativeRotation(Vector3(90.0f, 0.0f, 0.0f));  // ë‹¨ìœ„: ë„ (Euler)
 	}
 
-	// ¸ğµ¨
+	// ëª¨ë¸
 	{
-		APlayer* player = world->SpawnActor<APlayer>();
-
-		//vector<PBRMeshData> meshes = GeometryGenerator::ReadFromFile("stan_lee/", "scene.gltf");
 
 		shared_ptr<const CPUMeshAsset> cpu1 = CPUAssetManager::LoadCPUMesh("stan_lee/", "scene.gltf");
 
-		//player->GetStaticMeshComponent()->SetPBRMeshData(meshes);
-		player->GetStaticMeshComponent()->SetPBRMeshData(cpu1);
-		player->GetStaticMeshComponent()->SetRelativePosition(Vector3(0, -0.5f, -9.5f));
-		player->GetStaticMeshComponent()->SetRelativeRotation(Vector3(0.0f, 0.0f, 0.0f));  // ´ÜÀ§: µµ (Euler)
+		//APlayer* player = world->SpawnActor<APlayer>();
+		//player->GetStaticMeshComponent()->SetPBRMeshData(cpu1);
+		//player->GetStaticMeshComponent()->SetRelativePosition(Vector3(0, -0.5f, -9.5f));
+		//player->GetStaticMeshComponent()->SetRelativeRotation(Vector3(0.0f, 0.0f, 0.0f));  // ë‹¨ìœ„: ë„ (Euler)
 
 		APlayer* play[100];
 
-		for (int i = 0; i < 100; ++i)
+		for (int i = 0; i < 0; ++i)
 		{
-			play[i] = world->SpawnActor<APlayer>();
+			for (int j = 0; j < 0; ++j)
+			{
+				play[i] = world->SpawnActor<APlayer>();
 
-			//play[i]->GetStaticMeshComponent()->SetPBRMeshData(meshes);
-			play[i]->GetStaticMeshComponent()->SetPBRMeshData(cpu1);
-			play[i]->GetStaticMeshComponent()->SetRelativePosition(Vector3(i, -0.5f, -9.5f));
-			play[i]->GetStaticMeshComponent()->SetRelativeRotation(Vector3(0.0f, 0.0f, 0.0f));  // ´ÜÀ§: µµ (Euler)
+				play[i]->GetStaticMeshComponent()->SetPBRMeshData(cpu1);
+				play[i]->GetStaticMeshComponent()->SetRelativePosition(Vector3(i, -0.5f, j));
+				play[i]->GetStaticMeshComponent()->SetRelativeRotation(Vector3(0.0f, 0.0f, 0.0f));  // ë‹¨ìœ„: ë„ (Euler)
+			}
 		}
 	}
 
-	// Á¶¸í
+	// ì¡°ëª…
 	{
-		//ALight* light = world->SpawnActor<ALight>();
+		ALight* light = world->SpawnActor<ALight>();
 
-		//light->GetLightComponent()->SetRelativePosition(Vector3(0, 3, -14));
-		//light->GetLightComponent()->SetRelativeRotation(Vector3(-25, 0, 0));
-		//light->GetLightComponent()->SetLightType((uint32_t)LIGHT_DIRECTIONAL | LIGHT_SHADOW);
-		//light->SetName("SpotLight");
+		light->GetLightComponent()->SetLightType((uint32_t)LIGHT_DIRECTIONAL);
+		light->GetLightComponent()->SetRelativePosition(Vector3(0, 20, -14));
+		light->GetLightComponent()->SetRelativeRotation(Vector3(-25, 0, 0));
+		light->SetName("DirectionLight");
+	}
+
+	// ëª¨ë¸ ë¡œë“œ í…ŒìŠ¤íŠ¸
+	{
+		string path = "Mixamo/PaladinJNordstrom/";
+
+		vector<string> clipNames =
+		{
+			//"MeleeAttack.fbx",
+			//"ComboAttack.fbx",
+			"Idle.fbx",
+			"EquipUnderarm.fbx",
+			"MeleeKick.fbx",
+			"RunForward.fbx",
+		};
+
+		shared_ptr<AnimationData> aniData = make_shared<AnimationData>();
+
+		auto [meshes, _] = GeometryGenerator::ReadAnimationFromFile(path, "PaladinJNordstrom.fbx");
+
+		shared_ptr<const CPUMeshAsset> asset = CPUAssetManager::CreateProcedural("PaladinJNordstrom:character", meshes);
+
+		for (auto& name : clipNames)
+		{
+			auto [_, ani] = GeometryGenerator::ReadAnimationFromFile(path, name);
+
+			if (aniData->clips.empty()) {
+				*aniData = move(ani);
+			}
+			else {
+				aniData->clips.push_back(ani.clips.front());
+			}
+		}
+		CPUAssetManager::SaveAnimation("PaladinJNordstrom:Animation", aniData);
+
+		ASkinnedTestActor* skinned = world->SpawnActor<ASkinnedTestActor>();
+		skinned->GetSkeletalMeshComponent()->SetAssets(asset, aniData);
+		skinned->GetSkeletalMeshComponent()->SetMaterialFactors(Vector3(1.0f), 0.8f, 0.0f);
+
+		skinned->GetSkeletalMeshComponent()->SetRelativePosition(Vector3(1.0f, -0.5f, -9.f));
+		skinned->GetSkeletalMeshComponent()->SetTrack(0, true, 1.0f);
+		skinned->SetName("Paladin");
 	}
 
 	// SkinnedMesh(1),(2)
 	{
 		string path = "Mixamo/Rumy/";
-		/*vector<string> clipNames =
-		{
-			"CatwalkIdle.fbx", "CatwalkIdleToWalkForward.fbx",
-			"CatwalkWalkForward.fbx", "CatwalkWalkForward03.fbx", "CatwalkWalkStop.fbx",
-			"BreakdanceFreezeVar2.fbx"
-		};*/
+
 		vector<string> clipNames =
 		{
-			"Idle.fbx", "Walking60.fbx"//, "Idle60.fbx"
+			"Idle.fbx", 
+			"Walking60.fbx",
+			"backward60.fbx",
+			"left60.fbx", "right60.fbx", "Run60.fbx",
+			//"RootWalking.fbx",
+			//"CoverToStand.fbx"
+			//"Walking60_InPlace.fbx",
+			//"Walking60_Not_InPlace.fbx"
 		};
 
 		shared_ptr<AnimationData> aniData = make_shared<AnimationData>();
 
-		// Ä³¸¯ÅÍÀÇ Á¤Á¡À» 1È¸ ÀĞÀ½
+		// ìºë¦­í„°ì˜ ì •ì ì„ 1íšŒ ì½ìŒ
 		auto [meshes, _] = GeometryGenerator::ReadAnimationFromFile(path, "character.fbx");
 
 		shared_ptr<const CPUMeshAsset> asset = CPUAssetManager::CreateProcedural("Rumy:character", meshes);
 
 		for (auto& name : clipNames)
 		{
-			// ¾Ö´Ï¸ŞÀÌ¼Ç Á¤º¸¸¸ ÀĞÀ½
+			// ì• ë‹ˆë©”ì´ì…˜ ì •ë³´ë§Œ ì½ìŒ
 			auto [_, ani] = GeometryGenerator::ReadAnimationFromFile(path, name);
 
-			// °ñ°İ°°Àº µ¥ÀÌÅÍ´Â ¿©·¯¹ø ÃÊ±âÈ­ÇÒ ÇÊ¿ä ¾øÀ¸¹Ç·Î 1È¸¸¸
-			// ¹ÙÀÎµå Æ÷Áî°°Àº µ¥ÀÌÅÍ´Â ÀÌÈÄ¿¡ µé¾î¿Ã Å¬¸³µµ ÀüºÎ °°Àº Á¤º¸´Ù.
-			// ±×·¡¼­ ÀÌÈÄ¿¡´Â Ãß°¡¸¸ ÇØÁØ´Ù
+			// ê³¨ê²©ê°™ì€ ë°ì´í„°ëŠ” ì—¬ëŸ¬ë²ˆ ì´ˆê¸°í™”í•  í•„ìš” ì—†ìœ¼ë¯€ë¡œ 1íšŒë§Œ
+			// ë°”ì¸ë“œ í¬ì¦ˆê°™ì€ ë°ì´í„°ëŠ” ì´í›„ì— ë“¤ì–´ì˜¬ í´ë¦½ë„ ì „ë¶€ ê°™ì€ ì •ë³´ë‹¤.
+			// ê·¸ë˜ì„œ ì´í›„ì—ëŠ” ì¶”ê°€ë§Œ í•´ì¤€ë‹¤
 			if (aniData->clips.empty()) {
 				*aniData = move(ani);
 			}
 			else {
-				// fbx¿¡ Å¬¸³ÀÌ ÇÏ³ª¸¸ ÀÖÁö ¾Ê´Ù. ÇöÀç´Â ÇÏ³ª¸¸ ÀÖÁö¸¸.
-				// ¾Æ¹«Æ° ¸Ç ¾Õ¿¡ Ã¹¹øÂ° Å¬¸³¸¸ »ç¿ëÇÏ°Ú´Ù´Â °Í
+				// fbxì— í´ë¦½ì´ í•˜ë‚˜ë§Œ ìˆì§€ ì•Šë‹¤. í˜„ì¬ëŠ” í•˜ë‚˜ë§Œ ìˆì§€ë§Œ.
+				// ì•„ë¬´íŠ¼ ë§¨ ì•ì— ì²«ë²ˆì§¸ í´ë¦½ë§Œ ì‚¬ìš©í•˜ê² ë‹¤ëŠ” ê²ƒ
 				aniData->clips.push_back(ani.clips.front());
 			}
 		}
+		CPUAssetManager::SaveAnimation("Rumy:Animation", aniData);
 
-		ASkinnedTestActor* skinned[100];
 
-		for (int i = 0; i < 2; ++i)
+		ASkinnedTestActor* skinned[400];
+
+		/*skinned[0] = world->SpawnActor<ASkinnedTestActor>();
+
+		skinned[0]->GetSkeletalMeshComponent()->SetAssets(asset, aniData);
+		skinned[0]->GetSkeletalMeshComponent()->SetMaterialFactors(Vector3(1.0f), 0.8f, 0.0f);
+		skinned[0]->GetSkeletalMeshComponent()->SetRelativePosition(Vector3(0, -0.5f, -9.f));
+		skinned[0]->GetSkeletalMeshComponent()->SetTrack(0, true, 1.0f);*/
+
+		for (int i = 0; i < 0; ++i)
 		{
-			skinned[i] = world->SpawnActor<ASkinnedTestActor>();
+			for (int j = 0; j < 0; ++j)
+			{
+				int index = i * 10 + j;
 
-			skinned[i]->GetSkeletalMeshComponent()->SetAssets(asset, aniData);
-			skinned[i]->GetSkeletalMeshComponent()->SetMaterialFactors(Vector3(1.0f), 0.8f, 0.0f);
-			skinned[i]->GetSkeletalMeshComponent()->SetRelativePosition(Vector3(i, 0.0f, 0.0f));
-			skinned[i]->GetSkeletalMeshComponent()->SetTrack(i % 2, true, 1.0f);
+				skinned[index] = world->SpawnActor<ASkinnedTestActor>();
+
+				skinned[index]->GetSkeletalMeshComponent()->SetAssets(asset, aniData);
+				skinned[index]->GetSkeletalMeshComponent()->SetMaterialFactors(Vector3(1.0f), 0.8f, 0.0f);
+				skinned[index]->GetSkeletalMeshComponent()->SetRelativePosition(Vector3(-15.f + i*2, -0.5f, -15.f + j*2));
+				skinned[index]->GetSkeletalMeshComponent()->SetTrack(i % clipNames.size(), true, 1.0f);
+
+				string name = "skinned" + to_string(index);
+				skinned[index]->SetName(name);
+			}
 		}
 
+
+		// Pawnê³¼ Controller í…ŒìŠ¤íŠ¸
+		{
+			/*APawnTest* pawnActor = static_cast<APawnTest*>(ClassID::Create("APawnTest", world));
+
+			pawnActor->GetSkeletalMeshComponent()->SetAssets(asset, aniData);
+			pawnActor->GetSkeletalMeshComponent()->SetMaterialFactors(Vector3(1.0f), 0.8f, 0.0f);
+			pawnActor->GetSkeletalMeshComponent()->SetRelativePosition(Vector3(0, 0.f, -9.f));
+			pawnActor->GetSkeletalMeshComponent()->SetTrack(0, true, 1.0f);
+
+			APlayerController* playerController = world->SpawnActor<APlayerController>();
+			AMyController* playerController = static_cast<AMyController*>(ClassID::Create("AMyController", world));
+			playerController->Possess(pawnActor);
+
+			AMyController* p = new AMyController();*/
+		}
+
+		// GameMode í…ŒìŠ¤íŠ¸
+		{
+			//APawnTest* p = new APawnTest();		// [í…ŒìŠ¤íŠ¸]ê°•ì œ ì°¸ì¡°, ì‹¬ë³¼ ì¶”ê°€ë¡œ .objë§í¬ìš©
+
+			//AGameMode* gameMode = static_cast<AGameMode*>(ClassID::Create("AGameMode", world));
+
+			//// --- ê¸°ë³¸ Pawn / Controller í´ë˜ìŠ¤ ì´ë¦„ ì§€ì • ---
+			//gameMode->SetDefaultPawnClass("APawnTest");
+			//gameMode->SetDefaultControllerClass("AMyController");
+
+			//// --- ê²Œì„ ì‹œì‘ ---
+			//gameMode->StartPlay();
+
+
+			//// Controller Pawn ë³€ê²½ í…ŒìŠ¤íŠ¸
+			//APawnTest* pawnActor = static_cast<APawnTest*>(ClassID::Create("APawnTest", world));
+			//pawnActor->GetSkeletalMeshComponent()->SetRelativePosition(Vector3(0, -0.5f, -8.f));
+			//pawnActor->SetName("Pawn01");
+			//
+			//APawnTest* pawnActor1 = static_cast<APawnTest*>(ClassID::Create("APawnTest", world));
+			//pawnActor1->GetSkeletalMeshComponent()->SetRelativePosition(Vector3(0, -0.5f, -7.f));
+			//pawnActor1->SetName("Pawn02");
+
+			//APawnTest* pawnActor2 = static_cast<APawnTest*>(ClassID::Create("APawnTest", world));
+			//pawnActor2->GetSkeletalMeshComponent()->SetRelativePosition(Vector3(0, -0.5f, -6.f));
+			//pawnActor2->SetName("Pawn03");
+		}
 	}
 
-	// ¸ğµç ¾×ÅÍ ¹èÄ¡°¡ ³¡³µ´Ù¸é
+	// ëª¨ë“  ì•¡í„° ë°°ì¹˜ê°€ ëë‚¬ë‹¤ë©´
 	world->StartAllActors();
 
 	CKeyboard::Create();
 	CTimer::Create();
 	CMouse::Create();
 	CContext::Create();
+	PerfMon::Init(D3D::Get()->GetDevice(), 3);
 
 	EditorApplication::SetWorld(game->GetWorld());
 	EditorApplication::SetRenderer(game->GetRenderer());
 	EditorApplication::Initialize();
+
+	// FPSí™•ì¸ìš© ë°ì´í„° ë¡œë”© ì‹œê°„ì€ ì œì™¸í•˜ê¸° ìœ„í•´ ì‹œê°„ì‹œê°„ ì¬ì…‹íŒ…
+	g_profile.SetStartTime();		
 
 	WPARAM result = Window::Run(game);
 

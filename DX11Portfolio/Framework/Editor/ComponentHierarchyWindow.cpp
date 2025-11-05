@@ -34,13 +34,15 @@ ComponentHierarchyWindow::ComponentHierarchyWindow()
 
 ComponentHierarchyWindow::~ComponentHierarchyWindow()
 {
-	if (m_ComponentHandle.IsValid())
-		EditorSelection::OnSelected.Remove(m_ComponentHandle);
+	if (ComponentHandle.IsValid())
+		EditorSelection::OnSelected.Remove(ComponentHandle);
 }
 
 void ComponentHierarchyWindow::Initialize() 
 {
-	m_ComponentHandle = EditorSelection::OnSelected.AddDynamic(this, &ComponentHierarchyWindow::OnUpdateSeleted, "ComponentHierarchyWindow::OnUpdateSeleted");
+	ComponentHandle = EditorSelection::OnSelected.AddDynamic(
+		this, &ComponentHierarchyWindow::OnUpdateSeleted, 
+		"ComponentHierarchyWindow::OnUpdateSeleted");
 }
 
 void ComponentHierarchyWindow::Run()

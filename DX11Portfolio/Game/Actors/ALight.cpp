@@ -11,7 +11,7 @@ ALight::ALight()
 
 void ALight::Initialize()
 {
-	m_lightComponent->SetRadiance(Vector3(5.0f));
+	m_lightComponent->SetRadiance(Vector3(3.0f));
 	m_lightComponent->SetFalloff(0.0f,20.0f);
 }
 

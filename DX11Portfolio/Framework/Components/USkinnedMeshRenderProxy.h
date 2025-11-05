@@ -18,11 +18,21 @@ public:
 	void Draw(ID3D11DeviceContext* context) override;
 	void DrawNormal(ID3D11DeviceContext* context) override;
 	
+	// DrawIndexed용
 	void InitBonesRT(int boneCount);
 	void UpdateBonesGPU();
 	void SetUpdateBones(const vector<Matrix>& bones);
 
+	// 인스턴싱
+	void SetUpdateBonesCPU(const vector<Matrix>& bones);
+	vector<Matrix>* GetBonesPalette()
+	{
+		return &bonesPalette;
+	}
+
 private:
-	StructuredBuffer<Matrix> boneBufferRT;
+	StructuredBuffer<Matrix> boneBufferRT;		// 미사용
+
+	vector<Matrix> bonesPalette;
 	int boneCount = 0;
 };

@@ -14,9 +14,9 @@ struct FDelegateHandle
 struct FBoundFunction
 {
     void* ObjectPtr = nullptr;          // 함수가지는 객체
-    std::function<void()> Invoker;      // 실행할 함수 주소
+    function<void()> Invoker;      // 실행할 함수 주소
     FDelegateHandle Handle;             // 디버깅용 핸들
-    std::string FunctionName;           // 함수 이름 Delete용
+    string FunctionName;           // 함수 이름 Delete용
 
     bool Matches(void* InObj, const std::string& InFuncName) const
     {
@@ -28,7 +28,7 @@ class FDynamicMulticastDelegate
 {
 public:
     template<typename T>
-    FDelegateHandle AddDynamic(T* Object, void (T::* Method)(), const std::string& MethodName)
+    FDelegateHandle AddDynamic(T* Object, void (T::* Method)(), const string& MethodName)
     {
         FBoundFunction Bound;
         Bound.ObjectPtr = static_cast<void*>(Object);
@@ -40,9 +40,9 @@ public:
     }
 
     template<typename T>
-    void RemoveDynamic(T* Object, const std::string& MethodName)
+    void RemoveDynamic(T* Object, const string& MethodName)
     {
-        Delegates.erase(std::remove_if(Delegates.begin(), Delegates.end(),
+        Delegates.erase(remove_if(Delegates.begin(), Delegates.end(),
             [Object, &MethodName](const FBoundFunction& bound)
             {
                 return bound.Matches(static_cast<void*>(Object), MethodName);

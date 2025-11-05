@@ -272,6 +272,45 @@
     <ClInclude Include="Manager\GPUAssetManager.h">
       <Filter>Manager</Filter>
     </ClInclude>
+    <ClInclude Include="Utilities\PerfMon.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\SkeletalEditor.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\AnimationEditor.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Gameplay\AGameMode.h">
+      <Filter>Gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="Gameplay\AController.h">
+      <Filter>Gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="Gameplay\APlayerController.h">
+      <Filter>Gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="Gameplay\APawn.h">
+      <Filter>Gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="Gameplay\ACharacter.h">
+      <Filter>Gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\PawnEditor.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Gameplay\ClassID.h">
+      <Filter>Gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="Gameplay\ClassIDRegister.h">
+      <Filter>Gameplay</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\ControllerEditor.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\FEditorCommandQueue.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Framework.cpp" />
@@ -500,6 +539,45 @@
     <ClCompile Include="Manager\GPUAssetManager.cpp">
       <Filter>Manager</Filter>
     </ClCompile>
+    <ClCompile Include="Utilities\PerfMon.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\SkeletalEditor.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Animations\AnimationClip.cpp">
+      <Filter>Animations</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\AnimationEditor.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Gameplay\AGameMode.cpp">
+      <Filter>Gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="Gameplay\AController.cpp">
+      <Filter>Gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="Gameplay\APlayerController.cpp">
+      <Filter>Gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="Gameplay\APawn.cpp">
+      <Filter>Gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="Gameplay\ACharacter.cpp">
+      <Filter>Gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\PawnEditor.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Gameplay\ClassID.cpp">
+      <Filter>Gameplay</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\ControllerEditor.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\FEditorCommandQueue.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="System">
@@ -571,6 +649,9 @@
     <Filter Include="Components\Proxy">
       <UniqueIdentifier>{4b5f7c61-5d31-4350-9b31-3db4ff4e87bc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Gameplay">
+      <UniqueIdentifier>{a0234c5a-5e7d-4525-bf95-2f0261af0e8e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\Billboards\BillboardPointsVertexShader.hlsl">
@@ -626,6 +707,15 @@
     </FxCompile>
     <FxCompile Include="Shaders\PostProcess\PostEffectsPS.hlsl">
       <Filter>Shaders\PostProcess</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\BasicShader\BasicInstancedVS.hlsl">
+      <Filter>Shaders\BasicShader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\DepthMap\DepthOnlyInstanceVS.hlsl">
+      <Filter>Shaders\DepthMap</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\BasicShader\BasicInstancedPS.hlsl">
+      <Filter>Shaders\BasicShader</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

@@ -29,12 +29,15 @@ public:
 	AActor* GetParent() const;
 
 public:
-	void Destroy();
+	virtual void Destroy();
 	virtual void Initialize() {};
 	virtual void BeginPlay() {};
 	virtual void Tick();
 	virtual void FixedTick(double dt);
 	virtual void OnGUI();
+
+public:
+	void ClearComponent();
 
 public:
 	shared_ptr<UActorComponent> AddComponent(shared_ptr<UActorComponent> comp);
@@ -47,7 +50,15 @@ protected:
 	vector<shared_ptr<UActorComponent>> Components;
 	shared_ptr<USceneComponent> root = nullptr;
 	string m_name;
-	UWorld* m_world = nullptr;
+	UWorld* world = nullptr;
+
+protected:
+	Transform actorTransform;				// RootComponent가 없을 때만 사용되는 Transform
+public:
+	Vector3 GetPosition() const;
+	void SetPosition(const Vector3& pos);
+	Quaternion GetRotation() const;
+	void SetRotation(const Quaternion& q);
 
 private:
 	bool ContainsComponent(const shared_ptr<UActorComponent>& comp) const;

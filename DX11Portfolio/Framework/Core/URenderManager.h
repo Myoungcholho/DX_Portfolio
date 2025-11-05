@@ -45,4 +45,5 @@ private:
 
 private:
 	unique_ptr<URenderer> m_renderer;
+
 };

@@ -6,6 +6,8 @@
 #include "Actors/APlayer.h"
 #include "Actors/ALight.h"
 #include "Actors/ASkinnedTestActor.h"
+#include "Actors/APawnTest.h"
+#include "Actors/AMyController.h"
 
 // 오브젝트
 #include "Object/Mirror.h"

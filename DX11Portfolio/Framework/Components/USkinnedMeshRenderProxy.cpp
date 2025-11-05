@@ -117,3 +117,8 @@ void USkinnedMeshRenderProxy::SetUpdateBones(const vector<Matrix>& bones)
 {
     boneBufferRT.m_cpu = bones;
 }
+
+void USkinnedMeshRenderProxy::SetUpdateBonesCPU(const vector<Matrix>& bones)
+{
+    bonesPalette = bones;
+}

@@ -20,6 +20,7 @@ namespace Graphics
 	extern ComPtr<ID3D11DepthStencilState> drawDSS; // 일반적으로 그리기
 	extern ComPtr<ID3D11DepthStencilState> maskDSS; // 스텐실버퍼에 표시
 	extern ComPtr<ID3D11DepthStencilState> drawMaskedDSS; // 스텐실 표시된 곳만
+	extern ComPtr<ID3D11DepthStencilState> depthEqualState;
 
 	// Shaders
 	extern ComPtr<ID3D11VertexShader> basicVS;
@@ -28,7 +29,11 @@ namespace Graphics
 	extern ComPtr<ID3D11VertexShader> samplingVS;
 	extern ComPtr<ID3D11VertexShader> normalVS;
 	extern ComPtr<ID3D11VertexShader> depthOnlyVS;
+	extern ComPtr<ID3D11VertexShader> depthOnlyInstanceVS;
 	extern ComPtr<ID3D11VertexShader> depthOnlySkinnedVS;
+	extern ComPtr<ID3D11VertexShader> depthOnlySkinnedInstanceVS;
+	extern ComPtr<ID3D11VertexShader> basicInstanceVS;				// 인스턴스용
+	extern ComPtr<ID3D11VertexShader> skinnedInstanceVS;
 
 	extern ComPtr<ID3D11PixelShader> basicPS;
 	extern ComPtr<ID3D11PixelShader> skyboxPS;
@@ -70,10 +75,15 @@ namespace Graphics
 	extern GraphicsPSO reflectSkyboxWirePSO;
 	extern GraphicsPSO normalsPSO;
 	extern GraphicsPSO depthOnlyPSO;
+	extern GraphicsPSO depthOnlyInstancePSO;			// 인스턴싱용 PSO
 	extern GraphicsPSO depthOnlySkinnedPSO;				// 애니메이션
+	extern GraphicsPSO depthOnlySkinnedInstancePSO;		// 인스턴싱용 PSO
 	extern GraphicsPSO postEffectsPSO;
 	extern GraphicsPSO postProcessingPSO;
-
+	extern GraphicsPSO defaultSolidInstancePSO;
+	extern GraphicsPSO defaultWireInstancePSO;
+	extern GraphicsPSO skinnedSolidInstancePSO;
+	extern GraphicsPSO skinnedWireInstancePSO;
 
 	void InitCommonStates(ComPtr<ID3D11Device>& device);
 

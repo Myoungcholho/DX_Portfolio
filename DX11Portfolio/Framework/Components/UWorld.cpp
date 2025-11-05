@@ -9,6 +9,9 @@ void UWorld::Initialize()
 
 void UWorld::Tick()
 {
+	// Editor가 보낸 변경사항 처리
+	FEditorCommandQueue::ProcessAll();
+
 	// 이번 프레임에 순회할 Actor 스냅샷
 	vector<AActor*> snapshot;
 	snapshot.reserve(Actors.size());
@@ -37,7 +40,7 @@ void UWorld::FixedTick(double fixedDt)
 	}
 }
 
-void UWorld::Render()
+void UWorld::ProxySnapshot()
 {
 	vector<shared_ptr<URenderProxy>> proxies;
 	vector<LightData> lights;
@@ -148,6 +151,8 @@ void UWorld::RemoveActor(AActor* actor)
 
 	if (it == Actors.end()) 
 		return;
+
+	actor->ClearComponent();
 
 	actor->SetWorld(nullptr);
 	Actors.erase(it);

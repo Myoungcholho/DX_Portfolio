@@ -88,6 +88,18 @@ void CContext::Tick_WorldTime()
 	
 }
 
+SimpleMath::Matrix CContext::GetViewMatrix()
+{
+	return View->GetViewMatrix();
+}
+
+SimpleMath::Matrix CContext::GetProjectionMatrix()
+{
+	return View->GetProjectionMatrix();
+}
+
+// -------------- ¹Ì»ç¿ë ----------------------------------------------------//
+
 void CContext::UpdateMirror(const Matrix& mirror)
 {
 	//this->mirror = mirror;
@@ -153,15 +165,6 @@ void CContext::ResizeScreen()
 	Viewport->MaxDepth = 1;*/
 }
 
-SimpleMath::Matrix CContext::GetViewMatrix()
-{
-	return View->GetViewMatrix();
-}
-
-SimpleMath::Matrix CContext::GetProjectionMatrix()
-{
-	return View->GetProjectionMatrix();
-}
 
 //SimpleMath::Matrix CContext::GetMirrorMatrix()
 //{

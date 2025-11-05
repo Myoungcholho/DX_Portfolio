@@ -1,4 +1,4 @@
-#include "Framework.h"
+ï»¿#include "Framework.h"
 #include "ModelLoader.h"
 
 #include <DirectXMesh.h>
@@ -6,8 +6,30 @@
 #include <filesystem>
 #include <fstream>
 
+#define M_PI 3.14159265358979323846
+
+// ìœ í‹¸: ì¿¼í„°ë‹ˆì–¸ -> Yaw(ë„)ë§Œ ê°„ë‹¨íˆ ë½‘ê¸° (ìš°ì¸¡ì†ì¢Œí‘œ Y-up ê°€ì •)
+static float YawDegFromQuaternion(const aiQuaternion& q)
+{
+	// Yaw(=Yì¶• íšŒì „)ë§Œ ëŒ€ëµ í™•ì¸í•˜ëŠ” í•­ë“±ì‹
+	// ì°¸ê³ : Assimp ì¿¼í„°ë‹ˆì–¸ì€ (x,y,z,w)
+	double siny_cosp = 2.0 * (double(q.w) * q.y + double(q.z) * q.x);
+	double cosy_cosp = 1.0 - 2.0 * (double(q.y) * q.y + double(q.x) * q.x);
+	double yawRad = std::atan2(siny_cosp, cosy_cosp);
+	return float(yawRad * 180.0 / M_PI);
+}
+
+// ìœ í‹¸: ì´ë¦„ì´ Hipsë¥˜ì¸ì§€ íŒì •
+static bool IsHipsName(const std::string& n)
+{
+	// í•„ìš”í•˜ë©´ ì¶”ê°€: "mixamorig:Hips", "root_Hips", "Armature|Hips" ë“±
+	if (n == "Hips") return true;
+	if (n.find("Hips") != std::string::npos) return true;
+	return false;
+}
+
 /// <summary>
-/// ¿©·¯ °³ÀÇ ¸Ş½Ã¸¦ ¹Ş¾Æ °¢°¢ÀÇ vertex normalÀ» ´Ù½Ã °è»êÇÏ´Â ÇÔ¼ö
+/// ì—¬ëŸ¬ ê°œì˜ ë©”ì‹œë¥¼ ë°›ì•„ ê°ê°ì˜ vertex normalì„ ë‹¤ì‹œ ê³„ì‚°í•˜ëŠ” í•¨ìˆ˜
 /// </summary>
 void UpdateNormals(vector<PBRMeshData>& meshes)
 {
@@ -16,7 +38,7 @@ void UpdateNormals(vector<PBRMeshData>& meshes)
 		vector<Vector3> normalsTemp(m.vertices.size(), Vector3(0.0f));
 		vector<float> weightsTemp(m.vertices.size(), 0.0f);
 
-		// ¸Ş½ÃÀÇ ÀÎµ¦½º ¹öÆÛ¸¦ 3°³¾¿ ÀĞ¾î »ï°¢Çü ÇÏ³ª¾¿ ¼øÈ¸
+		// ë©”ì‹œì˜ ì¸ë±ìŠ¤ ë²„í¼ë¥¼ 3ê°œì”© ì½ì–´ ì‚¼ê°í˜• í•˜ë‚˜ì”© ìˆœíšŒ
 		for (int i = 0; i < m.indices.size(); i += 3) 
 		{
 			int idx0 = m.indices[i];
@@ -27,21 +49,21 @@ void UpdateNormals(vector<PBRMeshData>& meshes)
 			Vertex v1 = m.vertices[idx1];
 			Vertex v2 = m.vertices[idx2];
 
-			// »ï°¢ÇüÀÇ µÎ º¯ º¤ÅÍ¸¦ ¿ÜÀûÇØ ¹ı¼±À» ±¸ÇÔ
+			// ì‚¼ê°í˜•ì˜ ë‘ ë³€ ë²¡í„°ë¥¼ ì™¸ì í•´ ë²•ì„ ì„ êµ¬í•¨
 			Vector3 faceNormal = (v1.position - v0.position).Cross(v2.position - v0.position);
 
-			// ±¸ÇÑ ¹ı¼±À» ¼¼ Á¤Á¡¿¡ ´©Àû, Á¤Á¡ÀÌ ¼ÓÇÑ »ï°¢ÇüµéÀÇ ³ë¸»À» ÀüºÎ ´õÇÔ
+			// êµ¬í•œ ë²•ì„ ì„ ì„¸ ì •ì ì— ëˆ„ì , ì •ì ì´ ì†í•œ ì‚¼ê°í˜•ë“¤ì˜ ë…¸ë§ì„ ì „ë¶€ ë”í•¨
 			normalsTemp[idx0] += faceNormal;
 			normalsTemp[idx1] += faceNormal;
 			normalsTemp[idx2] += faceNormal;
 
-			// Á¤Á¡ÀÌ °ãÃÄÁö¸é normal°ªµµ ´Ù¾çÇÏ°í, ÀÌ¸¦ Æò±Õ³»±âÀ§ÇØ 1¾¿ ´©ÀûÇØµÒ
+			// ì •ì ì´ ê²¹ì³ì§€ë©´ normalê°’ë„ ë‹¤ì–‘í•˜ê³ , ì´ë¥¼ í‰ê· ë‚´ê¸°ìœ„í•´ 1ì”© ëˆ„ì í•´ë‘ 
 			weightsTemp[idx0] += 1.0f;
 			weightsTemp[idx1] += 1.0f;
 			weightsTemp[idx2] += 1.0f;
 		}
 
-		// ¸ğµç Á¤Á¡¿¡ ´ëÇØ ´©ÀûµÈ ³ë¸» ÇÕ°è¸¦ ³ª´² Æò±ÕÀ» ±¸ÇÔ
+		// ëª¨ë“  ì •ì ì— ëŒ€í•´ ëˆ„ì ëœ ë…¸ë§ í•©ê³„ë¥¼ ë‚˜ëˆ  í‰ê· ì„ êµ¬í•¨
 		for (int i = 0; i < m.vertices.size(); i++) 
 		{
 			if (weightsTemp[i] > 0.0f) 
@@ -54,14 +76,14 @@ void UpdateNormals(vector<PBRMeshData>& meshes)
 }
 
 /// <summary>
-/// ÆÄÀÏ °æ·Î¿¡¼­ . ÀÌÈÄÀÇ È®ÀåÀÚ¸¦ ¼Ò¹®ÀÚ·Î º¯°æÇØ ¸®ÅÏ
+/// íŒŒì¼ ê²½ë¡œì—ì„œ . ì´í›„ì˜ í™•ì¥ìë¥¼ ì†Œë¬¸ìë¡œ ë³€ê²½í•´ ë¦¬í„´
 /// </summary>
 string GetExtension(const string filename)
 {
-	// .ÀÌÈÄÀÇ È®ÀåÀÚ¸¸ °¡Á®¿À°í
+	// .ì´í›„ì˜ í™•ì¥ìë§Œ ê°€ì ¸ì˜¤ê³ 
 	string ext(filesystem::path(filename).extension().string());
 
-	// È®ÀåÀÚ¸¦ ÀüºÎ ¼Ò¹®ÀÚ·Î º¯°æ (tolower)
+	// í™•ì¥ìë¥¼ ì „ë¶€ ì†Œë¬¸ìë¡œ ë³€ê²½ (tolower)
 	std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c) { return std::tolower(c); });
 	return ext;
 }
@@ -69,46 +91,60 @@ string GetExtension(const string filename)
 ///////////////////////////////////////////////////////////////////////////////
 
 /// <summary>
-/// Assimp¿¡¼­ ÀĞ¾î¿Â ¾Ö´Ï¸ŞÀÌ¼Ç Á¤º¸¸¦ m_aniData·Î ¿Å°Ü ´ã´Â ¿ªÇÒ
+/// Assimpì—ì„œ ì½ì–´ì˜¨ ì• ë‹ˆë©”ì´ì…˜ ì •ë³´ë¥¼ m_aniDataë¡œ ì˜®ê²¨ ë‹´ëŠ” ì—­í• 
 /// </summary>
-void ModelLoader::ReadAnimation(const aiScene *pScene)
+void ModelLoader::ReadAnimation(const aiScene *pScene, string filename)
 {
-    m_aniData.clips.resize(pScene->mNumAnimations);				// AnimationClip °´Ã¼ »ı¼º
+    m_aniData.clips.resize(pScene->mNumAnimations);				// AnimationClip ê°ì²´ ìƒì„±
 
     for (uint32_t i = 0; i < pScene->mNumAnimations; i++) 
 	{
-        AnimationClip &clip = m_aniData.clips[i];				// AnimationClip µ¥ÀÌÅÍ Ã¤¿ì±â À§ÇØ ÂüÁ¶
+        AnimationClip &clip = m_aniData.clips[i];				// AnimationClip ë°ì´í„° ì±„ìš°ê¸° ìœ„í•´ ì°¸ì¡°
 
-        const aiAnimation *ani = pScene->mAnimations[i];		// .fbxÀÇ i¹øÂ° ¾Ö´Ï¸ŞÀÌ¼ÇÀ» ²¨³¿
+        const aiAnimation *ani = pScene->mAnimations[i];		// .fbxì˜ ië²ˆì§¸ ì• ë‹ˆë©”ì´ì…˜ì„ êº¼ëƒ„
 
-        clip.duration = ani->mDuration;							// i¹øÂ° ¾Ö´Ï¸ŞÀÌ¼ÇÀÇ ÃÑ ±æÀÌ
-        clip.ticksPerSec = ani->mTicksPerSecond;				// i¹øÂ° ¾Ö´Ï¸ŞÀÌ¼ÇÀÇ Æ½ ¼Óµµ
-        clip.keys.resize(m_aniData.boneNameToId.size());		// Ä³¸¯ÅÍ ÀüÃ¼ º» °³¼ö·Î ¾Ö´Ï¸ŞÀÌ¼Ç µ¥ÀÌÅÍ°¡ ÀÖµç ¾øµç bondId·Î ¹Ù·Î Á¢±Ù °¡´ÉÇÏ°Ô ¹è¿­ ÅëÀÏ
-        clip.numChannels = ani->mNumChannels;					// ¾Ö´Ï¸ŞÀÌ¼Ç µ¥ÀÌÅÍ°¡ ÀÖ´Â º»ÀÇ ¼ö(µğ¹ö±ë¿ë, È¤Àº loop È½¼ö·Îµµ »ç¿ë °¡´É)
+        clip.duration = ani->mDuration;							// ië²ˆì§¸ ì• ë‹ˆë©”ì´ì…˜ì˜ ì´ ê¸¸ì´
+        clip.ticksPerSec = ani->mTicksPerSecond;				// ië²ˆì§¸ ì• ë‹ˆë©”ì´ì…˜ì˜ í‹± ì†ë„
+        clip.keys.resize(m_aniData.boneNameToId.size());		// ìºë¦­í„° ì „ì²´ ë³¸ ê°œìˆ˜ë¡œ ì• ë‹ˆë©”ì´ì…˜ ë°ì´í„°ê°€ ìˆë“  ì—†ë“  bondIdë¡œ ë°”ë¡œ ì ‘ê·¼ ê°€ëŠ¥í•˜ê²Œ ë°°ì—´ í†µì¼
+        clip.numChannels = ani->mNumChannels;					// ì• ë‹ˆë©”ì´ì…˜ ë°ì´í„°ê°€ ìˆëŠ” ë³¸ì˜ ìˆ˜(ë””ë²„ê¹…ìš©, í˜¹ì€ loop íšŸìˆ˜ë¡œë„ ì‚¬ìš© ê°€ëŠ¥)
 		clip.numKeys = static_cast<int>(clip.duration);
+		clip.name = filename;
 
-		// ¾Ö´Ï¸ŞÀÌ¼ÇÀÌ Àû¿ëµÇ´Â º» °³¼ö¸¸Å­ ¹İº¹
+		// ì• ë‹ˆë©”ì´ì…˜ì´ ì ìš©ë˜ëŠ” ë³¸ ê°œìˆ˜ë§Œí¼ ë°˜ë³µ
         for (uint32_t c = 0; c < ani->mNumChannels; c++) 
 		{
-            const aiNodeAnim *nodeAnim = ani->mChannels[c];								// ¾Ö´Ï¸ŞÀÌ¼Ç¿¡¼­ º¯°æÇÒ º»ÀÇ µ¥ÀÌÅÍ¸¦ °¡Á®¿È ex)spine01, leftfoot
-			const int boneId = m_aniData.boneNameToId[nodeAnim->mNodeName.C_Str()];		// ÇØ´ç º»ÀÇ ÀÌ¸§À» ¾ò°í, ¸î¹ø ÀÎµ¦½ºÀÎÁö ¾ò¾î¿È
-            clip.keys[boneId].resize(nodeAnim->mNumPositionKeys);						// ÇØ´ç º»ÀÌ °¡Áö´Â Å° ÇÁ·¹ÀÓ ¼ö¸¸Å­ ¹è¿­ Å©±â¸¦ È®º¸
+            const aiNodeAnim *nodeAnim = ani->mChannels[c];								// ì• ë‹ˆë©”ì´ì…˜ì—ì„œ ë³€ê²½í•  ë³¸ì˜ ë°ì´í„°ë¥¼ ê°€ì ¸ì˜´ ex)spine01, leftfoot
+			const int boneId = m_aniData.boneNameToId[nodeAnim->mNodeName.C_Str()];		// í•´ë‹¹ ë³¸ì˜ ì´ë¦„ì„ ì–»ê³ , ëª‡ë²ˆ ì¸ë±ìŠ¤ì¸ì§€ ì–»ì–´ì˜´
+            clip.keys[boneId].resize(nodeAnim->mNumPositionKeys);						// í•´ë‹¹ ë³¸ì´ ê°€ì§€ëŠ” í‚¤ í”„ë ˆì„ ìˆ˜ë§Œí¼ ë°°ì—´ í¬ê¸°ë¥¼ í™•ë³´
 
-			// ÇØ´ç º»ÀÌ °¡Áö´Â Å°ÇÁ·¹ÀÓ ¼ö¸¸Å­ ¹İº¹
-			// Å° ÇÁ·¹ÀÓ ±â¹İ ¾Ö´Ï¸ŞÀÌ¼Ç°ú ÇÁ·¹ÀÓº° »ùÇÃ¸µ ¾Ö´Ï¸ŞÀÌ¼ÇÀÇ Â÷ÀÌ°¡ ¿©±â¼­ ³ªÅ¸³²,
-			// ÀÎµ¦½º¸¦ ½ÇÇàÇÒ ÇÁ·¹ÀÓ °ªÀ¸·Î »ç¿ëÇÏÁö ¾Ê´Â´Ù.
+			// í•´ë‹¹ ë³¸ì´ ê°€ì§€ëŠ” í‚¤í”„ë ˆì„ ìˆ˜ë§Œí¼ ë°˜ë³µ
+			// í‚¤ í”„ë ˆì„ ê¸°ë°˜ ì• ë‹ˆë©”ì´ì…˜ê³¼ í”„ë ˆì„ë³„ ìƒ˜í”Œë§ ì• ë‹ˆë©”ì´ì…˜ì˜ ì°¨ì´ê°€ ì—¬ê¸°ì„œ ë‚˜íƒ€ë‚¨,
+			// ì¸ë±ìŠ¤ë¥¼ ì‹¤í–‰í•  í”„ë ˆì„ ê°’ìœ¼ë¡œ ì‚¬ìš©í•˜ì§€ ì•ŠëŠ”ë‹¤.
 			// 
             for (uint32_t k = 0; k < nodeAnim->mNumPositionKeys; k++)
 			{
-				const aiVector3D pos = nodeAnim->mPositionKeys[k].mValue;				// Æ÷Áö¼Ç °ª
-                const aiQuaternion rot = nodeAnim->mRotationKeys[k].mValue;				// È¸Àü °ª
-                const aiVector3D scale = nodeAnim->mScalingKeys[k].mValue;				// Å©±â °ª
+				const aiVector3D pos = nodeAnim->mPositionKeys[k].mValue;				// í¬ì§€ì…˜ ê°’
+                const aiQuaternion rot = nodeAnim->mRotationKeys[k].mValue;				// íšŒì „ ê°’
+                const aiVector3D scale = nodeAnim->mScalingKeys[k].mValue;				// í¬ê¸° ê°’
 				
-				AnimationClip::Key &key = clip.keys[boneId][k];							// ÇØ´ç º»ÀÇ k¹øÂ° Å°ÇÁ·¹ÀÓ µ¥ÀÌÅÍ¸¦ ÂüÁ¶								
-                key.pos = {pos.x, pos.y, pos.z};										// k¹øÂ° Å°ÇÁ·¹ÀÓ À§Ä¡ µ¥ÀÌÅÍ¸¦ ÀúÀå
-                key.rot = Quaternion(rot.x, rot.y, rot.z, rot.w);						// k¹øÂ° Å°ÇÁ·¹ÀÓ È¸Àü µ¥ÀÌÅÍ ÀúÀå
-                key.scale = {scale.x, scale.y, scale.z};								// Å©±â µ¥ÀÌÅÍ ÀúÀå
-				key.timeTicks = nodeAnim->mPositionKeys[k].mTime;						// Å°ÇÁ·¹ÀÓÀÌ ÁøÇà½Ã°£ ¾ğÁ¦¿¡ ÇØ´çÇÏ´ÂÁö, ÇöÀç ÀÎµ¦½º==mTimeÀÌ±â¿¡ ±»ÀÌ »ç¿ëÀº ¾ÈÇÑ´Ù.
+				AnimationClip::Key &key = clip.keys[boneId][k];							// í•´ë‹¹ ë³¸ì˜ kë²ˆì§¸ í‚¤í”„ë ˆì„ ë°ì´í„°ë¥¼ ì°¸ì¡°								
+
+                key.pos = {pos.x , pos.y, pos.z };										// kë²ˆì§¸ í‚¤í”„ë ˆì„ ìœ„ì¹˜ ë°ì´í„°ë¥¼ ì €ì¥
+                key.rot = Quaternion(rot.x, rot.y, rot.z, rot.w);						// kë²ˆì§¸ í‚¤í”„ë ˆì„ íšŒì „ ë°ì´í„° ì €ì¥
+
+                key.scale = {scale.x, scale.y, scale.z};								// í¬ê¸° ë°ì´í„° ì €ì¥
+				key.timeTicks = nodeAnim->mPositionKeys[k].mTime;						// í‚¤í”„ë ˆì„ì´ ì§„í–‰ì‹œê°„ ì–¸ì œì— í•´ë‹¹í•˜ëŠ”ì§€, í˜„ì¬ ì¸ë±ìŠ¤==mTimeì´ê¸°ì— êµ³ì´ ì‚¬ìš©ì€ ì•ˆí•œë‹¤.
+
+				// === Hipsë§Œ ê°„ë‹¨ ì¶œë ¥ ===
+				const std::string chName = nodeAnim->mNodeName.C_Str();
+				if (IsHipsName(chName)) 
+				{
+					std::cout << "frame=" << k
+						<< " pos=(" << key.pos.x << ", " << key.pos.y << ", " << key.pos.z << ")"
+						<< " rotQ=(" << key.rot.x << ", " << key.rot.y << ", " << key.rot.z << ", " << key.rot.w << ")"
+						<< " scale=(" << key.scale.x << ", " << key.scale.y << ", " << key.scale.z << ")"
+						<< "\n";
+				}
             }
         }
     }
@@ -131,35 +167,35 @@ void ModelLoader::Load(string basePath, string filename, bool revertNormals)
 		aiProcess_Triangulate | aiProcess_ConvertToLeftHanded
 	);
 
-	if (pScene)	// ÆÄÀÏ ÀĞ¾ú´Ù¸é
+	if (pScene)	// íŒŒì¼ ì½ì—ˆë‹¤ë©´
 	{
-		// 1. »ÀµéÀÇ ¸ñ·Ï »ı¼º [boneNameToId ¼ÂÆÃ]
+		// 1. ë¼ˆë“¤ì˜ ëª©ë¡ ìƒì„± [boneNameToId ì…‹íŒ…]
 		FindDeformingBones(pScene);
 
-		// 2. Æ®¸® ±¸Á¶¸¦ µû¶ó ¾÷µ¥ÀÌÆ® ¼ø¼­´ë·Î »ÀµéÀÇ ÀÎµ¦½º °áÁ¤ [boneNameToId ¼ÂÆÃ]
+		// 2. íŠ¸ë¦¬ êµ¬ì¡°ë¥¼ ë”°ë¼ ì—…ë°ì´íŠ¸ ìˆœì„œëŒ€ë¡œ ë¼ˆë“¤ì˜ ì¸ë±ìŠ¤ ê²°ì • [boneNameToId ì…‹íŒ…]
 		int counter = 0;
 		UpdateBoneIDs(pScene->mRootNode, &counter);
 
-		// 3. ¾÷µ¥ÀÌÆ® ¼ø¼­´ë·Î »À ÀÌ¸§ ÀúÀå [boneIdToName ¼ÂÆÃ]
+		// 3. ì—…ë°ì´íŠ¸ ìˆœì„œëŒ€ë¡œ ë¼ˆ ì´ë¦„ ì €ì¥ [boneIdToName ì…‹íŒ…]
 		m_aniData.boneIdToName.resize(m_aniData.boneNameToId.size());
 		for (pair<const string,int32_t>& i : m_aniData.boneNameToId)
 			m_aniData.boneIdToName[i.second] = i.first;
 
-		// 4. °¢ »ÀÀÇ ºÎ¸ğ ÀÎµ¦½º ÀúÀå ÁØºñ [boneParents ¼ÂÆÃ]
+		// 4. ê° ë¼ˆì˜ ë¶€ëª¨ ì¸ë±ìŠ¤ ì €ì¥ ì¤€ë¹„ [boneParents ì…‹íŒ…]
 		m_aniData.boneParents.resize(m_aniData.boneNameToId.size(), -1);
 		
 		Matrix tr;
 		ProcessNode(pScene->mRootNode, pScene, tr);
 
-		// 5. ¾Ö´Ï¸ŞÀÌ¼Ç Á¤º¸ ÀĞ±â
+		// 5. ì• ë‹ˆë©”ì´ì…˜ ì •ë³´ ì½ê¸°
 		if (pScene->HasAnimations())
-			ReadAnimation(pScene);
+			ReadAnimation(pScene, filename);
 		
-		// 6. tangent ±¸ÇØ¼­ ÀúÀåÇÏ±â
+		// 6. tangent êµ¬í•´ì„œ ì €ì¥í•˜ê¸°
 		UpdateTangents();
 
 	}
-	else // ÆÄÀÏ ¸øÀĞ¾ú´Ù¸é
+	else // íŒŒì¼ ëª»ì½ì—ˆë‹¤ë©´
 	{
 		std::cout << "Failed to read file: " << m_basePath + filename << std::endl;
 		auto errorDescription = importer.GetErrorString();
@@ -168,8 +204,8 @@ void ModelLoader::Load(string basePath, string filename, bool revertNormals)
 }
 
 /// <summary>
-/// ¸ğµ¨ Á¤Á¡ µ¥ÀÌÅÍ´Â ÀÌ¹Ì Load¿¡¼­ ÇÑ¹ø ÀĞ¾î¿ÔÀ¸¹Ç·Î ´Ù½Ã ÇÒ ÇÊ¿ä ¾ø±â¿¡
-/// ¾Ö´Ï¸ŞÀÌ¼Ç Á¤º¸¸¸ LoadÇÏ´Â °Í
+/// ëª¨ë¸ ì •ì  ë°ì´í„°ëŠ” ì´ë¯¸ Loadì—ì„œ í•œë²ˆ ì½ì–´ì™”ìœ¼ë¯€ë¡œ ë‹¤ì‹œ í•  í•„ìš” ì—†ê¸°ì—
+/// ì• ë‹ˆë©”ì´ì…˜ ì •ë³´ë§Œ Loadí•˜ëŠ” ê²ƒ
 /// </summary>
 void ModelLoader::LoadAnimation(string basePath, string filename)
 {
@@ -181,7 +217,7 @@ void ModelLoader::LoadAnimation(string basePath, string filename)
 
 	if (pScene && pScene->HasAnimations()) 
 	{
-		ReadAnimation(pScene);
+		ReadAnimation(pScene,filename);
 	}
 	else 
 	{
@@ -192,68 +228,68 @@ void ModelLoader::LoadAnimation(string basePath, string filename)
 }
 
 /// <summary>
-/// ºÎ¸ğ ³ëµå°¡ º»ÀÌ ¾Æ´Ï¶ó¸é, ±× ºÎ¸ğ ³ëµå´Â °è»ê¿¡ ¿µÇâ¹ŞÀ» ³ëµå°¡ ¾Æ´Ï¶ó¼­
-/// Áï ³ªÀÇ »óÀ§ º» ³ëµå¸¦ Ã£±â À§ÇÑ ÇÔ¼ö
+/// ë¶€ëª¨ ë…¸ë“œê°€ ë³¸ì´ ì•„ë‹ˆë¼ë©´, ê·¸ ë¶€ëª¨ ë…¸ë“œëŠ” ê³„ì‚°ì— ì˜í–¥ë°›ì„ ë…¸ë“œê°€ ì•„ë‹ˆë¼ì„œ
+/// ì¦‰ ë‚˜ì˜ ìƒìœ„ ë³¸ ë…¸ë“œë¥¼ ì°¾ê¸° ìœ„í•œ í•¨ìˆ˜
 /// </summary>
 const aiNode* ModelLoader::FindParent(const aiNode* node)
 {
 	if (!node)
 		return nullptr;
 
-	// ÇöÀç ³ëµå ÀÌ¸§ÀÌ boneNameToId¿¡ µî·ÏµÇ¾î ÀÖ´Ù¸é, ¾Ö´Ï¸ŞÀÌ¼Ç¿¡ ½ÇÁ¦·Î »ç¿ëµÇ´Â º»ÀÌ¶ó¸é
-	// ÀÌ ³ëµå°¡ ¿ì¸®°¡ Ã£´Â ºÎ¸ğ º»ÀÓ.
+	// í˜„ì¬ ë…¸ë“œ ì´ë¦„ì´ boneNameToIdì— ë“±ë¡ë˜ì–´ ìˆë‹¤ë©´, ì• ë‹ˆë©”ì´ì…˜ì— ì‹¤ì œë¡œ ì‚¬ìš©ë˜ëŠ” ë³¸ì´ë¼ë©´
+	// ì´ ë…¸ë“œê°€ ìš°ë¦¬ê°€ ì°¾ëŠ” ë¶€ëª¨ ë³¸ì„.
 	if (m_aniData.boneNameToId.count(node->mName.C_Str()) > 0)
 		return node;
 
-	// ¸¸¾à »óÀ§ ³ëµå°¡ º»À¸·Î »ç¿ëµÇÁö ¾Ê´Â´Ù¸é º»À¸·Î »ç¿ëµÇ´Â ³ëµå¸¦ Ã£±â À§ÇØ Àç±Í·Î ·çÇÁ
+	// ë§Œì•½ ìƒìœ„ ë…¸ë“œê°€ ë³¸ìœ¼ë¡œ ì‚¬ìš©ë˜ì§€ ì•ŠëŠ”ë‹¤ë©´ ë³¸ìœ¼ë¡œ ì‚¬ìš©ë˜ëŠ” ë…¸ë“œë¥¼ ì°¾ê¸° ìœ„í•´ ì¬ê·€ë¡œ ë£¨í”„
 	return FindParent(node->mParent);
 }
 
 /// <summary>
-/// ·çÆ®³ëµå·ÎºÎÅÍ ÀÚ½Ä±îÁö Àç±Í·Î ¼øÈ¸ÇÏ¸é¼­ ¸¸¾à ³ëµå°¡ ¸Ş½¬°¡ ÀÖ´Ù¸é ¸Ş½¬ Á¤º¸¸¦ ±¸¼º.
+/// ë£¨íŠ¸ë…¸ë“œë¡œë¶€í„° ìì‹ê¹Œì§€ ì¬ê·€ë¡œ ìˆœíšŒí•˜ë©´ì„œ ë§Œì•½ ë…¸ë“œê°€ ë©”ì‰¬ê°€ ìˆë‹¤ë©´ ë©”ì‰¬ ì •ë³´ë¥¼ êµ¬ì„±.
 /// RootNode
-///¦§¦¡ Armature(½ºÄÌ·¹Åæ ³ëµå, ¸Ş½¬ ¾øÀ½)
-///¦¢   ¦¦¦¡ Hips(Bone, ¸Ş½¬ ¾øÀ½)
-///¦¢       ¦§¦¡ Spine(Bone, ¸Ş½¬ ¾øÀ½)
-///¦¢       ¦¢   ¦¦¦¡ Chest(Bone, ¸Ş½¬ ¾øÀ½)
-///¦¢       ¦¢       ¦¦¦¡ Head(Bone, ¸Ş½¬ ¾øÀ½)
-///¦¢       ¦¦¦¡ LeftArm(Bone, ¸Ş½¬ ¾øÀ½)
-///¦¢           ¦¦¦¡ LeftHand(Bone, ¸Ş½¬ ¾øÀ½)
-///¦¢       ¦¦¦¡ RightArm ¡¦
-///¦¦¦¡ BodyMeshNode(¸Ş½¬ ÀÖÀ½, ¸öÅë ¸Ş½Ã ¿¬°á)
-///¦¦¦¡ HairMeshNode(¸Ş½¬ ÀÖÀ½, ¸Ó¸®Ä«¶ô ¸Ş½Ã ¿¬°á)
-///¦¦¦¡ PantsMeshNode(¸Ş½¬ ÀÖÀ½, ¹ÙÁö ¸Ş½Ã ¿¬°á)
-/// ÀÌ·± ´À³¦ÀÌ´Ù
+///â”œâ”€ Armature(ìŠ¤ì¼ˆë ˆí†¤ ë…¸ë“œ, ë©”ì‰¬ ì—†ìŒ)
+///â”‚   â””â”€ Hips(Bone, ë©”ì‰¬ ì—†ìŒ)
+///â”‚       â”œâ”€ Spine(Bone, ë©”ì‰¬ ì—†ìŒ)
+///â”‚       â”‚   â””â”€ Chest(Bone, ë©”ì‰¬ ì—†ìŒ)
+///â”‚       â”‚       â””â”€ Head(Bone, ë©”ì‰¬ ì—†ìŒ)
+///â”‚       â””â”€ LeftArm(Bone, ë©”ì‰¬ ì—†ìŒ)
+///â”‚           â””â”€ LeftHand(Bone, ë©”ì‰¬ ì—†ìŒ)
+///â”‚       â””â”€ RightArm â€¦
+///â””â”€ BodyMeshNode(ë©”ì‰¬ ìˆìŒ, ëª¸í†µ ë©”ì‹œ ì—°ê²°)
+///â””â”€ HairMeshNode(ë©”ì‰¬ ìˆìŒ, ë¨¸ë¦¬ì¹´ë½ ë©”ì‹œ ì—°ê²°)
+///â””â”€ PantsMeshNode(ë©”ì‰¬ ìˆìŒ, ë°”ì§€ ë©”ì‹œ ì—°ê²°)
+/// ì´ëŸ° ëŠë‚Œì´ë‹¤
 /// </summary>
 void ModelLoader::ProcessNode(aiNode* node, const aiScene* scene, DirectX::SimpleMath::Matrix tr)
 {
-	// ºÎ¸ğ°¡ ÀÖ°í && boneNameToID¿¡ µî·ÏµÇ¾úÀ¸¸ç && ºÎ¸ğ ³ëµåµµ ¿ª½Ã boneÀ¸·Î ÀÎ½ÄµÉ ¼ö ÀÖ´Ù¸é
+	// ë¶€ëª¨ê°€ ìˆê³  && boneNameToIDì— ë“±ë¡ë˜ì—ˆìœ¼ë©° && ë¶€ëª¨ ë…¸ë“œë„ ì—­ì‹œ boneìœ¼ë¡œ ì¸ì‹ë  ìˆ˜ ìˆë‹¤ë©´
 	if (node->mParent && m_aniData.boneNameToId.count(node->mName.C_Str()) && FindParent(node->mParent)) 
 	{
-		// ºÎ¸ğÀÇ º» ¹øÈ£¸¦ ¾ò¾î ÀúÀåÇØµÒ
+		// ë¶€ëª¨ì˜ ë³¸ ë²ˆí˜¸ë¥¼ ì–»ì–´ ì €ì¥í•´ë‘ 
 		const int32_t boneId = m_aniData.boneNameToId[node->mName.C_Str()];
 		m_aniData.boneParents[boneId] = m_aniData.boneNameToId[FindParent(node->mParent)->mName.C_Str()];
 	}
 
-	// ÇöÀç ·ÎÄÃ Çà·Ä * ºÎ¸ğ Çà·Ä·Î ³ëµåÀÇ WorldMatrix ±¸Ãà, Transpose´Â col -> row
+	// í˜„ì¬ ë¡œì»¬ í–‰ë ¬ * ë¶€ëª¨ í–‰ë ¬ë¡œ ë…¸ë“œì˜ WorldMatrix êµ¬ì¶•, TransposeëŠ” col -> row
 	Matrix m(&node->mTransformation.a1);
 	m = m.Transpose() * tr;
 
-	// ³ëµå¿¡ ¿¬°áµÈ ¸Ş½Ã °³¼ö¸¸Å­ ¹İº¹
+	// ë…¸ë“œì— ì—°ê²°ëœ ë©”ì‹œ ê°œìˆ˜ë§Œí¼ ë°˜ë³µ
 	for (UINT i = 0; i < node->mNumMeshes; i++) 
 	{
-		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];						// ¾ÀÀÌ °¡Áø ¸Ş½Ã ¹è¿­¿¡¼­, ³ëµå°¡ ÂüÁ¶ÇÏ´Â ¸Ş½Ã ÀÎµ¦½º¸¦ ²¨³»¿È
-		PBRMeshData newMesh = this->ProcessMesh(mesh, scene);					// aiMeshµ¥ÀÌÅÍ¸¦ PBRMeshData·Î º¯È¯
+		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];						// ì”¬ì´ ê°€ì§„ ë©”ì‹œ ë°°ì—´ì—ì„œ, ë…¸ë“œê°€ ì°¸ì¡°í•˜ëŠ” ë©”ì‹œ ì¸ë±ìŠ¤ë¥¼ êº¼ë‚´ì˜´
+		PBRMeshData newMesh = this->ProcessMesh(mesh, scene);					// aiMeshë°ì´í„°ë¥¼ PBRMeshDataë¡œ ë³€í™˜
 
-		// Á¤Á¡µéÀº ÀüºÎ ÀÚ±â ¸Ş½Ã±âÁØ(ÆÈ,¸öÅë µî) ·ÎÄÃ ÁÂÇ¥¸¸ °¡Áö°í ÀÖÀ¸¹Ç·Î ºÎ¸ğ±îÁö ´©ÀûµÈ ÁÂÇ¥°è Çà·ÄÀ» °öÇØ¼­ ¿ùµå ÁÂÇ¥°è¿¡ ¸ÂÃã
+		// ì •ì ë“¤ì€ ì „ë¶€ ìê¸° ë©”ì‹œê¸°ì¤€(íŒ”,ëª¸í†µ ë“±) ë¡œì»¬ ì¢Œí‘œë§Œ ê°€ì§€ê³  ìˆìœ¼ë¯€ë¡œ ë¶€ëª¨ê¹Œì§€ ëˆ„ì ëœ ì¢Œí‘œê³„ í–‰ë ¬ì„ ê³±í•´ì„œ ì›”ë“œ ì¢Œí‘œê³„ì— ë§ì¶¤
 		for (Vertex& v : newMesh.vertices) 
 		{
 			v.position = Vector3::Transform(v.position, m);
 		}
-		m_meshes.push_back(newMesh);											// ¸Ş½ÃÇÏ³ª ±¸¼º¿Ï·áÇÏ°í vector¿¡ push
+		m_meshes.push_back(newMesh);											// ë©”ì‹œí•˜ë‚˜ êµ¬ì„±ì™„ë£Œí•˜ê³  vectorì— push
 	}
 
-	// ÀÚ½Ä ³ëµå Àç±Í µ¹¸é¼­ ¸Ş½Ã ±¸¼º ½Ãµµ, º»ÀÎ ¿ùµå ÁÂÇ¥ Çà·Äµµ °è»êÇÏ¶ó°í ÀÎÀÚ·Î ³Ñ°ÜÁÜ
+	// ìì‹ ë…¸ë“œ ì¬ê·€ ëŒë©´ì„œ ë©”ì‹œ êµ¬ì„± ì‹œë„, ë³¸ì¸ ì›”ë“œ ì¢Œí‘œ í–‰ë ¬ë„ ê³„ì‚°í•˜ë¼ê³  ì¸ìë¡œ ë„˜ê²¨ì¤Œ
 	for (UINT i = 0; i < node->mNumChildren; i++) 
 	{
 		this->ProcessNode(node->mChildren[i], scene, m);
@@ -261,10 +297,10 @@ void ModelLoader::ProcessNode(aiNode* node, const aiScene* scene, DirectX::Simpl
 }
 
 /// <summary>
-/// aiMesh¸¦ ÀĞ¾î PBRMeshDataÇü½ÄÀ¸·Î º¯È¯
+/// aiMeshë¥¼ ì½ì–´ PBRMeshDataí˜•ì‹ìœ¼ë¡œ ë³€í™˜
 /// </summary>
-/// <param name="mesh"> Assimp°¡ ÆÄ½ÌÇÑ ¸Ş½Ã ÇÏ³ª</param>
-/// <param name="scene">¾À ÀüÃ¼ µ¥ÀÌÅÍ</param>
+/// <param name="mesh"> Assimpê°€ íŒŒì‹±í•œ ë©”ì‹œ í•˜ë‚˜</param>
+/// <param name="scene">ì”¬ ì „ì²´ ë°ì´í„°</param>
 /// <returns></returns>
 PBRMeshData ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 {
@@ -273,17 +309,17 @@ PBRMeshData ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	vector<uint32_t>& indices = newMesh.indices;
 	vector<SkinnedVertex>& skinnedVertices = newMesh.skinnedVertices;
 
-	// ¸Ş½¬°¡ °¡Áö´Â Á¤Á¡ ¼ö ¸¸Å­ ¹İº¹
+	// ë©”ì‰¬ê°€ ê°€ì§€ëŠ” ì •ì  ìˆ˜ ë§Œí¼ ë°˜ë³µ
 	for (UINT i = 0; i < mesh->mNumVertices; i++) 
 	{
 		Vertex vertex;
 
-		// 1. Position Data Ã¤¿ò
+		// 1. Position Data ì±„ì›€
 		vertex.position.x = mesh->mVertices[i].x;
 		vertex.position.y = mesh->mVertices[i].y;
 		vertex.position.z = mesh->mVertices[i].z;
 
-		// 2. Normal Data Ã¤¿ò
+		// 2. Normal Data ì±„ì›€
 		vertex.normalModel.x = mesh->mNormals[i].x;
 		if (m_isGLTF) 
 		{
@@ -303,81 +339,84 @@ PBRMeshData ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 
 		vertex.normalModel.Normalize();
 
-		// 3. TexCoord Data Ã¤¿ò
+		// 3. TexCoord Data ì±„ì›€
 		if (mesh->mTextureCoords[0]) 
 		{
 			vertex.texcoord.x = (float)mesh->mTextureCoords[0][i].x;
 			vertex.texcoord.y = (float)mesh->mTextureCoords[0][i].y;
 		}
 
-		// 4. vector¿¡ pushÇØ¼­ ¸Ş½¬°¡ °¡Áö´Â Á¤Á¡ Á¤º¸¸¦ ±¸¼º
+		// 4. vectorì— pushí•´ì„œ ë©”ì‰¬ê°€ ê°€ì§€ëŠ” ì •ì  ì •ë³´ë¥¼ êµ¬ì„±
 		vertices.push_back(vertex);
 	}
 
-	// ¸Ş½Ã°¡ °¡Áø ¸é(face) ¼ö ¸¸Å­ ¹İº¹
+	// ë©”ì‹œê°€ ê°€ì§„ ë©´(face) ìˆ˜ ë§Œí¼ ë°˜ë³µ
 	for (UINT i = 0; i < mesh->mNumFaces; i++) 
 	{
-		aiFace face = mesh->mFaces[i];						// i¹øÂ° ¸é Á¤º¸
+		aiFace face = mesh->mFaces[i];						// ië²ˆì§¸ ë©´ ì •ë³´
 
-		for (UINT j = 0; j < face.mNumIndices; j++)			// ¸éÀ» ±¸¼ºÇÏ´Â Á¤Á¡ ÀÎµ¦½º ¼ö
-			indices.push_back(face.mIndices[j]);			// ÀÎµ¦½º¸¦ ³» ÀÎµ¦½º º¤ÅÍ¿¡ Ãß°¡
+		for (UINT j = 0; j < face.mNumIndices; j++)			// ë©´ì„ êµ¬ì„±í•˜ëŠ” ì •ì  ì¸ë±ìŠ¤ ìˆ˜
+			indices.push_back(face.mIndices[j]);			// ì¸ë±ìŠ¤ë¥¼ ë‚´ ì¸ë±ìŠ¤ ë²¡í„°ì— ì¶”ê°€
 	}
 
-	// ¸Ş½Ã°¡ º»À» °¡Áö°í ÀÖ´Ù¸é
+	// ë©”ì‹œê°€ ë³¸ì„ ê°€ì§€ê³  ìˆë‹¤ë©´
 	if (mesh->HasBones()) 
 	{
-		vector<vector<float>> boneWeights(vertices.size());					// Á¤Á¡¿¡ °¢ º»ÀÌ ±â¿©ÇÏ´Â °¡ÁßÄ¡ Á¤º¸
-		vector<vector<uint8_t>> boneIndices(vertices.size());				// Á¤Á¡¿¡ ¾î¶² º»ÀÌ ¿µÇâÀ» ÁÖ´ÂÁö Á¤º¸
+		vector<vector<float>> boneWeights(vertices.size());					// ì •ì ì— ê° ë³¸ì´ ê¸°ì—¬í•˜ëŠ” ê°€ì¤‘ì¹˜ ì •ë³´
+		vector<vector<uint8_t>> boneIndices(vertices.size());				// ì •ì ì— ì–´ë–¤ ë³¸ì´ ì˜í–¥ì„ ì£¼ëŠ”ì§€ ì •ë³´
 
-		// 1È¸¸¸ ÇØµµ µÇ´Âµ¥ ¾ÈÁ¤¼º ¶§¹®¿¡ °è¼Ó
-		m_aniData.offsetMatrices.resize(m_aniData.boneNameToId.size());		// º»º° ¿ÀÇÁ¼Â Çà·Ä(¹ÙÀÎµåÆ÷Áî ¡æ ·ÎÄÃ º¯È¯)
-		//m_aniData.boneTransforms.resize(m_aniData.boneNameToId.size());		// ·±Å¸ÀÓ¿¡ °»½ÅµÇ´Â º» ÃÖÁ¾ º¯È¯
+		// 1íšŒë§Œ í•´ë„ ë˜ëŠ”ë° ì•ˆì •ì„± ë•Œë¬¸ì— ê³„ì†
+		m_aniData.offsetMatrices.resize(m_aniData.boneNameToId.size());		// ë³¸ë³„ ì˜¤í”„ì…‹ í–‰ë ¬(ë°”ì¸ë“œí¬ì¦ˆ â†’ ë¡œì»¬ ë³€í™˜)
+		//m_aniData.boneTransforms.resize(m_aniData.boneNameToId.size());		// ëŸ°íƒ€ì„ì— ê°±ì‹ ë˜ëŠ” ë³¸ ìµœì¢… ë³€í™˜
 
 		int count = 0;
-		// ¸Ş½Ã¿¡¼­ »ç¿ëµÇ´Â º»ÀÇ °³¼ö
+		// ë©”ì‹œì—ì„œ ì‚¬ìš©ë˜ëŠ” ë³¸ì˜ ê°œìˆ˜
 		for (uint32_t i = 0; i < mesh->mNumBones; i++) 
 		{
-			// º»À» °¡Á®¿À°í
+			// ë³¸ì„ ê°€ì ¸ì˜¤ê³ 
 			const aiBone* bone = mesh->mBones[i];
 
-			// º»ÀÇ ÀÌ¸§À¸·Î ¸ÅÇÎµÈ ÀÎµ¦½º¸¦ °¡Á®¿È
+			// ë³¸ì˜ ì´ë¦„ìœ¼ë¡œ ë§¤í•‘ëœ ì¸ë±ìŠ¤ë¥¼ ê°€ì ¸ì˜´
 			const uint32_t boneId = m_aniData.boneNameToId[bone->mName.C_Str()];
 
-			// ¸ğµ¨ °ø°£ ÁÂÇ¥ -> º» ·ÎÄÃ ÁÂÇ¥·Î ¹Ù²ãÁÖ´Â Çà·Ä ÀúÀå
-			// ´Ù¸¥ ¸Ş½Ã¿¡¼­ µ¤¾î¾²±â°¡ ¹ß»ıÇÒ ¼ö ÀÖÁö¸¸ °°Àº »À¿¡ ¼ÓÇÏ¹Ç·Î ½ÇÁ¦ °ªÀº µ¿ÀÏÇØ ¹®Á¦ ¾ø´Ù.
-			// Àü ¸Ş½Ã¿¡¼­ ÀÏ°üµÈ °ªÀÌ¹Ç·Î
+			// ëª¨ë¸ ê³µê°„ ì¢Œí‘œ -> ë³¸ ë¡œì»¬ ì¢Œí‘œë¡œ ë°”ê¿”ì£¼ëŠ” í–‰ë ¬ ì €ì¥
+			// ë‹¤ë¥¸ ë©”ì‹œì—ì„œ ë®ì–´ì“°ê¸°ê°€ ë°œìƒí•  ìˆ˜ ìˆì§€ë§Œ ê°™ì€ ë¼ˆì— ì†í•˜ë¯€ë¡œ ì‹¤ì œ ê°’ì€ ë™ì¼í•´ ë¬¸ì œ ì—†ë‹¤.
+			// ì „ ë©”ì‹œì—ì„œ ì¼ê´€ëœ ê°’ì´ë¯€ë¡œ
 			m_aniData.offsetMatrices[boneId] = Matrix((float*)&bone->mOffsetMatrix).Transpose();
+			//Matrix scale = Matrix::CreateScale(0.1f);
+			//m_aniData.offsetMatrices[boneId] = m_aniData.offsetMatrices[boneId] * scale;
 
-			// º»ÀÌ ¿µÇâÀ» ÁÖ´Â Á¤Á¡ °³¼ö¸¸Å­ ¹İº¹
-			// ¸Ş½Ã -> º» -> ¿µÇâÁÖ´Â Á¤Á¡À¸·Î ¿Â °Í
+
+			// ë³¸ì´ ì˜í–¥ì„ ì£¼ëŠ” ì •ì  ê°œìˆ˜ë§Œí¼ ë°˜ë³µ
+			// ë©”ì‹œ -> ë³¸ -> ì˜í–¥ì£¼ëŠ” ì •ì ìœ¼ë¡œ ì˜¨ ê²ƒ
 			for (uint32_t j = 0; j < bone->mNumWeights; j++)
 			{
-				aiVertexWeight weight = bone->mWeights[j];							// Á¤Á¡¹øÈ£¿Í °¡ÁßÄ¡ Á¤º¸°¡ ÀÖÀ½
+				aiVertexWeight weight = bone->mWeights[j];							// ì •ì ë²ˆí˜¸ì™€ ê°€ì¤‘ì¹˜ ì •ë³´ê°€ ìˆìŒ
 				assert(weight.mVertexId < boneIndices.size());
 
-				boneIndices[weight.mVertexId].push_back(boneId);					// [Á¤Á¡¹øÈ£] = ¿µÇâ¹ŞÀ» º» ¹øÈ£
-				boneWeights[weight.mVertexId].push_back(weight.mWeight);			// [Á¤Á¡¹øÈ£] = ¿µÇâ¹ŞÀ» °¡ÁßÄ¡ ±â·Ï
+				boneIndices[weight.mVertexId].push_back(boneId);					// [ì •ì ë²ˆí˜¸] = ì˜í–¥ë°›ì„ ë³¸ ë²ˆí˜¸
+				boneWeights[weight.mVertexId].push_back(weight.mWeight);			// [ì •ì ë²ˆí˜¸] = ì˜í–¥ë°›ì„ ê°€ì¤‘ì¹˜ ê¸°ë¡
 			}
 		}
 
-		// SkinnedMesh Data ±¸¼º ½ÃÀÛ
+		// SkinnedMesh Data êµ¬ì„± ì‹œì‘
 		skinnedVertices.resize(vertices.size());
 		for (int i = 0; i < vertices.size(); i++) 
 		{
-			// ¿ø·¡ VertexÀÇ ±âº» ¼Ó¼º º¹»ç
+			// ì›ë˜ Vertexì˜ ê¸°ë³¸ ì†ì„± ë³µì‚¬
 			skinnedVertices[i].position = vertices[i].position;
 			skinnedVertices[i].normalModel = vertices[i].normalModel;
 			skinnedVertices[i].texcoord = vertices[i].texcoord;
 
-			// ÀÌ Á¤Á¡ÀÌ ¿µÇâÀ» ¹Ş´Â ¸ğµç º» Á¤º¸ ±â·Ï
+			// ì´ ì •ì ì´ ì˜í–¥ì„ ë°›ëŠ” ëª¨ë“  ë³¸ ì •ë³´ ê¸°ë¡
 			for (int j = 0; j < boneWeights[i].size(); j++) 
 			{
-				skinnedVertices[i].blendWeights[j] = boneWeights[i][j];			// Á¤Á¡ i°¡ bone j¿¡ ¹Ş´Â °¡ÁßÄ¡
-				skinnedVertices[i].boneIndices[j] = boneIndices[i][j];			// Á¤Á¡ i¿¡ ¿µÇâÀ» ÁÖ´Â boneÀÇ ÀÎµ¦½º(ID)
+				skinnedVertices[i].blendWeights[j] = boneWeights[i][j];			// ì •ì  iê°€ bone jì— ë°›ëŠ” ê°€ì¤‘ì¹˜
+				skinnedVertices[i].boneIndices[j] = boneIndices[i][j];			// ì •ì  iì— ì˜í–¥ì„ ì£¼ëŠ” boneì˜ ì¸ë±ìŠ¤(ID)
 			}
 		}
 
-		// ¸Ş½Ã°¡ °¡Áö´Â ÅØ½ºÃ³ Á¤º¸ ÀÌ¸§ ¾ò¾î¿Í ÀúÀå
+		// ë©”ì‹œê°€ ê°€ì§€ëŠ” í…ìŠ¤ì²˜ ì •ë³´ ì´ë¦„ ì–»ì–´ì™€ ì €ì¥
 		if (mesh->mMaterialIndex >= 0) 
 		{
 			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
@@ -408,43 +447,43 @@ PBRMeshData ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 }
 
 /// <summary>
-/// aiSceneÀº ¸ğµç ¸Ş½ÃÀÇ ¸ŞÅ×¸®¾ó Á¤º¸¸¦ ¹è¿­·Î °¡Áö°í ÀÖ°í ¸Ş½¬´Â º»ÀÎÀÌ »ç¿ëµÇ´Â ¸ŞÅ×¸®¾óÀÇ ÀÎµ¦½º ¹øÈ£¸¸ °¡Áö°í ÀÖ´Ù.
-/// µû¶ó¼­ ±× ÀÎµ¦½º ¹øÈ£¿¡ Á¢±ÙÇØ aiMaterial*¸¦ ¾ò°í ÀÌ Á¤º¸¿¡ typeÀÌ ÀÖ´ÂÁö È®ÀÎÇÏ°í ÀÖ´Ù¸é °æ·Î¸¦ ÀúÀåÇÑ´Ù.
+/// aiSceneì€ ëª¨ë“  ë©”ì‹œì˜ ë©”í…Œë¦¬ì–¼ ì •ë³´ë¥¼ ë°°ì—´ë¡œ ê°€ì§€ê³  ìˆê³  ë©”ì‰¬ëŠ” ë³¸ì¸ì´ ì‚¬ìš©ë˜ëŠ” ë©”í…Œë¦¬ì–¼ì˜ ì¸ë±ìŠ¤ ë²ˆí˜¸ë§Œ ê°€ì§€ê³  ìˆë‹¤.
+/// ë”°ë¼ì„œ ê·¸ ì¸ë±ìŠ¤ ë²ˆí˜¸ì— ì ‘ê·¼í•´ aiMaterial*ë¥¼ ì–»ê³  ì´ ì •ë³´ì— typeì´ ìˆëŠ”ì§€ í™•ì¸í•˜ê³  ìˆë‹¤ë©´ ê²½ë¡œë¥¼ ì €ì¥í•œë‹¤.
 /// aiScene
-///¦§¦¡ mMeshes[]
-///¦¢    ¦§¦¡ mesh[0].mMaterialIndex = 0  --->mMaterials[0]
-///¦¢    ¦§¦¡ mesh[1].mMaterialIndex = 1  --->mMaterials[1]
-///¦¢    ¦¦¦¡ mesh[2].mMaterialIndex = 0  --->mMaterials[0](°°Àº ÀçÁú °øÀ¯)
-///¦¢
-///¦¦¦¡ mMaterials[]
-///¦§¦¡[0] Material(diffuse = skin.png, normal = skin_n.png ¡¦)
-///¦§¦¡[1] Material(diffuse = cloth.png, normal = cloth_n.png ¡¦)
-///¦¦¦¡ ... 
+///â”œâ”€ mMeshes[]
+///â”‚    â”œâ”€ mesh[0].mMaterialIndex = 0  --->mMaterials[0]
+///â”‚    â”œâ”€ mesh[1].mMaterialIndex = 1  --->mMaterials[1]
+///â”‚    â””â”€ mesh[2].mMaterialIndex = 0  --->mMaterials[0](ê°™ì€ ì¬ì§ˆ ê³µìœ )
+///â”‚
+///â””â”€ mMaterials[]
+///â”œâ”€[0] Material(diffuse = skin.png, normal = skin_n.png â€¦)
+///â”œâ”€[1] Material(diffuse = cloth.png, normal = cloth_n.png â€¦)
+///â””â”€ ... 
 /// 
-/// ÀÌ·± ´À³¦ÀÌ´Ù.
+/// ì´ëŸ° ëŠë‚Œì´ë‹¤.
 /// </summary>
 string ModelLoader::ReadTextureFilename(const aiScene* scene, aiMaterial* material, aiTextureType type)
 {
-	// ¸Ş½¬ÀÇ ¸ŞÅ×¸®¾ó ÀÎµ¦½º¸¦ ¾ò°í ¾ÀÀÌ °ü¸®ÇÏ´Â ¸ŞÅ×¸®¾óµéÀÇ ÀÎµ¦½ºÀÇ Á¤º¸°¡ ÀÖ´Ù¸é
-	// ±×¸®°í ±× Type¿¡ °ªÀÌ ÀúÀåµÇ¾î ÀÖ´Ù¸é
+	// ë©”ì‰¬ì˜ ë©”í…Œë¦¬ì–¼ ì¸ë±ìŠ¤ë¥¼ ì–»ê³  ì”¬ì´ ê´€ë¦¬í•˜ëŠ” ë©”í…Œë¦¬ì–¼ë“¤ì˜ ì¸ë±ìŠ¤ì˜ ì •ë³´ê°€ ìˆë‹¤ë©´
+	// ê·¸ë¦¬ê³  ê·¸ Typeì— ê°’ì´ ì €ì¥ë˜ì–´ ìˆë‹¤ë©´
 	if (material->GetTextureCount(type) > 0) 
 	{
-		// ÆÄÀÏ ¹®ÀÚ¿­À» ¾ò¾î¿È
+		// íŒŒì¼ ë¬¸ìì—´ì„ ì–»ì–´ì˜´
 		aiString filepath;
 		material->GetTexture(type, 0, &filepath);
 
-		// Ç® ÆÄÀÏ °æ·Î¸¦ ¸¸µé°í
+		// í’€ íŒŒì¼ ê²½ë¡œë¥¼ ë§Œë“¤ê³ 
 		string fullPath = m_basePath + string(filesystem::path(filepath.C_Str()).filename().string());
 
-		// 1. ½ÇÁ¦·Î ÆÄÀÏÀÌ Á¸ÀçÇÏ´ÂÁö È®ÀÎ
+		// 1. ì‹¤ì œë¡œ íŒŒì¼ì´ ì¡´ì¬í•˜ëŠ”ì§€ í™•ì¸
 		if (!filesystem::exists(fullPath)) 
 		{
-			// 2. ÆÄÀÏÀÌ ¾øÀ» °æ¿ì È¤½Ã fbx ÀÚÃ¼¿¡ EmbeddedÀÎÁö È®ÀÎ
+			// 2. íŒŒì¼ì´ ì—†ì„ ê²½ìš° í˜¹ì‹œ fbx ìì²´ì— Embeddedì¸ì§€ í™•ì¸
 			const aiTexture* texture = scene->GetEmbeddedTexture(filepath.C_Str());
 			if (texture) 
 			{
-				// 3. Embedded texture°¡ Á¸ÀçÇÏ°í pngÀÏ °æ¿ì ÀúÀå
-				// Áï ÀÓº£µğµåµÈ pngÆÄÀÏÀ» ÀĞ¾î¼­ ÆÄÀÏ·Î ¸¸µë
+				// 3. Embedded textureê°€ ì¡´ì¬í•˜ê³  pngì¼ ê²½ìš° ì €ì¥
+				// ì¦‰ ì„ë² ë””ë“œëœ pngíŒŒì¼ì„ ì½ì–´ì„œ íŒŒì¼ë¡œ ë§Œë“¬
 				if (string(texture->achFormatHint).find("png") != string::npos) 
 				{
 					ofstream fs(fullPath.c_str(), ios::binary | ios::out);
@@ -454,29 +493,29 @@ string ModelLoader::ReadTextureFilename(const aiScene* scene, aiMaterial* materi
 			}
 			else 
 			{
-				// ÆÄÀÏµµ ¾ø°í ÀÓº£µğµåµµ ¾ø´Â °æ¿ì
+				// íŒŒì¼ë„ ì—†ê³  ì„ë² ë””ë“œë„ ì—†ëŠ” ê²½ìš°
 				cout << fullPath << " doesn't exists. Return empty filename." << endl;
 			}
 		}
 		else 
 		{
-			// ÆÄÀÏÀÌ Á¸ÀçÇÏ¹Ç·Î °æ·Î ¹İÈ¯
+			// íŒŒì¼ì´ ì¡´ì¬í•˜ë¯€ë¡œ ê²½ë¡œ ë°˜í™˜
 			return fullPath;
 		}
 
-		// ÆÄÀÏÀÌ Á¸ÀçÇÏ¹Ç·Î °æ·Î ¹İÈ¯
+		// íŒŒì¼ì´ ì¡´ì¬í•˜ë¯€ë¡œ ê²½ë¡œ ë°˜í™˜
 		return fullPath;
 	}
 	else 
 	{
-		// ¸ŞÅ×¸®¾óÀÌ ÇØ´ç ÆÄÀÏÀ» °¡Áö°í ÀÖÁö ¾ÊÀ¸¹Ç·Î ºó ¹®ÀÚ ¹İÈ¯
+		// ë©”í…Œë¦¬ì–¼ì´ í•´ë‹¹ íŒŒì¼ì„ ê°€ì§€ê³  ìˆì§€ ì•Šìœ¼ë¯€ë¡œ ë¹ˆ ë¬¸ì ë°˜í™˜
 		return "";
 	}
 }
 
 void ModelLoader::UpdateTangents()
 {
-	// ¸Ş½Ã ÀüºÎ ¼øÈ¸
+	// ë©”ì‹œ ì „ë¶€ ìˆœíšŒ
 	for (PBRMeshData& m : this->m_meshes)
 	{
 		vector<XMFLOAT3> positions(m.vertices.size());
@@ -493,7 +532,7 @@ void ModelLoader::UpdateTangents()
 			texcoords[i] = v.texcoord;
 		}
 
-		// »ï°¢Çü/Á¤Á¡/UV Á¤º¸¸¦ ±â¹İÀ¸·Î °¢ Á¤Á¡ÀÇ Tangent, Bitangent¸¦ °è»ê
+		// ì‚¼ê°í˜•/ì •ì /UV ì •ë³´ë¥¼ ê¸°ë°˜ìœ¼ë¡œ ê° ì •ì ì˜ Tangent, Bitangentë¥¼ ê³„ì‚°
 		ComputeTangentFrame(m.indices.data(), m.indices.size() / 3, positions.data(), normals.data(), texcoords.data(), m.vertices.size(), tangents.data(), bitangents.data());
 
 		for (size_t i = 0; i < m.vertices.size(); i++) 
@@ -512,23 +551,23 @@ void ModelLoader::UpdateTangents()
 }
 
 /// <summary>
-/// ÀÇµµÄ¡ ¾ÊÀº »ğÀÔÀ» ¸·°í, ½ºÅ²¿¡ ½ÇÁ¦·Î ¾²´Â »À ÁıÇÕÀ» ¸ÕÀú È®Á¤ÇØ¼­
-/// ÀÌÈÄ ÀÎµ¦½º ±â¹İ ÀÚ·á±¸Á¶¿Í ¸ÅÇÎÀ» ÀÏ°ü¡¤¾ÈÀüÇÏ°Ô ¸¸µé·Á°í ¹Ì¸® µî·Ï
+/// ì˜ë„ì¹˜ ì•Šì€ ì‚½ì…ì„ ë§‰ê³ , ìŠ¤í‚¨ì— ì‹¤ì œë¡œ ì“°ëŠ” ë¼ˆ ì§‘í•©ì„ ë¨¼ì € í™•ì •í•´ì„œ
+/// ì´í›„ ì¸ë±ìŠ¤ ê¸°ë°˜ ìë£Œêµ¬ì¡°ì™€ ë§¤í•‘ì„ ì¼ê´€Â·ì•ˆì „í•˜ê²Œ ë§Œë“¤ë ¤ê³  ë¯¸ë¦¬ ë“±ë¡
 /// </summary>
 void ModelLoader::FindDeformingBones(const aiScene* scene)
 {
-	// ¾ÀÀÇ ¸ğµç ¸Ş½¬¸¦ ÈÈ´Â´Ù
+	// ì”¬ì˜ ëª¨ë“  ë©”ì‰¬ë¥¼ í›‘ëŠ”ë‹¤
 	for (uint32_t i = 0; i < scene->mNumMeshes; ++i)
 	{
-		const aiMesh* mesh = scene->mMeshes[i];						// meshÁ¤º¸¸¦ ¾ò°í
+		const aiMesh* mesh = scene->mMeshes[i];						// meshì •ë³´ë¥¼ ì–»ê³ 
 
-		// ¸Ş½¬°¡ º»À» °¡Áö°í ÀÖ´Ù¸é
+		// ë©”ì‰¬ê°€ ë³¸ì„ ê°€ì§€ê³  ìˆë‹¤ë©´
 		if (mesh->HasBones())
 		{
-			// ¸Ş½¬°¡ °¡Áö´Â º»ÀÇ °³¼ö¸¸Å­ ¹İº¹
+			// ë©”ì‰¬ê°€ ê°€ì§€ëŠ” ë³¸ì˜ ê°œìˆ˜ë§Œí¼ ë°˜ë³µ
 			for (uint32_t i = 0; i < mesh->mNumBones; i++) 
 			{
-				// ¹ß°ßÇÑ º»À» map¿¡ µî·Ï, ÃÊ±â°ªÀº -1·Î ¼ÂÆÃ
+				// ë°œê²¬í•œ ë³¸ì„ mapì— ë“±ë¡, ì´ˆê¸°ê°’ì€ -1ë¡œ ì…‹íŒ…
 				const aiBone* bone = mesh->mBones[i];
 				m_aniData.boneNameToId[bone->mName.C_Str()] = -1;
 			}
@@ -537,7 +576,7 @@ void ModelLoader::FindDeformingBones(const aiScene* scene)
 }
 
 /// <summary>
-/// º»¿¡ ID¸¦ ºÎ¿© ¾Æ·¡¿Í °°Àº ½Ä
+/// ë³¸ì— IDë¥¼ ë¶€ì—¬ ì•„ë˜ì™€ ê°™ì€ ì‹
 /// root 
 /// - hip (0)
 /// --Spine (1)
@@ -554,14 +593,14 @@ void ModelLoader::UpdateBoneIDs(aiNode* node, int* counter)
 {
 	if (node)
 	{
-		// nodeÀÇ mNameÀÌ Á¸ÀçÇÏ¸é ÀÌ ³ëµå´Â º¯Çü¿¡ ¾²ÀÌ´Â »À·Î -1·Î ÃÊ±âÈ­µÈ °ªÀ» º¯°æÇÔ
+		// nodeì˜ mNameì´ ì¡´ì¬í•˜ë©´ ì´ ë…¸ë“œëŠ” ë³€í˜•ì— ì“°ì´ëŠ” ë¼ˆë¡œ -1ë¡œ ì´ˆê¸°í™”ëœ ê°’ì„ ë³€ê²½í•¨
 		if (m_aniData.boneNameToId.count(node->mName.C_Str()))
 		{
 			m_aniData.boneNameToId[node->mName.C_Str()] = *counter;
 			*counter += 1;
 		}
 
-		// ÇöÀç ³ëµåÀÇ ¸ğµç ÀÚ½Ä ³ëµå¸¦ Àç±Í È£ÃâÇØ¼­ °°Àº °úÁ¤À» ¹İº¹
+		// í˜„ì¬ ë…¸ë“œì˜ ëª¨ë“  ìì‹ ë…¸ë“œë¥¼ ì¬ê·€ í˜¸ì¶œí•´ì„œ ê°™ì€ ê³¼ì •ì„ ë°˜ë³µ
 		for (UINT i = 0; i < node->mNumChildren; i++)
 		{
 			UpdateBoneIDs(node->mChildren[i], counter);

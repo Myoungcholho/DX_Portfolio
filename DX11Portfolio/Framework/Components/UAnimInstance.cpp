@@ -1,6 +1,12 @@
 #include "Framework.h"
 #include "UAnimInstance.h"
 
+/// <summary>
+/// 애니메이션 클립 실행
+/// </summary>
+/// <param name="index"></param>
+/// <param name="loop"></param>
+/// <param name="rate"></param>
 void UAnimInstance::PlayClip(int index, bool loop, float rate)
 {
     clipIndex = index;
@@ -9,6 +15,24 @@ void UAnimInstance::PlayClip(int index, bool loop, float rate)
 
     frame = 0;
     frameAccum = 0.0;
+}
+
+/// <summary>
+/// 특정 프레임에서 애니메이션을 정지
+/// </summary>
+/// <param name="startFrame"></param>
+/// <param name="loop"></param>
+/// <param name="rate"></param>
+void UAnimInstance::PlayAtFrame(int startFrame)
+{
+	if (!AnimData || AnimData->clips.empty())
+		return;
+
+	frame = clamp(startFrame, 0, AnimData->clips[clipIndex].numKeys - 1);
+	frameAccum = 0.0;
+	bPaused = true;
+
+	AnimData->EvaluateLocalPose(clipIndex, frame, frameAccum, localPose);
 }
 
 void UAnimInstance::Update(double dt)
@@ -24,6 +48,7 @@ void UAnimInstance::Update(double dt)
     if (bPaused || ticksPerSec <= 0.0)
         return;
 
+	// ---- 프레임 진행(현재 파이프) ------------------------------------------------------------
     frameAccum += dt * ticksPerSec * playRate;										// 델타 * 1초당 진행 속도 * 플레이 속도
     int step = (int)floor(frameAccum);												// 정수부분 추출
 	if (step > 0)
@@ -42,14 +67,26 @@ void UAnimInstance::Update(double dt)
 		}
 		else
 		{
-			if (clipNumKeys > 0) frame = clamp(frame + step, 0, clipNumKeys - 1);
-			else                 frame = max(0, frame + step);
+			if (clipNumKeys > 0)
+			{
+				frame = clamp(frame + step, 0, clipNumKeys - 1);
+
+				// 마지막 프레임에 도달하면 정지
+				if (frame >= clipNumKeys - 1)
+				{
+					frame = clipNumKeys - 1;
+					frameAccum = 0.0;
+					return;
+				}
+			}
+			else
+				frame = max(0, frame + step);
 		}
 	}
 
 	AnimData->EvaluateLocalPose(clipIndex, frame, frameAccum, localPose);
 
-	// 블렌딩 기능 수행
+	// ---- 블렌딩 처리 ------------------------------------------------------------------------
 	if (bBlending && nextClipIndex >= 0)
 	{
 		const AnimationClip& nextClip = AnimData->clips[nextClipIndex];
@@ -112,9 +149,26 @@ void UAnimInstance::Update(double dt)
 			nextClipIndex = -1;
 			toPose.clear();
 			fromPose.clear();
+
+			prevFrame = -1;					// 권위 prev 리셋
 		}
 
 	}
+}
+
+string UAnimInstance::GetCurrentClipName()
+{
+	return AnimData->clips[clipIndex].name;
+}
+
+float UAnimInstance::GetCurrentFrame()
+{
+	return frame;
+}
+
+float UAnimInstance::GetTotalFrames()
+{
+	return AnimData->clips[clipIndex].numKeys;
 }
 
 /// <summary>

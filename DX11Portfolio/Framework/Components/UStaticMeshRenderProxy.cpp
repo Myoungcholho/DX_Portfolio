@@ -48,14 +48,20 @@ void UStaticMeshRenderProxy::UpdateConstantBuffers(ComPtr<ID3D11Device>& device,
     D3D11Utils::UpdateBuffer(device, context ,materialConstsCPU, materialConstsGPU);
 }
 
+/// <summary>
+/// 프록시가 가지는 그리기 책임, 인스턴싱 적용 후 현재는 사용하지 않음
+/// </summary>
+/// <param name="context"></param>
 void UStaticMeshRenderProxy::Draw(ID3D11DeviceContext* context)
 {
+    UpdateConstantBuffers(device, this->context);
+
+    // Const
+    context->VSSetConstantBuffers(0, 1, meshConstsGPU.GetAddressOf());
+    context->PSSetConstantBuffers(0, 1, materialConstsGPU.GetAddressOf());
+
     for (const auto& mesh : gpuAsset->meshes)
     {
-        // Const
-        context->VSSetConstantBuffers(0, 1, meshConstsGPU.GetAddressOf());
-        context->PSSetConstantBuffers(0, 1, materialConstsGPU.GetAddressOf());
-
         // SRV
         // 물체 렌더링할 때 여러가지 텍스춰 사용 (t0 부터시작)
         vector<ID3D11ShaderResourceView*> resViews =

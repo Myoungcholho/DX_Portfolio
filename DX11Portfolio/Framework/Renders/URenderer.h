@@ -60,6 +60,10 @@ private:
 	void EndFrame();
 
 private:
+	void RenderOpaqueInstanced(const URenderQueue& queue);
+	void RenderSkinnedInstanced(const URenderQueue& queue);
+
+private:
 	void OnResize();
 
 private:
@@ -124,6 +128,25 @@ private:
 	ComPtr<ID3D11ShaderResourceView> m_shadowSRVs[MAX_LIGHTS];
 
 private:
+	StructuredBuffer<InstanceData> m_instances;			// 공용 인스턴스 SB (SRV)
+	UINT m_instanceCapacity = 0;						// 담을 수 있는 인스턴스 개수
+
+	void EnsureInstanceCapacity(ID3D11Device* device, size_t needed);
+
+private:
+	StructuredBuffer<SkinnedInstanceDataGPU> m_skinnedInstances;	// transform, material 등
+	UINT m_skinnedInstanceCapacity = 0;
+
+	StructuredBuffer<Matrix> m_bonePalettes;					// 모든 인스턴스의 본 팔레트 모음
+	UINT m_bonePaletteCapacity = 0;
+
+	void EnsureSkinnedInstanceCapacity(ID3D11Device* device, size_t needed);
+	void EnsureBonePaletteCapacity(ID3D11Device* device, size_t needed);
+
+	SkinnedBatchCB skinnedBatchConstsCPU;
+	ComPtr<ID3D11Buffer> skinnedBatchConstsGPU;
+
+private:
 	ComPtr<ID3D11Device> device = nullptr;
 	ComPtr<ID3D11DeviceContext> context = nullptr;
 	UINT numQualityLevels = 0;
@@ -133,5 +156,5 @@ private:
 	bool bWireRender = false;
 
 private:
-	FDelegateHandle m_resizeHandle{};
+	FDelegateHandle ResizeHandle{};
 };

@@ -42,6 +42,12 @@ private:
 	friend void PRO_BEGIN(const WCHAR* s);
 	friend void PRO_END(const WCHAR* s);
 
+public:
+	void SetStartTime();					// 시작 시간을 임의로 바꾸고 싶다면
+
+private:
+	LARGE_INTEGER programStart;
+	LARGE_INTEGER programEnd;
 };
 
 extern Profile g_profile;

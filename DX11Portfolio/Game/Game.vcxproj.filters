@@ -32,6 +32,12 @@
     <ClInclude Include="Actors\ASkinnedTestActor.h">
       <Filter>Actors</Filter>
     </ClInclude>
+    <ClInclude Include="Actors\APawnTest.h">
+      <Filter>Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="Actors\AMyController.h">
+      <Filter>Actors</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Pch.cpp" />
@@ -63,6 +69,12 @@
       <Filter>Actors</Filter>
     </ClCompile>
     <ClCompile Include="Actors\ASkinnedTestActor.cpp">
+      <Filter>Actors</Filter>
+    </ClCompile>
+    <ClCompile Include="Actors\APawnTest.cpp">
+      <Filter>Actors</Filter>
+    </ClCompile>
+    <ClCompile Include="Actors\AMyController.cpp">
       <Filter>Actors</Filter>
     </ClCompile>
   </ItemGroup>

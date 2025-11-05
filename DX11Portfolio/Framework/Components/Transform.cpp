@@ -4,30 +4,44 @@
 /// <summary>
 /// 쿼터 -> 오일러 변환 시 튐 현상 방지를 위해 이전 값과 가까운 값으로 결정
 /// </summary>
-Vector3 ToEulerClosestTo(const Quaternion& q, const Vector3& previousEuler)
+Vector3 ToEulerClosestTo(const Quaternion& q, const Vector3& previousEulerDeg)
 {
-	Vector3 euler = q.ToEuler(); // 기존 변환 결과, 튀는 결과일 수 있음
-	Vector3 best = euler;
+	Vector3 eulerRad = q.ToEuler(); // 기존 변환 결과, 튀는 결과일 수 있음
+	
+	// 2) prev(deg) → rad
+	Vector3 prevRad(
+		XMConvertToRadians(previousEulerDeg.x),
+		XMConvertToRadians(previousEulerDeg.y),
+		XMConvertToRadians(previousEulerDeg.z)
+	);
+
+	// 3) 2π 래핑 후보 중 prev에 가장 가까운 라디안 선택
+	const float TWO_PI = XM_2PI;
+	Vector3 best = eulerRad;
 	float minDiff = FLT_MAX;
-
-	for (int xOffset = -1; xOffset <= 1; ++xOffset)
-		for (int yOffset = -1; yOffset <= 1; ++yOffset)
-			for (int zOffset = -1; zOffset <= 1; ++zOffset)
+	for (int i = -1; i <= 1; ++i)
+		for (int j = -1; j <= 1; ++j)
+			for (int k = -1; k <= 1; ++k)
 			{
-				Vector3 candidate = euler;
-				candidate.x += 360.0f * xOffset;
-				candidate.y += 360.0f * yOffset;
-				candidate.z += 360.0f * zOffset;
+				Vector3 cand = eulerRad;
+				cand.x += i * TWO_PI;
+				cand.y += j * TWO_PI;
+				cand.z += k * TWO_PI;
 
-				float diff = (candidate - previousEuler).LengthSquared();	// 이전 값과 얼마나 가까운지
-				if (diff < minDiff)
-				{
-					minDiff = diff;
-					best = candidate;
+				float diff = (cand - prevRad).LengthSquared();
+				if (diff < minDiff) 
+				{ 
+					minDiff = diff; 
+					best = cand; 
 				}
 			}
 
-	return best;
+	// 4) 반환은 UI(deg)
+	return {
+		XMConvertToDegrees(best.x),
+		XMConvertToDegrees(best.y),
+		XMConvertToDegrees(best.z)
+	};
 }
 
 Transform::Transform()

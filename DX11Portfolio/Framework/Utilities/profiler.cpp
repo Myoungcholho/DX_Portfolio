@@ -31,12 +31,14 @@ Profile::Profile(const char* szLogFile)
 	strcat_s(_logFileName, 64, ".txt");
 
 	QueryPerformanceFrequency(&baseTime);
+
+	QueryPerformanceCounter(&programStart);
 }
 
 Profile::~Profile()
 {
+	QueryPerformanceCounter(&programEnd);
 	SaveLogFile();
-
 }
 
 void Profile::SaveLogFile()
@@ -66,7 +68,15 @@ void Profile::SaveLogFile()
 
 	fprintf(pfile, "-------------------------------------------------------------------------------\n");
 
+	double totalRunTimeSec = (double)(programEnd.QuadPart - programStart.QuadPart) / (double)baseTime.QuadPart;
+	fprintf(pfile, "Program Run Time: %.3f sec\n", totalRunTimeSec);
+
 	fclose(pfile);
+}
+
+void Profile::SetStartTime()
+{
+	QueryPerformanceCounter(&programStart);
 }
 
 void Profile::ProfileBegin(const WCHAR* szName)

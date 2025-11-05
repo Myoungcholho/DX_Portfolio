@@ -3,6 +3,25 @@
 
 static int s_actorID = 0;
 
+static void DetachForeignDescendants(USceneComponent* node, AActor* self)
+{
+	if (!node) return;
+	auto list = node->GetChildren();              // 반드시 '복사본'
+
+	for (auto* c : list)
+	{
+		if (!c) continue;
+		if (c->GetOwner() != self)
+		{
+			c->Detach(EAttachMode::KeepWorld);    // 손자/증손도 포함해 끊김
+		}
+		else
+		{
+			DetachForeignDescendants(c, self);    // 내 소유면 더 내려가서 검사
+		}
+	}
+}
+
 AActor::AActor()
 {
 	m_name = "Actor_" + to_string(s_actorID++);
@@ -33,6 +52,14 @@ void AActor::SetRootComponent(shared_ptr<USceneComponent> comp)
 	if (root)
 	{
 		root->OnAttach(this);
+
+		// 이전 Transform을 Root로 이전
+		root->SetRelativeTransform(actorTransform);
+		root->UpdateWorldTransformRecursive();
+
+		// 기존 actorTransform은 더 이상 직접 사용하지 않음
+		actorTransform = Transform();
+
 		if (!ContainsComponent(root))
 			Components.push_back(root);
 	}
@@ -40,12 +67,12 @@ void AActor::SetRootComponent(shared_ptr<USceneComponent> comp)
 
 void AActor::SetWorld(UWorld* world)
 {
-	m_world = world;
+	this->world = world;
 }
 
 UWorld* AActor::GetWorld() const
 {
-	return m_world;
+	return world;
 }
 
 void AActor::Tick()
@@ -66,6 +93,25 @@ void AActor::OnGUI()
 {
 	for (auto& comp : Components)
 		comp->OnGUI();
+}
+
+void AActor::ClearComponent()
+{
+	if (root)
+	{
+		DetachForeignDescendants(root.get(), this);
+		if (root->GetParent())
+			root->Detach(EAttachMode::KeepWorld);
+	}
+
+	// 소유한 컴포넌트들 정리
+	auto comps = move(Components);
+	Components.clear();
+
+	for (auto& comp : comps)
+		comp->Destroy();		// 외부 시스템 등록 해제, 델리게이트 해제 등
+
+	root.reset();
 }
 
 bool AActor::AttachToActor(AActor* parent, EAttachMode mode)
@@ -108,51 +154,46 @@ AActor* AActor::GetParent() const
 		: nullptr;										// 안 붙어 있으면 부모 없음
 }
 
-static void DetachForeignDescendants(USceneComponent* node, AActor* self) 
-{
-	if (!node) return;
-	auto list = node->GetChildren();              // 반드시 '복사본'
-
-	for (auto* c : list) 
-	{
-		if (!c) continue;
-		if (c->GetOwner() != self) 
-		{
-			c->Detach(EAttachMode::KeepWorld);    // 손자/증손도 포함해 끊김
-		}
-		else 
-		{
-			DetachForeignDescendants(c, self);    // 내 소유면 더 내려가서 검사
-		}
-	}
-}
-
 /// <summary>
-/// 
+/// Actor 삭제 메서드
 /// </summary>
 void AActor::Destroy()
 {
 	if (bPendingDestroy) return;
 	bPendingDestroy = true;
 
-	if (root) 
-	{
-		DetachForeignDescendants(root.get(), this);
-		if (root->GetParent())
-			root->Detach(EAttachMode::KeepWorld);
-	}
+	if (world) 
+		world->MarkActorForDestroy(this);
+}
 
-	// 소유한 컴포넌트들 정리
-	auto comps = move(Components);
-	Components.clear();
+Vector3 AActor::GetPosition() const
+{
+	if (root)
+		return root->GetRelativeTransform().GetPosition();
+	return actorTransform.GetPosition();
+}
 
-	for (auto& comp : comps)
-		comp->Destroy();		// 외부 시스템 등록 해제, 델리게이트 해제 등
+void AActor::SetPosition(const Vector3& pos)
+{
+	if (root)
+		root->SetRelativePosition(pos);
+	else
+		actorTransform.SetPosition(pos);
+}
 
-	root.reset();
+Quaternion AActor::GetRotation() const
+{
+	if (root)
+		return root->GetRelativeRotationQuat();
+	return actorTransform.GetRotationQuat();
+}
 
-	if (m_world) 
-		m_world->MarkActorForDestroy(this);
+void AActor::SetRotation(const Quaternion& q)
+{
+	if (root)
+		root->SetRelativeRotation(q);
+	else
+		actorTransform.SetRotation(q);
 }
 
 /// <summary>

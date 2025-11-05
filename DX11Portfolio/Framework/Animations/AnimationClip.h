@@ -1,4 +1,5 @@
 ﻿#pragma once
+//#define DebugRot
 
 #include <directxtk/SimpleMath.h>
 #include <iostream>
@@ -13,11 +14,26 @@ using std::map;
 using std::string;
 using std::vector;
 
+struct FRootMotionDelta
+{
+	Quaternion dRot = Quaternion{ 0.0f,0.0f,0.0f,1.0f };
+	Vector3    dPos = Vector3{ 0.0f,0.0f,0.0f };
+};
+struct RootMotionAcc {
+	Vector3 sumPosL{ 0,0,0 };		// 로컬 Δpos 누적
+	double   sumYawRad{ 0.f };		// Δyaw 누적 (언랩 후)
+	int     count{ 0 };
+};
+
+static RootMotionAcc acc;
+
+// --------------------------------------------------------------------------//
+
 struct AnimationClip
 {
 	struct Key
-	{
-		double timeTicks = 0.0;				// 키의 시간
+	{	
+		double timeTicks = 0.0;						// 키의 시간
 		Vector3 pos = Vector3(0.0f);
 		Vector3 scale = Vector3(1.0f);
 		Quaternion rot = Quaternion();
@@ -30,13 +46,14 @@ struct AnimationClip
 		}
 	};
 
-	string name;					// 애니메이션 이름
-	vector<vector<Key>> keys;		// [Bone][Frame]
-	int numChannels;				// 뼈 개수
-	int numKeys;					// 프레임 개수
-	double duration;				// 애니메이션 총 길이
-	double ticksPerSec;				// 재생 속도
+	string name;								// 애니메이션 이름
+	vector<vector<Key>> keys;					// [Bone][Frame]
+	int numChannels;							// 뼈 개수
+	int numKeys;								// 프레임 개수
+	double duration;							// 애니메이션 총 길이
+	double ticksPerSec;							// 재생 속도
 };
+
 
 struct AnimationData
 {
@@ -57,111 +74,62 @@ struct AnimationData
 	
 	//Matrix accumulatedRootTransform = Matrix();	// 루트 애니메이션용 누적
 	//Vector3 prevPos = Vector3(0.0f);			// delta값 구하기 위해 이전 값 저장
-
-	void ComposeSkinPalette(const vector<Matrix>& csPose, vector<Matrix>& outPalette) const
-	{
-		const int n = (int)boneParents.size();
-		if ((int)outPalette.size() != n)
-			outPalette.assign(n, Matrix());
-
-		Matrix defaultInv = defaultTransform.Invert();
-		for (int i = 0; i < n; ++i)
-		{
-			outPalette[i] = defaultInv *
-				offsetMatrices[i] *
-				csPose[i] *
-				defaultTransform;
-
-			outPalette[i] = outPalette[i].Transpose();
-		}
-	}
-
+	void ComposeSkinPalette(const vector<Matrix>& csPose, vector<Matrix>& outPalette) const;
 
 	/// <summary>
 	/// 로컬 포즈 추출, 특정 클립의 frame에서 모든 본의 로컬 키를 vector로 저장
 	/// </summary>
-	void EvaluateLocalPose(int clipId, int frame, double accum, vector<AnimationClip::Key>& outLocalPose) const
-	{
-		const AnimationClip& clip = clips[clipId];
-		const int boneCount = (int)boneParents.size();
+	void EvaluateLocalPose(int clipId, int frame, double accum, vector<AnimationClip::Key>& outLocalPose) const;
 
-		// 출력 버퍼 크기 보장용
-		if ((int)outLocalPose.size() != boneCount)
-			outLocalPose.assign(boneCount, AnimationClip::Key());
-
-		const float t = (float)clamp(accum, 0.0, 1.0);
-
-		for (int boneId = 0; boneId < boneCount; ++boneId)
-		{
-			const vector<AnimationClip::Key>& keys = clip.keys[boneId];
-			const int keyCount = (int)keys.size();
-
-			if (keyCount == 0) {
-				outLocalPose[boneId] = AnimationClip::Key(); // 바인드/아이덴티티 기본값
-				continue;
-			}
-
-			// f0: 현재 프레임, f1: 다음 프레임
-			// (non-loop을 안전하게 처리하기 위해 마지막에선 f1=f0로 고정)
-			const int f0 = clamp(frame, 0, keyCount - 1);
-			const int f1 = (f0 + 1 < keyCount) ? (f0 + 1) : f0;
-
-			const AnimationClip::Key& k0 = keys[f0];
-			const AnimationClip::Key& k1 = keys[f1];
-
-			AnimationClip::Key out;
-			out.pos = Vector3::Lerp(k0.pos, k1.pos, t);
-			out.scale = Vector3::Lerp(k0.scale, k1.scale, t);
-			out.rot = MathHelper::SlerpSafe(k0.rot, k1.rot, t);
-
-			outLocalPose[boneId] = out;
-		}
-	}
-
+public:
 	/// <summary>
-	/// 로컬포즈 -> 컴포넌트 포즈로 변환
+	/// 로컬포즈를 반영해 월드 행렬 팔레트를 구성
 	/// </summary>
-	void BuildComponentPoseFromLocal(const vector<AnimationClip::Key>& localPose,
+	void BuildBonePaletteFromLocal(
+		const vector<AnimationClip::Key>& localPose,
 		int frame,
 		vector<Matrix>& outCSPose,
-		Matrix& accumulatedRootTransform,  
-		Vector3& prevPos                   
-	) const
-	{
-		const int boneCount = (int)boneParents.size();
-		if (boneCount <= 0) return;
+		Matrix& accumulatedRootTransform,		
+		Vector3& prevPos						// 이전 루트 위치 저장
+	) const;
 
-		if ((int)outCSPose.size() != boneCount)
-			outCSPose.assign(boneCount, Matrix());
+	/// 로컬 포즈 → 컴포넌트 포즈 변환 (루트모션은 외부로 반환), 실패 1
+	void BuildComponentPoseFromLocal2(
+		const vector<AnimationClip::Key>& localPose,
+		int frame,
+		vector<Matrix>& outCSPose,         // 컴포넌트 스페이스 팔레트
+		FRootMotionDelta& outRootMotionDelta,   // 루트모션 Δ(로컬 기준) 반환
+		Vector3& prevPos,                       // 이전 루트 위치(로컬)
+		Quaternion& prevRot,                     // 이전 루트 회전(로컬)
+		int& prevFrame
+	) const;
 
-		for (int boneId = 0; boneId < boneCount; ++boneId)
-		{
-			const int parentIdx = boneParents[boneId];
-			const Matrix parentMatrix = (parentIdx >= 0) ? outCSPose[parentIdx] : accumulatedRootTransform;
+	void BuildComponentPoseFromLocal3(
+		const vector<AnimationClip::Key>& localPose,
+		int frame,
+		const AnimationClip::Key& rootStart,					// 0프의 루트 (클립 로드시 캐싱)
+		const AnimationClip::Key& rootEnd,						// 마지막 프의 루트 (캐싱)
+		std::vector<Matrix>& outCSPose,
+		FRootMotionDelta& outRootMotionDelta,
+		Vector3& prevPos, Quaternion& prevRot, int& prevFrame,
+		double posScale = 1.0
+	) const;
 
-			AnimationClip::Key key = (boneId < (int)localPose.size()) ? localPose[boneId] : AnimationClip::Key();
+	void BuildComponentPoseFromLocal4(
+		const vector<AnimationClip::Key>& localPose,
+		int frame,
+		vector<Matrix>& outCSPose,
+		Vector3& outRootPos,
+		Quaternion& outRootRot,
+		Vector3& outRootScale,
+		Vector3& prevPos,
+		Quaternion& prevRot
+	) const;
 
-			// 루트 처리(루트모션 누적)
-			if (parentIdx < 0)
-			{
-				if (frame != 0)
-				{
-					accumulatedRootTransform = Matrix::CreateTranslation(key.pos - prevPos) * accumulatedRootTransform;
-				}
-				else
-				{
-					auto t = accumulatedRootTransform.Translation();
-					t.y = key.pos.y;
-					accumulatedRootTransform.Translation(t);
-				}
-
-				prevPos = key.pos;
-				key.pos = Vector3(0.0f); // 루트 본은 제자리 재생
-			}
-
-			outCSPose[boneId] = key.GetTransform() * parentMatrix;
-		}
-	}
+public:
+	AnimationClip::Key GetRootKeyAt(int clipIndex, int frame) const;
+	AnimationClip::Key GetRootKeyStart(int clipIndex) const;
+	AnimationClip::Key GetRootKeyEnd(int clipIndex) const;
 
 };
 
@@ -229,3 +197,16 @@ struct AnimationData
 	//		boneTransforms[boneId] = key.GetTransform() * parentMatrix;
 	//	}
 	//}
+
+//struct AnimationData
+//{
+//	// ModelData
+//	map<string, int32_t> boneNameToId;   // 이름 → 인덱스
+//	vector<string>       boneIdToName;   // 인덱스 → 이름
+//	vector<int32_t>      boneParents;    // 본 계층 구조
+//	vector<Matrix>       offsetMatrices; // Inverse BindPose
+//	Matrix defaultTransform;             // 정규화 보정 행렬
+//
+//	// AnimationData
+//	vector<AnimationClip> clips;         // 모든 애니메이션 클립 모음
+//};

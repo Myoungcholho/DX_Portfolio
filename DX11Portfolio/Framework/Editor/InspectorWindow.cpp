@@ -67,6 +67,21 @@ void InspectorWindow::OnUpdateTarget()
 
     UActorComponent* selComp = EditorSelection::GetActorComponent();
 
+    // -- Actor 전용 ---
+    if (auto* pawn = dynamic_cast<APawn*>(actor))
+    {
+        auto pawnEditor = make_unique<PawnEditor>(pawn);
+        pawnEditor->SetName("Pawn");
+        mEditors.emplace_back(move(pawnEditor));
+    }
+
+    if (auto* controller = dynamic_cast<AController*>(actor))
+    {
+        auto controllerEditor = make_unique<ControllerEditor>(controller);
+        controllerEditor->SetName("Controller");
+        mEditors.emplace_back(move(controllerEditor));
+    }
+
     // 공통: 컴포넌트 타입별 에디터 추가 람다
     auto addEditors = [&](UActorComponent* comp, const char* overrideName = nullptr)
         {
@@ -84,11 +99,17 @@ void InspectorWindow::OnUpdateTarget()
                 le->SetName(light->mName);
                 mEditors.emplace_back(std::move(le));
             }
-            if (auto* mesh = dynamic_cast<UStaticMeshComponent*>(comp)) 
+            if (auto* mesh = dynamic_cast<UPrimitiveComponent*>(comp)) 
             {
-                auto se = std::make_unique<StaticMeshEditor>(mesh);
+                auto se = std::make_unique<PrimitiveEditor>(mesh);
                 se->SetName(mesh->mName);
                 mEditors.emplace_back(std::move(se));
+            }
+            if (auto* skeletal = dynamic_cast<USkeletalMeshComponent*>(comp))
+            {
+                auto sk = std::make_unique<AnimationEditor>(skeletal);
+                sk->SetName(skeletal->mName);
+                mEditors.emplace_back(std::move(sk));
             }
         };
 

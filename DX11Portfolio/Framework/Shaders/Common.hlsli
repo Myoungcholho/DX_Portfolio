@@ -45,6 +45,40 @@ struct Light
     matrix invProj;
 };
 
+struct InstanceTransform
+{
+    matrix world;
+    matrix worldIT; // World의 InverseTranspose
+    int useHeightMap;
+    float heightScale;
+    float2 dummy;
+};
+
+struct InstanceMaterial
+{
+    float3 albedoFactor; // baseColor
+    float roughnessFactor;
+    float metallicFactor;
+    float3 emissionFactor;
+
+    int useAlbedoMap;
+    int useNormalMap;
+    int useAOMap; // Ambient Occlusion
+    int invertNormalMapY;
+    int useMetallicMap;
+    int useRoughnessMap;
+    int useEmissiveMap;
+    float exposure;
+    float gamma;
+    float3 dummy0;
+};
+
+struct InstanceData
+{
+    InstanceTransform xform;
+    InstanceMaterial mat;
+};
+
 // 공용 Constants
 cbuffer GlobalConstants : register(b1)
 {
@@ -90,6 +124,16 @@ struct PixelShaderInput
     float3 normalWorld : NORMAL0;
     float2 texcoord : TEXCOORD0;
     float3 tangentWorld : TANGENT0;
+};
+
+struct PixelShaderInputInstance
+{
+    float4 posProj : SV_POSITION; // Screen position
+    float3 posWorld : POSITION; // World position (조명 계산에 사용)
+    float3 normalWorld : NORMAL0;
+    float2 texcoord : TEXCOORD0;
+    float3 tangentWorld : TANGENT0;
+    uint instanced : TEXCOORD1;
 };
 
 #endif // __COMMON_HLSLI__

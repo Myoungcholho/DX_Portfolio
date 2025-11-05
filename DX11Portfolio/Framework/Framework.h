@@ -22,6 +22,7 @@ using namespace chrono;
 #include "Utilities/D3D11Utils.h"
 #include "Components/Transform.h"
 #include "Utilities/Profiler.h"
+#include "Utilities/PerfMon.h"
 
 // ComPtr
 #include <wrl/client.h>
@@ -64,6 +65,9 @@ using Microsoft::WRL::ComPtr;
 #include "Editor/TransformEditor.h"
 #include "Editor/LightEditor.h"
 #include "Editor/StaticMeshEditor.h"
+#include "Editor/AnimationEditor.h"
+#include "Editor/PawnEditor.h"
+#include "Editor/ControllerEditor.h"
 
 #include "Editor/InspectorWindow.h"
 #include "Editor/EditorSelection.h"
@@ -72,8 +76,11 @@ using Microsoft::WRL::ComPtr;
 #include "Editor/EditorGizmoSystem.h"
 #include "Editor/RendererSettingsWindow.h"
 
+#include "Editor/FEditorCommandQueue.h"
+
 #include "Editor/ImGuiManager.h"
 #include "Editor/EditorApplication.h"
+
 
 // Render
 #include "Renders/GraphicsPSO.h"
@@ -148,3 +155,11 @@ using Microsoft::WRL::ComPtr;
 //#include "Renders/URenderer.h"
 #include "Core/URenderManager.h"
 #include "Core/UGameInstance.h"
+
+// GamePlay
+#include "Gameplay/AGameMode.h"
+#include "Gameplay/APawn.h"
+#include "Gameplay/ACharacter.h"
+#include "Gameplay/AController.h"
+#include "Gameplay/APlayerController.h"
+#include "Gameplay/ClassID.h"

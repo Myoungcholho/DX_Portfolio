@@ -27,7 +27,7 @@ void TransformEditor::OnGUI()
     if (!mEditingPos && !mEditingRot && !mEditingScale)
         RefreshBuffersFromTarget();
 
-    ImGui::PushID(mTarget); // 🔑 컴포넌트별 고유 ID
+    ImGui::PushID(mTarget); // 컴포넌트별 고유 ID
 
     // 에디터 이름 사용(Inspector에서 SetName으로 넣어준 값)
     const char* title = GetName().empty() ? "Transform" : GetName().c_str();
@@ -118,8 +118,17 @@ void TransformEditor::RefreshBuffersFromTarget()
 void TransformEditor::ApplyBuffersToTarget()
 {
 	if (!mTarget) return;
-	mTarget->SetRelativePosition(mPosBuf);
-	mTarget->SetRelativeRotation(mRotBuf); // degrees 버전 사용
-	mTarget->SetRelativeScale(mScaleBuf);
-	mTarget->UpdateWorldTransformRecursive();
+
+	//mTarget->SetRelativePosition(mPosBuf);
+	//mTarget->SetRelativeRotation(mRotBuf); // degrees 버전 사용
+	//mTarget->SetRelativeScale(mScaleBuf);
+	//mTarget->UpdateWorldTransformRecursive();
+
+    FTransformUpdateCommand cmd;
+    cmd.target = mTarget;
+    cmd.position = mPosBuf;
+    cmd.rotation = mRotBuf;
+    cmd.scale = mScaleBuf;
+
+    FEditorCommandQueue::Enqueue(cmd);
 }

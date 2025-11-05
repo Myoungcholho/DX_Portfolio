@@ -16,14 +16,14 @@ public:
     USceneComponent();
     ~USceneComponent() override = default;
 
-protected:
     // 언리얼의 값 관리 형식 방식을 적용
     // Transform은 Value타입에 가깝기 때문에 소유권 공유 필요가 없음
+protected:
 	Transform localTransform;		                    // 부모 기준 위치(상대 위치, Local)
 	Transform worldTransform;		                    // 렌더링에 사용(절대 위치, World)
 
-	USceneComponent* parent;                          // 부모 포인터
-	vector<USceneComponent*> children;           // 자식 포인터
+	USceneComponent* parent;                            // 부모 포인터
+	vector<USceneComponent*> children;                  // 자식 포인터
 
 public:
     void SetRelativePosition(const Vector3& position);
@@ -33,10 +33,16 @@ public:
     void SetRelativeTransform(const Transform& t);      // 부모를 기준으로 하는 로컬 트랜스폼을 설정
     Vector3 GetRelativePosition() const;
     Vector3 GetRelativeRotationEuler() const;
+    Quaternion GetRelativeRotationQuat() const;
     Vector3 GetRelativeScale() const;
     Vector3 GetForwardVector() const;
     void UpdateWorldTransform();
     void UpdateWorldTransformRecursive();
+    Vector3 GetActorWorldPosition();
+
+    // 로컬Transform
+    Transform GetRelativeTransform() const;
+    Transform GetWorldTransform() const;
 
     // 월드행렬 반환
     const Matrix& GetWorldMatrix();

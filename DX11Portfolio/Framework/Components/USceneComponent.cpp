@@ -88,6 +88,23 @@ void USceneComponent::UpdateWorldTransformRecursive()
     }
 }
 
+Vector3 USceneComponent::GetActorWorldPosition()
+{
+    UpdateWorldTransform();
+
+    return worldTransform.GetPosition();
+}
+
+Transform USceneComponent::GetRelativeTransform() const
+{
+    return localTransform;
+}
+
+Transform USceneComponent::GetWorldTransform() const
+{
+    return worldTransform;
+}
+
 bool USceneComponent::AttachTo(USceneComponent* newParent, EAttachMode mode)
 {
     if (parent == newParent) return true;
@@ -188,6 +205,11 @@ Vector3 USceneComponent::GetRelativePosition() const
 Vector3 USceneComponent::GetRelativeRotationEuler() const
 {
     return localTransform.GetRotation();
+}
+
+Quaternion USceneComponent::GetRelativeRotationQuat() const
+{
+    return localTransform.GetRotationQuat();
 }
 
 Vector3 USceneComponent::GetRelativeScale() const

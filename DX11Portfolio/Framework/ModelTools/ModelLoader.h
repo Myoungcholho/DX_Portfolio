@@ -13,7 +13,7 @@
 class ModelLoader
 {
 public:
-    void ReadAnimation(const aiScene* scene);
+    void ReadAnimation(const aiScene* scene, string filename);
 
     void Load(string basePath, string filename, bool revertNormals);
     void LoadAnimation(string basePath, string filename);
@@ -23,7 +23,6 @@ public:
     void ProcessNode(aiNode* node, const aiScene* scene,DirectX::SimpleMath::Matrix tr);
 
     PBRMeshData ProcessMesh(aiMesh* mesh, const aiScene* scene);
-
 
     string ReadTextureFilename(const aiScene* scene, aiMaterial* material,aiTextureType type);
 

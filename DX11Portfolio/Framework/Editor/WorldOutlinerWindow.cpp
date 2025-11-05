@@ -104,7 +104,7 @@ void WorldOutlinerWindow::DrawActorNode(AActor* a)
 			EditorSelection::SetActor(a);
 		}
 		if (ImGui::MenuItem("Delete")) {															
-			// TODO: 월드에서 제거
+			a->Destroy();
 		}
 		ImGui::EndPopup();																			
 	}
@@ -136,7 +136,10 @@ void WorldOutlinerWindow::DrawActorFlat(AActor* a)
 	{
 		if (ImGui::MenuItem("Select")) 
 			EditorSelection::SetActor(a);
-		if (ImGui::MenuItem("Delete")) { /* TODO */ }
+		if (ImGui::MenuItem("Delete")) 
+		{ 
+			a->Destroy();
+		}
 		if (ImGui::MenuItem("Rename")) { /* TODO */ }
 		ImGui::EndPopup();
 	}

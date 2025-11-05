@@ -1,6 +1,13 @@
 ﻿#include "Framework.h"
 #include "URenderer.h"
 
+static size_t NextPow2(size_t v) 
+{
+	size_t p = 1;
+	while (p < v) p <<= 1;
+	return p;
+}
+
 URenderer::URenderer()
 {
 	device = D3D::Get()->GetDeviceCom();
@@ -84,17 +91,25 @@ URenderer::URenderer()
 
 	for (int i = 0; i < MAX_LIGHTS; ++i)
 		ThrowIfFailed(device->CreateShaderResourceView(m_shadowBuffers[i].Get(), &srvDesc, m_shadowSRVs[i].GetAddressOf()));
+
+	// SkinnedInstance용
+	D3D11Utils::CreateConstBuffer(device, skinnedBatchConstsCPU, skinnedBatchConstsGPU);
 }
 
 URenderer::~URenderer()
 {
-	if (m_resizeHandle.IsValid()) 
+	if (ResizeHandle.IsValid()) 
 	{
-		D3D::Get()->OnReSizeDelegate.Remove(m_resizeHandle);
-		m_resizeHandle = FDelegateHandle{};
+		D3D::Get()->OnReSizeDelegate.Remove(ResizeHandle);
+		ResizeHandle = FDelegateHandle{};
 	}
 }
 
+/// <summary>
+/// 글로벌 GPU버퍼, 포스트이펙트 GPU버퍼, 쉐도우GPU버퍼, 배경으로 사용될 텍스처를 만들고
+/// 포스트프로세스를 초기화하는 작업을 실행
+/// Resize델리게이트도 연결
+/// </summary>
 void URenderer::Init()
 {
 	D3D11Utils::CreateConstBuffer(device, m_globalConstsCPU, m_globalConstsGPU);
@@ -122,10 +137,13 @@ void URenderer::Init()
 		4
 	);
 
-	m_resizeHandle = D3D::Get()->OnReSizeDelegate.AddDynamic(this, &URenderer::OnResize, "URenderer::OnResize");
+	ResizeHandle = D3D::Get()->OnReSizeDelegate.AddDynamic(this, &URenderer::OnResize, "URenderer::OnResize");
 }
 
-//RenderLoop에서 호출, cbuffer로 보낼 데이터 수집
+/// <summary>
+/// 글로벌로 사용하는 Light의 CPU정보를 업데이트
+/// </summary>
+/// <param name="lights"></param>
 void URenderer::UpdateGlobalLights(const vector<LightData>& lights)
 {
 	const size_t n = min(lights.size(), size_t(MAX_LIGHTS));
@@ -138,6 +156,13 @@ void URenderer::UpdateGlobalLights(const vector<LightData>& lights)
 		m_globalConstsCPU.lights[i] = {};
 }
 
+/// <summary>
+/// 글로벌 eye, view, proj, invProj 등 렌더링 시 고유로 사용되는 것들을 업데이트
+/// </summary>
+/// <param name="eyeWorld"> 눈 위치 </param>
+/// <param name="viewRow"> view 행렬 </param>
+/// <param name="projRow"> proj 행렬 </param>
+/// <param name="refl"> 반사 행렬 </param>
 void URenderer::UpdateGlobalConstants(const Vector3& eyeWorld, const Matrix& viewRow, const Matrix& projRow, const Matrix& refl)
 {
 	m_globalConstsCPU.eyeWorld = eyeWorld;
@@ -155,6 +180,10 @@ void URenderer::UpdateGlobalConstants(const Vector3& eyeWorld, const Matrix& vie
 	D3D11Utils::UpdateBuffer(device, context, m_reflectGlobalConstsCPU, m_reflectGlobalConstsGPU);
 }
 
+/// <summary>
+/// 글로벌로 사용할 GPU버퍼를 파이프라인에 바인딩
+/// </summary>
+/// <param name="globalConstsGPU"> 바인딩할 GPU버퍼 </param>
 void URenderer::SetGlobalConsts(ID3D11Buffer* globalConstsGPU)
 {
 	context->VSSetConstantBuffers(1, 1, &globalConstsGPU);
@@ -179,7 +208,9 @@ void URenderer::RenderFrame(const URenderQueue& queue)
 	EndFrame();								// 현재 작업 X
 }
 
-
+/// <summary>
+/// RSViewport, 샘플러, 배경Texture 등 모든 곳에서 사용되는 데이터 파이프라인에 바인딩
+/// </summary>
 void URenderer::BindCommonResources()
 {
 	// Viewport설정
@@ -213,25 +244,18 @@ void URenderer::RenderDepthOnly(const URenderQueue& queue)
 	context->OMSetRenderTargets(0, NULL ,D3D::Get()->GetDepthOnly_DSV().Get());
 	context->ClearDepthStencilView(D3D::Get()->GetDepthOnly_DSV().Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
+	Graphics::depthOnlyInstancePSO.Apply(context.Get());
+	RenderOpaqueInstanced(queue);
+
 	Graphics::depthOnlyPSO.Apply(context.Get());
-
-	for (auto* comp : queue.GetOpaqueList())
-	{
-		comp->UpdateConstantBuffers(device, context);
-		comp->Draw(context.Get());
-	}
-
 	for (auto* comp : queue.GetSkyboxList())
 	{
 		comp->UpdateConstantBuffers(device, context);
 		comp->Draw(context.Get());
 	}
-
-	for (auto* comp : queue.GetSkinnedList())
-	{
-		comp->UpdateConstantBuffers(device, context);
-		comp->Draw(context.Get());
-	}
+	
+	Graphics::depthOnlySkinnedInstancePSO.Apply(context.Get());
+	RenderSkinnedInstanced(queue);
 }
 
 /// <summary>
@@ -242,8 +266,6 @@ void URenderer::RenderShadowMap(const URenderQueue& queue)
 	SetShadowViewport();													// 그림자용 viewport 변경
 
 	BuildShadowGlobalConsts();												// Light용 view proj 데이터 저장
-
-	Graphics::depthOnlyPSO.Apply(context.Get());
 
 	D3D11Utils::UnbindPSRange(context.Get(), 15, MAX_LIGHTS);
 
@@ -256,26 +278,35 @@ void URenderer::RenderShadowMap(const URenderQueue& queue)
 
 			SetGlobalConsts(m_shadowGlobalConstsGPU[i].Get());
 			
-			for (URenderProxy* comp : queue.GetOpaqueList())
+			/*for (URenderProxy* comp : queue.GetOpaqueList())
 			{
 				if (comp->bVisible && comp->castShadow)
 				{
 					comp->UpdateConstantBuffers(device, context);
 					comp->Draw(context.Get());
 				}
-			}
+			}*/
 
-			for (auto* comp : queue.GetSkyboxList())
+			Graphics::depthOnlyInstancePSO.Apply(context.Get());
+			RenderOpaqueInstanced(queue);
+
+			Graphics::depthOnlyPSO.Apply(context.Get());
+
+			for (URenderProxy* comp : queue.GetSkyboxList())
 			{
 				comp->UpdateConstantBuffers(device, context);
 				comp->Draw(context.Get());
 			}
 
-			for (auto* comp : queue.GetSkinnedList())
+			/*Graphics::depthOnlySkinnedPSO.Apply(context.Get());
+			for (URenderProxy* comp : queue.GetSkinnedList())
 			{
 				comp->UpdateConstantBuffers(device, context);
 				comp->Draw(context.Get());
-			}
+			}*/
+
+			Graphics::depthOnlySkinnedInstancePSO.Apply(context.Get());
+			RenderSkinnedInstanced(queue);
 		}
 	}
 
@@ -297,6 +328,7 @@ void URenderer::BeginFrame()
 
 	context->OMSetRenderTargets(UINT(rtvs.size()), rtvs.data(), D3D::Get()->GetDepthStencilView().Get());
 	context->ClearDepthStencilView(D3D::Get()->GetDepthStencilView().Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	//context->OMSetRenderTargets(UINT(rtvs.size()), rtvs.data(), D3D::Get()->GetDepthOnly_DSV().Get());
 	
 	// ShadowMap 전달
 	vector<ID3D11ShaderResourceView*> shadowSRVs;
@@ -322,24 +354,33 @@ void URenderer::RenderSkyBox(const URenderQueue& queue)
 
 void URenderer::RenderOpaque(const URenderQueue& queue)
 {
-	bWireRender ? Graphics::defaultWirePSO.Apply(context.Get()) : Graphics::defaultSolidPSO.Apply(context.Get());
+	//bWireRender ? Graphics::defaultWirePSO.Apply(context.Get()) : Graphics::defaultSolidPSO.Apply(context.Get());
 
-	for (auto* comp : queue.GetOpaqueList())
+	/*for (auto* comp : queue.GetOpaqueList())
 	{
 		comp->UpdateConstantBuffers(device, context);
 		comp->Draw(context.Get());
-	}
+	}*/
+
+	bWireRender ? Graphics::defaultWireInstancePSO.Apply(context.Get()) : Graphics::defaultSolidInstancePSO.Apply(context.Get());
+
+
+	RenderOpaqueInstanced(queue);
 }
 
 void URenderer::RenderSkinned(const URenderQueue& queue)
 {
-	bWireRender ? Graphics::skinnedWirePSO.Apply(context.Get()) : Graphics::skinnedSolidPSO.Apply(context.Get());
+	/*bWireRender ? Graphics::skinnedWirePSO.Apply(context.Get()) : Graphics::skinnedSolidPSO.Apply(context.Get());
 
 	for (auto* comp : queue.GetSkinnedList())
 	{
 		comp->UpdateConstantBuffers(device, context);
 		comp->Draw(context.Get());
-	}
+	}*/
+
+	bWireRender ? Graphics::skinnedWireInstancePSO.Apply(context.Get()) : Graphics::skinnedSolidInstancePSO.Apply(context.Get());
+
+	RenderSkinnedInstanced(queue);
 }
 
 void URenderer::RenderNormal(const URenderQueue& queue)
@@ -361,6 +402,144 @@ void URenderer::RenderMirror(const URenderQueue& queue)
 void URenderer::EndFrame()
 {
 	
+}
+
+/// <summary>
+/// Opaque 인스턴스들을 드로우콜을 실행하는 함수
+/// </summary>
+/// <param name="queue"></param>
+void URenderer::RenderOpaqueInstanced(const URenderQueue& queue)
+{
+	const unordered_map<shared_ptr<const GPUMeshAsset>, InstanceBatch>& batches = queue.GetOpaqueInstanceBatches();
+
+	// 물체들 순회
+	for (unordered_map<shared_ptr<const GPUMeshAsset>, InstanceBatch>::const_iterator it = batches.begin(); it != batches.end(); ++it)
+	{
+		const shared_ptr<const GPUMeshAsset>& meshAsset = it->first;
+		const InstanceBatch& batch = it->second;
+
+		if (!meshAsset || batch.instances.empty())
+			continue;
+
+		// 1. 인스턴스 데이터 준비
+		const size_t instanceCount = batch.instances.size();
+		EnsureInstanceCapacity(device.Get(), instanceCount);
+
+		// 2. CPU배열 채우기
+		memcpy(m_instances.m_cpu.data(), batch.instances.data(), instanceCount * sizeof(InstanceData));
+
+		// 3. GPU 업로드
+		m_instances.Upload(context.Get());
+
+		// 4. 셰이더에 바인딩
+		ID3D11ShaderResourceView* vsSrvs[1] = { m_instances.GetSRV() };
+		context->VSSetShaderResources(8, 1, vsSrvs);
+		context->PSSetShaderResources(8, 1, vsSrvs);
+
+		// 5. 에셋의 서브 메쉬 순회하며 드로우
+		for (const auto& mesh : meshAsset->meshes)
+		{
+			vector<ID3D11ShaderResourceView*> resViews =
+			{
+				mesh->albedoSRV.Get(),
+				mesh->normalSRV.Get(),
+				mesh->aoSRV.Get(),
+				mesh->metallicRoughnessSRV.Get(),
+				mesh->emissiveSRV.Get()
+			};
+
+			context->PSSetShaderResources(0, UINT(resViews.size()), resViews.data());
+			context->VSSetShaderResources(0, 1, mesh->heightSRV.GetAddressOf());
+
+			context->IASetVertexBuffers(0, 1, mesh->vertexBuffer.GetAddressOf(), &mesh->stride, &mesh->offset);
+			context->IASetIndexBuffer(mesh->indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+
+			context->DrawIndexedInstanced(mesh->indexCount, static_cast<UINT>(instanceCount), 0, 0, 0);
+		}
+
+	}
+}
+
+/// <summary>
+/// Skinned 인스턴스들을 드로우콜을 실행하는 함수
+/// </summary>
+/// <param name="queue"></param>
+void URenderer::RenderSkinnedInstanced(const URenderQueue& queue)
+{
+	const unordered_map<shared_ptr<const GPUMeshAsset>, SkinnedInstanceBatch>& batches = queue.GetSkinnedInstanceBatches();
+
+	// 물체들 순회 [메시 그룹]
+	for (unordered_map < shared_ptr<const GPUMeshAsset>, SkinnedInstanceBatch>::const_iterator it = batches.begin(); it != batches.end(); ++it)
+	{
+		const shared_ptr<const GPUMeshAsset>& meshAsset = it->first;
+		const SkinnedInstanceBatch& batch = it->second;
+
+		if (!meshAsset || batch.instances.empty())
+			continue;
+
+		const size_t instanceCount = batch.instances.size();
+		const uint32_t maxBoneCount = batch.maxBoneCount;
+
+		skinnedBatchConstsCPU.g_maxBoneCount = maxBoneCount;
+		D3D11Utils::UpdateBuffer(device, context, skinnedBatchConstsCPU, skinnedBatchConstsGPU);
+
+		// 1. 인스턴스 데이터 업로드
+		EnsureSkinnedInstanceCapacity(device.Get(), instanceCount);
+		for (size_t i = 0; i < instanceCount; i++)
+		{
+			m_skinnedInstances.m_cpu[i].meshConstsCPU = batch.instances[i].meshConstsCPU;
+			m_skinnedInstances.m_cpu[i].materialConstsCPU = batch.instances[i].materialConstsCPU;
+		}
+		m_skinnedInstances.Upload(context.Get());
+
+		// 2. 본 팔레트 업로드
+		EnsureBonePaletteCapacity(device.Get(), instanceCount * maxBoneCount);
+		for (size_t i = 0; i < instanceCount; i++)
+		{
+			const auto* palette = batch.instances[i].bonePaletteCPU;
+			const size_t boneCount = palette->size();
+
+			memcpy(&m_bonePalettes.m_cpu[i * maxBoneCount],
+				palette->data(),
+				boneCount * sizeof(Matrix));
+
+			for (size_t j = boneCount; j < maxBoneCount; j++)
+				m_bonePalettes.m_cpu[i * maxBoneCount + j] = Matrix();
+		}
+		m_bonePalettes.Upload(context.Get());
+
+		// 3. 셰이더 바인딩
+		ID3D11ShaderResourceView* srvs[2] = {
+			m_skinnedInstances.GetSRV(),
+			m_bonePalettes.GetSRV()
+		};
+		context->VSSetShaderResources(8, 2, srvs);
+		context->PSSetShaderResources(8, 1, srvs);
+
+		context->VSSetConstantBuffers(0, 1 , skinnedBatchConstsGPU.GetAddressOf());
+
+		// 4. DrawIndexedInstanced
+		for (const auto& mesh : meshAsset->meshes)
+		{
+			std::vector<ID3D11ShaderResourceView*> resViews =
+			{
+				mesh->albedoSRV.Get(),
+				mesh->normalSRV.Get(),
+				mesh->aoSRV.Get(),
+				mesh->metallicRoughnessSRV.Get(),
+				mesh->emissiveSRV.Get()
+			};
+
+			context->PSSetShaderResources(0, (UINT)resViews.size(), resViews.data());
+			context->VSSetShaderResources(0, 1, mesh->heightSRV.GetAddressOf());
+
+			context->IASetVertexBuffers(0, 1, mesh->vertexBuffer.GetAddressOf(), &mesh->stride, &mesh->offset);
+			context->IASetIndexBuffer(mesh->indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+
+			context->DrawIndexedInstanced(mesh->indexCount, (UINT)instanceCount, 0, 0, 0);
+		}
+	}
+
 }
 
 void URenderer::OnResize()
@@ -482,6 +661,7 @@ void URenderer::BuildShadowGlobalConsts()
 	D3D11Utils::UpdateBuffer(device, context, m_globalConstsCPU, m_globalConstsGPU);
 }
 
+
 void URenderer::RenderPostProcess()
 {
 	const float clearColor[4] = { 0, 0, 0, 1 };
@@ -506,15 +686,15 @@ void URenderer::RenderPostProcess()
 	D3D11Utils::UpdateBuffer(device,context, m_postEffectsConstsCPU, m_postEffectsConstsGPU);
 
 	// ----------------그림자 맵 확인------------------------
-	//SetGlobalConsts(m_shadowGlobalConstsGPU[0]);
-	//vector<ID3D11ShaderResourceView*> postEffectsSRVs = 
-	//{
-	//	m_resolvedSRV.Get(), m_shadowSRVs[0].Get() 
-	//};
-	//context->PSSetShaderResources(20, UINT(postEffectsSRVs.size()),postEffectsSRVs.data());
-	//context->OMSetRenderTargets(1, m_postEffectsRTV.GetAddressOf(), NULL);
-	//context->PSSetConstantBuffers(3, 1,m_postEffectsConstsGPU.GetAddressOf());
-	//m_postEffects.Render(context);
+	/*SetGlobalConsts(m_shadowGlobalConstsGPU[1].Get());
+	vector<ID3D11ShaderResourceView*> postEffectsSRVs = 
+	{
+		m_resolvedSRV.Get(), m_shadowSRVs[1].Get() 
+	};
+	context->PSSetShaderResources(20, UINT(postEffectsSRVs.size()),postEffectsSRVs.data());
+	context->OMSetRenderTargets(1, m_postEffectsRTV.GetAddressOf(), NULL);
+	context->PSSetConstantBuffers(3, 1,m_postEffectsConstsGPU.GetAddressOf());
+	m_postEffects.Render(context);*/
 
 	// -------------------------------------------------------
 		
@@ -544,4 +724,38 @@ void URenderer::RenderPostProcess()
 void URenderer::Present()
 {
 	D3D::Get()->Present();
+}
+
+// ----------------------------------------------- private Util -----------------------------------------------
+
+void URenderer::EnsureInstanceCapacity(ID3D11Device* device, size_t needed)
+{
+	if (m_instanceCapacity >= needed && m_instances.m_gpu) return;		// 크기가 만약 넉넉하다면 리턴
+
+	const size_t newCap = NextPow2(needed > 0 ? needed : 1);
+	m_instances.m_cpu.resize(newCap);									// cpu데이터 공간 확보
+	m_instances.Initialize(device);										// cpu데이터 공간을 기반으로 SRV생성
+	m_instanceCapacity = static_cast<UINT>(newCap);
+}
+
+void URenderer::EnsureSkinnedInstanceCapacity(ID3D11Device* device, size_t needed)
+{
+	if (m_skinnedInstanceCapacity >= needed && m_skinnedInstances.m_gpu)
+		return;
+
+	const size_t newCap = NextPow2(needed > 0 ? needed : 1);
+	m_skinnedInstances.m_cpu.resize(newCap);
+	m_skinnedInstances.Initialize(device);
+	m_skinnedInstanceCapacity = static_cast<UINT>(newCap);
+}
+
+void URenderer::EnsureBonePaletteCapacity(ID3D11Device* device, size_t needed)
+{
+	if (m_bonePaletteCapacity >= needed && m_bonePalettes.m_gpu)
+		return;
+
+	const size_t newCap = NextPow2(needed > 0 ? needed : 1);
+	m_bonePalettes.m_cpu.resize(newCap);
+	m_bonePalettes.Initialize(device);
+	m_bonePaletteCapacity = static_cast<UINT>(newCap);
 }

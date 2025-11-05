@@ -28,7 +28,7 @@ public:
     void Initialize();
     void Tick();
     void FixedTick(double fixedDt);                                             // Timer클래스의 Delta값과 고정Tick에서의 Delta값은 1:1로 동기가 아니므로 인자로 delta를 계산해 받게함.
-    void Render();
+    void ProxySnapshot();
     void Destroy();
     void OnGUI();
 

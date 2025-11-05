@@ -275,7 +275,20 @@ void EditorApplication::imGuiRender()
 	ImGui::End();																	// dockspace end
 
 	//////////////////////////////////////////////////////////////////////////////
+	{
+		ImGui::Begin("Debug Window");
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
+		const double cpuGameMs = PerfMon::GetCpuMs(CpuZone::GameThread);
+		const double cpuRenderMs = PerfMon::GetCpuMs(CpuZone::RenderThread);
+		const double gpuMs = PerfMon::GetGpuMs();
+
+		ImGui::Text("CPU (Game) : %.3f ms", cpuGameMs);
+		ImGui::Text("CPU (Render): %.3f ms", cpuRenderMs);
+		ImGui::Text("GPU        : %.3f ms", gpuMs);
+
+		ImGui::End();
+	}
 	ImGui::Render();
 
 	ID3D11DeviceContext* context = D3D::Get()->GetDeviceContext();

@@ -13,4 +13,4 @@ public:
 
 private:
 	shared_ptr<USkeletalMeshComponent> m_skeletalMeshComponent;
-};
+};	

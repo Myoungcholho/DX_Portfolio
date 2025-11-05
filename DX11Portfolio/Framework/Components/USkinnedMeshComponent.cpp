@@ -28,8 +28,7 @@ void USkinnedMeshComponent::Init()
 
 void USkinnedMeshComponent::RefreshConstantsCPU()
 {
-	// 월드/역전치 갱신
-	UPrimitiveComponent::RefreshConstantsCPU();
+	UPrimitiveComponent::RefreshConstantsCPU();				// 월드/역전치 갱신
 }
 
 //void USkinnedMeshComponent::SetAssets(const vector<PBRMeshData>& meshes, shared_ptr<const AnimationData> anim)
@@ -53,6 +52,7 @@ shared_ptr<URenderProxy> USkinnedMeshComponent::GetRenderProxy()
 	renderProxy->SetMaterialConstants(materialConstsCPU);
 	renderProxy->SetDrawNormal(drawNormals);
 	renderProxy->SetUpdateBones(bonesSnapshot);
+	renderProxy->SetUpdateBonesCPU(bonesSnapshot);
 
 	return renderProxy;
 }

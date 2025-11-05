@@ -1,18 +1,18 @@
 #include "Framework.h"
 #include "StaticMeshEditor.h"
 
-StaticMeshEditor::StaticMeshEditor(UStaticMeshComponent* target) : mTarget(target)
+PrimitiveEditor::PrimitiveEditor(UPrimitiveComponent* target) : mTarget(target)
 {
 	RefreshBuffersFromTarget();
 }
 
-void StaticMeshEditor::SetTarget(UStaticMeshComponent* target)
+void PrimitiveEditor::SetTarget(UPrimitiveComponent* target)
 {
 	mTarget = target;
 	RefreshBuffersFromTarget();
 }
 
-void StaticMeshEditor::OnGUI()
+void PrimitiveEditor::OnGUI()
 {
     if (!mTarget) return;
 
@@ -59,7 +59,7 @@ void StaticMeshEditor::OnGUI()
     ImGui::PopID();
 }
 
-void StaticMeshEditor::RefreshBuffersFromTarget()
+void PrimitiveEditor::RefreshBuffersFromTarget()
 {
 	if (!mTarget) return;
 
@@ -80,7 +80,7 @@ void StaticMeshEditor::RefreshBuffersFromTarget()
     drawNormals = mTarget->GetNormalDraws();
 }
 
-void StaticMeshEditor::ApplyBuffersToTarget()
+void PrimitiveEditor::ApplyBuffersToTarget()
 {
 	if (!mTarget) return;
 

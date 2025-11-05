@@ -13,15 +13,26 @@ public:
 	void Initialize(shared_ptr<const AnimationData> animData) { AnimData = animData; }
 
 	void PlayClip(int index, bool loop = true, float rate = 1.0f);
-	void Pause(bool b) { bPaused = b; }
+	void SetPause(bool b) { bPaused = b; }
 	void SetPlayRate(float r) { playRate = r; }
 	void SetLoop(bool b) { bLoop = b; }
+	void PlayAtFrame(int startFrame);
 
 	void Update(double dt);
 
 	const AnimationData* GetAnimData() { return AnimData.get(); }
 	int GetClipIndex() const { return clipIndex; }
+	bool GetLoop() const { return bLoop; }
 	int GetFrame() const { return frame; }
+	float GetPlayRate() const { return playRate; }
+	bool GetPause() const { return bPaused; }
+	bool IsBlending() const { return bBlending; }
+	int GetNextClipIndex() const { return nextClipIndex; }
+	float GetBlendDuration() const { return blendDur; }
+	string GetCurrentClipName();
+	float GetCurrentFrame();
+	float GetTotalFrames();
+
 	const vector<AnimationClip::Key>& GetLocalPose() const { return localPose; }
 
 public:
@@ -60,4 +71,10 @@ private:
 		const std::vector<AnimationClip::Key>& B,
 		float w,
 		std::vector<AnimationClip::Key>& Out);
+
+	// 루트모션 저장 상태
+public:
+	Vector3 prevRootPos = Vector3(0.0f, 0.0f, 0.0f);
+	Quaternion prevRootRot = Quaternion{ 0.0f,0.0f ,0.0f ,1.0f };
+	int prevFrame = 0;
 };

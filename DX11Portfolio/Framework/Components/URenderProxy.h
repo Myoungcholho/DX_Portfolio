@@ -27,7 +27,9 @@ public:
 		ComPtr<ID3D11Device>& device,
 		ComPtr<ID3D11DeviceContext>& context) {}
 
+	WorldInvConstantBuffer GetWorldInvConstants() const { return meshConstsCPU; }
 	MaterialConstants GetMaterialConstants() const { return materialConstsCPU; }
+	shared_ptr<const GPUMeshAsset> GetMeshAsset() { return gpuAsset; }
 
 protected:
 	//vector<shared_ptr<Mesh>> meshes;				// 그릴 Mesh GPU 정보

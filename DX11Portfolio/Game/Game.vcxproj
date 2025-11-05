@@ -136,6 +136,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Actors\ALight.h" />
+    <ClInclude Include="Actors\AMyController.h" />
+    <ClInclude Include="Actors\APawnTest.h" />
     <ClInclude Include="Actors\APlayer.h" />
     <ClInclude Include="Actors\ASkinnedTestActor.h" />
     <ClInclude Include="Actors\ASkyboxActor.h" />
@@ -149,6 +151,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Actors\ALight.cpp" />
+    <ClCompile Include="Actors\AMyController.cpp" />
+    <ClCompile Include="Actors\APawnTest.cpp" />
     <ClCompile Include="Actors\APlayer.cpp" />
     <ClCompile Include="Actors\ASkinnedTestActor.cpp" />
     <ClCompile Include="Actors\ASkyboxActor.cpp" />

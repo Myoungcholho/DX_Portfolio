@@ -141,6 +141,10 @@ void Window::MainRender(UGameInstance* game)
 
 	//game->OnGUI();
 
+	//PRO_BEGIN(L"GameThread");
+
+	PerfMon::BeginCpu(CpuZone::GameThread);
+
 	CTimer::Get()->Tick();
 	CMouse::Get()->Tick();
 	CContext::Get()->Tick();
@@ -151,4 +155,8 @@ void Window::MainRender(UGameInstance* game)
 	//ImGuiManager::Get()->EndFrame();
 
 	game->Render();
+
+	PerfMon::EndCpu(CpuZone::GameThread);
+
+	//PRO_END(L"GameThread");
 }

@@ -14,7 +14,7 @@ public:
 
 private:
 	void OnUpdateSeleted();
-	FDelegateHandle m_ComponentHandle;
+	FDelegateHandle ComponentHandle;
 
 private:
 	void DrawSceneCompNode(USceneComponent* sc, UActorComponent* selectedComp);

@@ -5,8 +5,10 @@
 
 //mutex CPUAssetManager::mtx;
 unordered_map<AssetKey, weak_ptr<const CPUMeshAsset>, AssetKeyHash> CPUAssetManager::cache;
+unordered_map<AssetKey, weak_ptr<AnimationData>, AssetKeyHash> CPUAssetManager::animationCache;
 
 // -------------------- 구현 --------------------
+// 디스크 읽는 작업과 + 캐시에 등록하는 과정 수행
 shared_ptr<const CPUMeshAsset> CPUAssetManager::LoadCPUMesh(const string& root, const string& file)
 {
     const AssetKey key{ root + file };                                                                       // 첫번째 멤버에 값을 초기화(path, list-init)
@@ -26,6 +28,12 @@ shared_ptr<const CPUMeshAsset> CPUAssetManager::LoadCPUMesh(const string& root, 
     return asset;                                                                                               // 호출자에게 shared_ptr을 복사
 }
 
+/// <summary>
+/// 디스크에 있는 읽는 작업은 수행하지 않음, 캐시에 등록하는 과정만 수행
+/// </summary>
+/// <param name="id"></param>
+/// <param name="meshes"></param>
+/// <returns></returns>
 shared_ptr<const CPUMeshAsset> CPUAssetManager::CreateProcedural(const string& id, const vector<PBRMeshData>& meshes)
 {
     const AssetKey key{ id };
@@ -40,6 +48,17 @@ shared_ptr<const CPUMeshAsset> CPUAssetManager::CreateProcedural(const string& i
     asset->meshes = meshes;
     cache.emplace(key, asset);
     return asset;
+}
+
+shared_ptr<const CPUMeshAsset> CPUAssetManager::GetProcedural(const string& id)
+{
+    const AssetKey key{ id };
+    auto it = cache.find(key);
+    if (it != cache.end()) {
+        if (auto sp = it->second.lock())
+            return sp;
+    }
+    return nullptr;
 }
 
 void CPUAssetManager::ClearUnused()
@@ -62,4 +81,32 @@ shared_ptr<const CPUMeshAsset> CPUAssetManager::BuildCPUMesh_(const string& root
     
     asset->meshes = move(cpu);
     return asset;
+}
+
+shared_ptr<AnimationData> CPUAssetManager::SaveAnimation(const string& id, shared_ptr<AnimationData>& aniData)
+{
+    const AssetKey key{ id };
+
+    // 이미 캐시에 있으면 기존 것 반환
+    auto it = animationCache.find(key);
+    if (it != animationCache.end()) {
+        if (auto sp = it->second.lock())
+            return sp;
+    }
+
+    // 없으면 새로 등록
+    animationCache.emplace(key, aniData);
+    return aniData;
+}
+
+shared_ptr<AnimationData> CPUAssetManager::GetAnimation(const string& id)
+{
+    const AssetKey key{ id };
+
+    auto it = animationCache.find(key);
+    if (it != animationCache.end()) {
+        if (auto sp = it->second.lock())
+            return sp;
+    }
+    return nullptr;
 }

@@ -18,13 +18,31 @@ public:
 	void FixedTick(double dt) override;
 
 	UAnimInstance& GetAnimInstance() { return Anim; }
+
+private:
+	void AnimationUpdate(double dt);
+	bool ShouldUpdateThisFrame(double dt);
+
 private:
 	UAnimInstance Anim;
 
-	vector<Matrix> CSPose;
-	Matrix accumRoot = Matrix();
+	vector<Matrix> SkinningPalette;
+	FRootMotionDelta accumRoot;			// 캐릭터 혹은 MovementComponent가, 월드 좌표에서 실제로 이동하는 주체가 들고 있어야 한다.
+
+	Matrix accumRoot2 = Matrix();
 	Vector3 prevPos = Vector3(0, 0, 0);
 
-	float acctime = 0.0f;
-	bool time = true;
+	// 4번째 루트모션 테스트 변수
+	Quaternion prevRot = Quaternion();
+	Vector3 outPos = Vector3();
+	Quaternion outRot = Quaternion();
+	Vector3 outScale = Vector3();
+
+	//float acctime = 0.0f;
+	//bool time = true;
+	bool bUseRootMotion = false;
+
+private:
+	double AccumulatedAnimTime = 0.0;		// 애니메이션 시간 갱신용
+	double accumulatedTime = 0.0;			// URO interval 체크용
 };

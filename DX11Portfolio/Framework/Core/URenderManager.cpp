@@ -55,7 +55,7 @@ void URenderManager::RenderLoop()
 	// 종료플레그가 있다면 돌지 않음
 	while(!m_shouldExit.load(memory_order_acquire))
 	{
-		//PRO_BEGIN(L"RenderFrame");
+		//PRO_BEGIN(L"RenderThread");
 
 		vector<shared_ptr<URenderProxy>> proxiesToRender;
 		vector<LightData> lightsToRender;
@@ -91,6 +91,10 @@ void URenderManager::RenderLoop()
 			renderQueue.AddProxy(move(proxy));
 		}
 
+		// --- 실제 드로우 제출 구간 ---
+		PerfMon::BeginCpu(CpuZone::RenderThread);
+		PerfMon::BeginGpu(D3D::Get()->GetDeviceContext());
+		
 		// 인자로 렌더큐를 전달해서 렌더링 시작
 		m_renderer->RenderFrame(renderQueue);
 
@@ -99,9 +103,16 @@ void URenderManager::RenderLoop()
 
 		EditorApplication::Run();
 
-		m_renderer->Present();
 
-		//PRO_END(L"RenderFrame");
+		PerfMon::EndGpu(D3D::Get()->GetDeviceContext());
+		PerfMon::EndCpu(CpuZone::RenderThread);
+
+		m_renderer->Present();
+		// --- 측정 완료 ---
+
+		PerfMon::TryResolveGpu(D3D::Get()->GetDeviceContext());
+
+		//PRO_END(L"RenderThread");
 	}
 }
 
