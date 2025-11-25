@@ -362,141 +362,136 @@ void Graphics::InitShaders(ComPtr<ID3D11Device>& device)
 void Graphics::InitPipelineStates(ComPtr<ID3D11Device>& device)
 {
 	// defaultSolidPSO;
-	defaultSolidPSO.m_vertexShader = basicVS;
-	defaultSolidPSO.m_inputLayout = basicIL;
-	defaultSolidPSO.m_pixelShader = basicPS;
-	defaultSolidPSO.m_rasterizerState = solidRS;
-	defaultSolidPSO.m_primitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	//defaultSolidPSO.m_depthStencilState = depthEqualState;
+	defaultSolidPSO.vertexShader = basicVS;
+	defaultSolidPSO.inputLayout = basicIL;
+	defaultSolidPSO.pixelShader = basicPS;
+	defaultSolidPSO.rasterizerState = solidRS;
+	defaultSolidPSO.primitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	// defaultSolidInstancePSO;
 	defaultSolidInstancePSO = defaultSolidPSO;
-	defaultSolidInstancePSO.m_vertexShader = basicInstanceVS;
-	defaultSolidInstancePSO.m_pixelShader = basicInstancePS;
-	//defaultSolidInstancePSO.m_depthStencilState = depthEqualState;
+	defaultSolidInstancePSO.vertexShader = basicInstanceVS;
+	defaultSolidInstancePSO.pixelShader = basicInstancePS;
 
 	// defaultWireInstancePSO;
 	defaultWireInstancePSO = defaultSolidInstancePSO;
-	defaultWireInstancePSO.m_rasterizerState = wireRS;
+	defaultWireInstancePSO.rasterizerState = wireRS;
 
 	// Skinned mesh solid
 	skinnedSolidPSO = defaultSolidPSO;
-	skinnedSolidPSO.m_vertexShader = skinnedVS;
-	skinnedSolidPSO.m_inputLayout = skinnedIL;
-	//skinnedSolidPSO.m_depthStencilState = depthEqualState;
+	skinnedSolidPSO.vertexShader = skinnedVS;
+	skinnedSolidPSO.inputLayout = skinnedIL;
 
 	// Skinned mesh Instacne Solid
 	skinnedSolidInstancePSO = defaultSolidPSO;
-	skinnedSolidInstancePSO.m_vertexShader = skinnedInstanceVS;
-	skinnedSolidInstancePSO.m_pixelShader = basicInstancePS;
-	skinnedSolidInstancePSO.m_inputLayout = skinnedIL;
-	//skinnedSolidInstancePSO.m_depthStencilState = depthEqualState;
+	skinnedSolidInstancePSO.vertexShader = skinnedInstanceVS;
+	skinnedSolidInstancePSO.pixelShader = basicInstancePS;
+	skinnedSolidInstancePSO.inputLayout = skinnedIL;
 
 	// Skinned mesh Instance Wire
 	skinnedWireInstancePSO = skinnedSolidInstancePSO;
-	skinnedWireInstancePSO.m_rasterizerState = wireRS;
+	skinnedWireInstancePSO.rasterizerState = wireRS;
 
 	// defaultWirePSO
 	defaultWirePSO = defaultSolidPSO;
-	defaultWirePSO.m_rasterizerState = wireRS;
+	defaultWirePSO.rasterizerState = wireRS;
 
 	// Skinned mesh wire
 	skinnedWirePSO = skinnedSolidPSO;
-	skinnedWirePSO.m_rasterizerState = wireRS;
+	skinnedWirePSO.rasterizerState = wireRS;
 
 
 	// stencilMarkPSO;
 	stencilMaskPSO = defaultSolidPSO;
-	stencilMaskPSO.m_depthStencilState = maskDSS;
-	stencilMaskPSO.m_stencilRef = 1;
-	//stencilMaskPSO.m_pixelShader = simplePS;
-	stencilMaskPSO.m_vertexShader = depthOnlyVS;
-	stencilMaskPSO.m_pixelShader = depthOnlyPS;
+	stencilMaskPSO.depthStencilState = maskDSS;
+	stencilMaskPSO.stencilRef = 1;
+	stencilMaskPSO.vertexShader = depthOnlyVS;
+	stencilMaskPSO.pixelShader = depthOnlyPS;
 
 	// reflectSolidPSO: 반사되면 Winding 반대
 	reflectSolidPSO = defaultSolidPSO;
-	reflectSolidPSO.m_depthStencilState = drawMaskedDSS;
-	reflectSolidPSO.m_rasterizerState = solidCCWRS; // 반시계
-	reflectSolidPSO.m_stencilRef = 1;
+	reflectSolidPSO.depthStencilState = drawMaskedDSS;
+	reflectSolidPSO.rasterizerState = solidCCWRS; // 반시계
+	reflectSolidPSO.stencilRef = 1;
 
 	reflectSkinnedSolidPSO = reflectSolidPSO;
-	reflectSkinnedSolidPSO.m_vertexShader = skinnedVS;
-	reflectSkinnedSolidPSO.m_inputLayout = skinnedIL;
+	reflectSkinnedSolidPSO.vertexShader = skinnedVS;
+	reflectSkinnedSolidPSO.inputLayout = skinnedIL;
 
 	// reflectWirePSO: 반사되면 Winding 반대
 	reflectWirePSO = reflectSolidPSO;
-	reflectWirePSO.m_rasterizerState = wireCCWRS; // 반시계
-	reflectWirePSO.m_stencilRef = 1;
+	reflectWirePSO.rasterizerState = wireCCWRS; // 반시계
+	reflectWirePSO.stencilRef = 1;
 
 	reflectSkinnedWirePSO = reflectSkinnedSolidPSO;
-	reflectSkinnedWirePSO.m_rasterizerState = wireCCWRS; // 반시계
-	reflectSkinnedWirePSO.m_stencilRef = 1;
+	reflectSkinnedWirePSO.rasterizerState = wireCCWRS; // 반시계
+	reflectSkinnedWirePSO.stencilRef = 1;
 
 	// mirrorBlendSolidPSO;
 	mirrorBlendSolidPSO = defaultSolidPSO;
-	mirrorBlendSolidPSO.m_blendState = mirrorBS;
-	mirrorBlendSolidPSO.m_depthStencilState = drawMaskedDSS;
-	mirrorBlendSolidPSO.m_stencilRef = 1;
+	mirrorBlendSolidPSO.blendState = mirrorBS;
+	mirrorBlendSolidPSO.depthStencilState = drawMaskedDSS;
+	mirrorBlendSolidPSO.stencilRef = 1;
 
 	// mirrorBlendWirePSO;
 	mirrorBlendWirePSO = defaultWirePSO;
-	mirrorBlendWirePSO.m_blendState = mirrorBS;
-	mirrorBlendWirePSO.m_depthStencilState = drawMaskedDSS;
-	mirrorBlendWirePSO.m_stencilRef = 1;
+	mirrorBlendWirePSO.blendState = mirrorBS;
+	mirrorBlendWirePSO.depthStencilState = drawMaskedDSS;
+	mirrorBlendWirePSO.stencilRef = 1;
 
 	// skyboxSolidPSO
 	skyboxSolidPSO = defaultSolidPSO;
-	skyboxSolidPSO.m_vertexShader = skyboxVS;
-	skyboxSolidPSO.m_pixelShader = skyboxPS;
-	skyboxSolidPSO.m_inputLayout = skyboxIL;
+	skyboxSolidPSO.vertexShader = skyboxVS;
+	skyboxSolidPSO.pixelShader = skyboxPS;
+	skyboxSolidPSO.inputLayout = skyboxIL;
 
 	// skyboxWirePSO
 	skyboxWirePSO = skyboxSolidPSO;
-	skyboxWirePSO.m_rasterizerState = wireRS;
+	skyboxWirePSO.rasterizerState = wireRS;
 
 	// reflectSkyboxSolidPSO
 	reflectSkyboxSolidPSO = skyboxSolidPSO;
-	reflectSkyboxSolidPSO.m_depthStencilState = drawMaskedDSS;
-	reflectSkyboxSolidPSO.m_rasterizerState = solidCCWRS; // 반시계
-	reflectSkyboxSolidPSO.m_stencilRef = 1;
+	reflectSkyboxSolidPSO.depthStencilState = drawMaskedDSS;
+	reflectSkyboxSolidPSO.rasterizerState = solidCCWRS; // 반시계
+	reflectSkyboxSolidPSO.stencilRef = 1;
 
 	// reflectSkyboxWirePSO
 	reflectSkyboxWirePSO = reflectSkyboxSolidPSO;
-	reflectSkyboxWirePSO.m_rasterizerState = wireCCWRS;
-	reflectSkyboxWirePSO.m_stencilRef = 1;
+	reflectSkyboxWirePSO.rasterizerState = wireCCWRS;
+	reflectSkyboxWirePSO.stencilRef = 1;
 
 	// normalsPSO
 	normalsPSO = defaultSolidPSO;
-	normalsPSO.m_vertexShader = normalVS;
-	normalsPSO.m_geometryShader = normalGS;
-	normalsPSO.m_pixelShader = normalPS;
-	normalsPSO.m_primitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
+	normalsPSO.vertexShader = normalVS;
+	normalsPSO.geometryShader = normalGS;
+	normalsPSO.pixelShader = normalPS;
+	normalsPSO.primitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
 
 	// depthOnlyPSO
 	depthOnlyPSO = defaultSolidPSO;
-	depthOnlyPSO.m_vertexShader = depthOnlyVS;
-	depthOnlyPSO.m_pixelShader = depthOnlyPS;
+	depthOnlyPSO.vertexShader = depthOnlyVS;
+	depthOnlyPSO.pixelShader = depthOnlyPS;
 
 	depthOnlyInstancePSO = depthOnlyPSO;
-	depthOnlyInstancePSO.m_vertexShader = depthOnlyInstanceVS;
+	depthOnlyInstancePSO.vertexShader = depthOnlyInstanceVS;
 
 	depthOnlySkinnedPSO = depthOnlyPSO;
-	depthOnlySkinnedPSO.m_vertexShader = depthOnlySkinnedVS;
-	depthOnlySkinnedPSO.m_inputLayout = skinnedIL;
+	depthOnlySkinnedPSO.vertexShader = depthOnlySkinnedVS;
+	depthOnlySkinnedPSO.inputLayout = skinnedIL;
 
 	depthOnlySkinnedInstancePSO = depthOnlyPSO;
-	depthOnlySkinnedInstancePSO.m_vertexShader = depthOnlySkinnedInstanceVS;
-	depthOnlySkinnedInstancePSO.m_inputLayout = skinnedIL;
+	depthOnlySkinnedInstancePSO.vertexShader = depthOnlySkinnedInstanceVS;
+	depthOnlySkinnedInstancePSO.inputLayout = skinnedIL;
 
 	// postEffectsPSO
-	postEffectsPSO.m_vertexShader = samplingVS;
-	postEffectsPSO.m_pixelShader = postEffectsPS;
-	postEffectsPSO.m_inputLayout = samplingIL;
-	postEffectsPSO.m_rasterizerState = postProcessingRS;
+	postEffectsPSO.vertexShader = samplingVS;
+	postEffectsPSO.pixelShader = postEffectsPS;
+	postEffectsPSO.inputLayout = samplingIL;
+	postEffectsPSO.rasterizerState = postProcessingRS;
 
 	// postProcessingPSO
-	postProcessingPSO.m_vertexShader = samplingVS;
-	postProcessingPSO.m_pixelShader = depthOnlyPS; // 사용 안해서 nullptr줘도 되는데 안전하게 더미
-	postProcessingPSO.m_inputLayout = samplingIL;
-	postProcessingPSO.m_rasterizerState = postProcessingRS;
+	postProcessingPSO.vertexShader = samplingVS;
+	postProcessingPSO.pixelShader = depthOnlyPS; // 사용 안해서 nullptr줘도 되는데 안전하게 더미
+	postProcessingPSO.inputLayout = samplingIL;
+	postProcessingPSO.rasterizerState = postProcessingRS;
 }

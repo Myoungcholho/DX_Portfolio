@@ -24,13 +24,13 @@ private:
 
 private:
 	// Shader
-	ComPtr<ID3D11VertexShader> m_vertexShader;
-	ComPtr<ID3D11VertexShader> m_vertexShaderPASS;
+	ComPtr<ID3D11VertexShader> vertexShader;
+	ComPtr<ID3D11VertexShader> vertexShaderPASS;
 
-	//ComPtr<ID3D11HullShader> m_hullShader;
-	//ComPtr<ID3D11DomainShader> m_domainShader;
-	//ComPtr<ID3D11GeometryShader> m_geometryShader;
-	ComPtr<ID3D11PixelShader> m_pixelShader;
+	/*ComPtr<ID3D11HullShader> hullShader;
+	ComPtr<ID3D11DomainShader> domainShader;
+	ComPtr<ID3D11GeometryShader> geometryShader;*/
+	ComPtr<ID3D11PixelShader> pixelShader;
 
 private:
 	// ConstantBufferData
@@ -60,8 +60,8 @@ private:
 	// (Vertex & Index) Buffer
 	ComPtr<ID3D11Buffer> vertexBuffer;
 	ComPtr<ID3D11Buffer> indexBuffer;
-	UINT m_indexCount = 0;
-	UINT m_vertexCount = 0;
+	UINT indexCount = 0;
+	UINT vertexCount = 0;
 
 	// Texture
 	ComPtr<ID3D11Texture2D> albedoTexture;
@@ -75,7 +75,7 @@ private:
 
 private:
 	// InputLayout
-	ComPtr<ID3D11InputLayout> m_inputLayout;
+	ComPtr<ID3D11InputLayout> inputLayout;
 
 
 private:

@@ -32,19 +32,19 @@ public:
 public:
     virtual void Tick() override;
 
-    void SetRadiance(const Vector3& rad) { m_light.radiance = rad; }
-    void SetFalloff(float start, float end) { m_light.fallOffStart = start; m_light.fallOffEnd = end; }
-    void SetSpotPower(float power) { m_light.spotPower = power; }
-    void SetLightType(uint32_t type) { m_light.type = type; }
-    void SetEnabled(bool Enabled) { m_light.mEnabled = Enabled; }
+    void SetRadiance(const Vector3& rad) { light.radiance = rad; }
+    void SetFalloff(float start, float end) { light.fallOffStart = start; light.fallOffEnd = end; }
+    void SetSpotPower(float power) { light.spotPower = power; }
+    void SetLightType(uint32_t type) { light.type = type; }
+    void SetEnabled(bool Enabled) { light.mEnabled = Enabled; }
 
-    const Vector3& GetRadiance() const { return m_light.radiance; }
-    float GetFalloffStart() const { return m_light.fallOffStart; }
-    float GetFalloffEnd() const { return m_light.fallOffEnd; }
-    float GetSpotPower() const { return m_light.spotPower; }
-    int GetLightType() const { return m_light.type; }
-    bool GetEnabled()const { return (bool)m_light.mEnabled; }
+    const Vector3& GetRadiance() const { return light.radiance; }
+    float GetFalloffStart() const { return light.fallOffStart; }
+    float GetFalloffEnd() const { return light.fallOffEnd; }
+    float GetSpotPower() const { return light.spotPower; }
+    int GetLightType() const { return light.type; }
+    bool GetEnabled()const { return (bool)light.mEnabled; }
 
 protected:
-    LightData m_light;
+    LightData light;
 };

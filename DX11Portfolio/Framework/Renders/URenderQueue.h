@@ -42,7 +42,7 @@ struct SkinnedInstanceDataGPU
 
 struct SkinnedBatchCB
 {
-	UINT g_maxBoneCount;
+	UINT maxBoneCount;
 	UINT padding[3];
 };
 
@@ -53,32 +53,32 @@ public:
 	void AddProxy(shared_ptr<URenderProxy> proxy);
 
 	// 프록시 목록 제공 (렌더링용)
-	const vector<URenderProxy*>& GetSkyboxList() const { return m_skyboxList; }
-	const vector<URenderProxy*>& GetOpaqueList() const { return m_opaqueList; }
-	const vector<URenderProxy*>& GetTransparentList() const { return m_transparentList; }
-	const vector<URenderProxy*>& GetSkinnedList() const { return m_skinnedList; }
+	const vector<URenderProxy*>& GetSkyboxList() const { return skyboxList; }
+	const vector<URenderProxy*>& GetOpaqueList() const { return opaqueList; }
+	const vector<URenderProxy*>& GetTransparentList() const { return transparentList; }
+	const vector<URenderProxy*>& GetSkinnedList() const { return skinnedList; }
 
 	// 인스턴싱용
 	const unordered_map<shared_ptr<const GPUMeshAsset>, InstanceBatch>& GetOpaqueInstanceBatches() const 
 	{
-		return m_opaqueInstanceBatches;
+		return opaqueInstanceBatches;
 	}
 	const unordered_map<shared_ptr<const GPUMeshAsset>, SkinnedInstanceBatch>& GetSkinnedInstanceBatches() const
 	{
-		return m_skinnedInstanceBatches;
+		return skinnedInstanceBatches;
 	}
 
 	// 프레임 끝나고 초기화
 	void Clear();
 
 private:
-	vector<shared_ptr<URenderProxy>> m_allProxies;
+	vector<shared_ptr<URenderProxy>> allProxies;
 
-	vector<URenderProxy*> m_skyboxList;
-	vector<URenderProxy*> m_opaqueList;
-	vector<URenderProxy*> m_transparentList;
-	vector<URenderProxy*> m_skinnedList;
+	vector<URenderProxy*> skyboxList;
+	vector<URenderProxy*> opaqueList;
+	vector<URenderProxy*> transparentList;
+	vector<URenderProxy*> skinnedList;
 
-	unordered_map<shared_ptr<const GPUMeshAsset>, InstanceBatch> m_opaqueInstanceBatches;
-	unordered_map<shared_ptr<const GPUMeshAsset>, SkinnedInstanceBatch> m_skinnedInstanceBatches;
+	unordered_map<shared_ptr<const GPUMeshAsset>, InstanceBatch> opaqueInstanceBatches;
+	unordered_map<shared_ptr<const GPUMeshAsset>, SkinnedInstanceBatch> skinnedInstanceBatches;
 };

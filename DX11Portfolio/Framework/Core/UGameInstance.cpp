@@ -59,8 +59,8 @@ void UGameInstance::Render()
 
 void UGameInstance::Shotdown()
 {
-	//if (m_renderManager)
-		//m_renderManager->Stop();
+	//if (RenderManager)
+		//RenderManager->Stop();
 
 	if (world)
 		world->Destroy();

@@ -6,7 +6,7 @@ REGISTER_CLASS(AGameMode);
 
 AGameMode::AGameMode()
 {
-    m_name = "AGameMode";
+    name = "AGameMode";
 }
 
 void AGameMode::StartPlay()

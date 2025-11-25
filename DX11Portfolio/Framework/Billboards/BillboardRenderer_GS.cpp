@@ -4,13 +4,13 @@
 void BillboardRenderer_GS::Initialize()
 {
     //// CBuffer Create
-    //m_constantData.width = 2.4f;
-    //m_constantData.EyeWorld = CContext::Get()->GetCamera()->GetPosition();
+    //constantData.width = 2.4f;
+    //constantData.EyeWorld = CContext::Get()->GetCamera()->GetPosition();
 
-    //D3D::Get()->CreateConstantBuffer(m_constantData, m_constantBuffer);
+    //D3D::Get()->CreateConstantBuffer(constantData, constantBuffer);
 
     //// GS Shader
-    //D3D::Get()->CreateGeometryShader(L"Billboards/BillboardPointsGeometryShader.hlsl", m_geometryShader);
+    //D3D::Get()->CreateGeometryShader(L"Billboards/BillboardPointsGeometryShader.hlsl", geometryShader);
 
     //// VS Shader
     //vector<D3D11_INPUT_ELEMENT_DESC> inputElements = 
@@ -18,10 +18,10 @@ void BillboardRenderer_GS::Initialize()
     //    { "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
     //};
     //D3D::Get()->CreateVertexShaderAndInputLayout(
-    //    L"Billboards/BillboardPointsVertexShader.hlsl", inputElements, m_vertexShader, m_inputLayout);
+    //    L"Billboards/BillboardPointsVertexShader.hlsl", inputElements, vertexShader, inputLayout);
 
     //// PS Shader
-    //D3D::Get()->CreatePixelShader(L"Billboards/BillboardPointsPixelShader.hlsl", m_pixelShader);
+    //D3D::Get()->CreatePixelShader(L"Billboards/BillboardPointsPixelShader.hlsl", pixelShader);
 
     //// Textures
     //vector<string> filenames =
@@ -33,31 +33,31 @@ void BillboardRenderer_GS::Initialize()
     //    "../../../_Textures/TreeBillboards/5.png"
     //};
     //
-    //D3D::Get()->CreateTextureArray(filenames, true, m_texArray, m_texArraySRV);
+    //D3D::Get()->CreateTextureArray(filenames, true, texArray, texArraySRV);
 }
 
 void BillboardRenderer_GS::Tick()
 {
-    //m_constantData.EyeWorld = CContext::Get()->GetCamera()->GetPosition();
+    //constantData.EyeWorld = CContext::Get()->GetCamera()->GetPosition();
 
-    //D3D::Get()->UpdateBuffer(m_constantData, m_constantBuffer);
+    //D3D::Get()->UpdateBuffer(constantData, constantBuffer);
 }
 
 void BillboardRenderer_GS::Render(BillboardInstance *data)
 {
     //ID3D11DeviceContext* context = D3D::Get()->GetDeviceContext();
 
-    //context->VSSetShader(m_vertexShader.Get(), 0, 0);
+    //context->VSSetShader(vertexShader.Get(), 0, 0);
     //context->PSSetSamplers(0, 1, GraphicsDevice::Get()->GetLinearWrapSampler());
-    //context->PSSetShader(m_pixelShader.Get(), 0, 0);
-    //context->PSSetShaderResources(0, 1, m_texArraySRV.GetAddressOf());
+    //context->PSSetShader(pixelShader.Get(), 0, 0);
+    //context->PSSetShaderResources(0, 1, texArraySRV.GetAddressOf());
 
-    //context->VSSetConstantBuffers(0, 1, m_constantBuffer.GetAddressOf());
-    //context->GSSetConstantBuffers(0, 1, m_constantBuffer.GetAddressOf());
+    //context->VSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
+    //context->GSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
 
-    //context->GSSetShader(m_geometryShader.Get(), 0, 0);
+    //context->GSSetShader(geometryShader.Get(), 0, 0);
 
-    //context->IASetInputLayout(m_inputLayout.Get());
+    //context->IASetInputLayout(inputLayout.Get());
 
     //UINT stride = sizeof(BillboardPoint);
     //UINT offset = 0;

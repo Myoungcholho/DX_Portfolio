@@ -91,21 +91,21 @@ string GetExtension(const string filename)
 ///////////////////////////////////////////////////////////////////////////////
 
 /// <summary>
-/// Assimp에서 읽어온 애니메이션 정보를 m_aniData로 옮겨 담는 역할
+/// Assimp에서 읽어온 애니메이션 정보를 aniData로 옮겨 담는 역할
 /// </summary>
 void ModelLoader::ReadAnimation(const aiScene *pScene, string filename)
 {
-    m_aniData.clips.resize(pScene->mNumAnimations);				// AnimationClip 객체 생성
+    aniData.clips.resize(pScene->mNumAnimations);				// AnimationClip 객체 생성
 
     for (uint32_t i = 0; i < pScene->mNumAnimations; i++) 
 	{
-        AnimationClip &clip = m_aniData.clips[i];				// AnimationClip 데이터 채우기 위해 참조
+        AnimationClip &clip = aniData.clips[i];				// AnimationClip 데이터 채우기 위해 참조
 
         const aiAnimation *ani = pScene->mAnimations[i];		// .fbx의 i번째 애니메이션을 꺼냄
 
         clip.duration = ani->mDuration;							// i번째 애니메이션의 총 길이
         clip.ticksPerSec = ani->mTicksPerSecond;				// i번째 애니메이션의 틱 속도
-        clip.keys.resize(m_aniData.boneNameToId.size());		// 캐릭터 전체 본 개수로 애니메이션 데이터가 있든 없든 bondId로 바로 접근 가능하게 배열 통일
+        clip.keys.resize(aniData.boneNameToId.size());		// 캐릭터 전체 본 개수로 애니메이션 데이터가 있든 없든 bondId로 바로 접근 가능하게 배열 통일
         clip.numChannels = ani->mNumChannels;					// 애니메이션 데이터가 있는 본의 수(디버깅용, 혹은 loop 횟수로도 사용 가능)
 		clip.numKeys = static_cast<int>(clip.duration);
 		clip.name = filename;
@@ -114,7 +114,7 @@ void ModelLoader::ReadAnimation(const aiScene *pScene, string filename)
         for (uint32_t c = 0; c < ani->mNumChannels; c++) 
 		{
             const aiNodeAnim *nodeAnim = ani->mChannels[c];								// 애니메이션에서 변경할 본의 데이터를 가져옴 ex)spine01, leftfoot
-			const int boneId = m_aniData.boneNameToId[nodeAnim->mNodeName.C_Str()];		// 해당 본의 이름을 얻고, 몇번 인덱스인지 얻어옴
+			const int boneId = aniData.boneNameToId[nodeAnim->mNodeName.C_Str()];		// 해당 본의 이름을 얻고, 몇번 인덱스인지 얻어옴
             clip.keys[boneId].resize(nodeAnim->mNumPositionKeys);						// 해당 본이 가지는 키 프레임 수만큼 배열 크기를 확보
 
 			// 해당 본이 가지는 키프레임 수만큼 반복
@@ -154,16 +154,16 @@ void ModelLoader::Load(string basePath, string filename, bool revertNormals)
 {
 	if (GetExtension(filename) == ".gltf")
 	{
-		m_isGLTF = false;
-		m_revertNormals = revertNormals;
+		isGLTF = false;
+		revertNormals = revertNormals;
 	}
 
-	m_basePath = basePath;
+	basePath = basePath;
 
 	Assimp::Importer importer;
 
 	const aiScene* pScene = importer.ReadFile(
-		m_basePath + filename,
+		basePath + filename,
 		aiProcess_Triangulate | aiProcess_ConvertToLeftHanded
 	);
 
@@ -177,12 +177,12 @@ void ModelLoader::Load(string basePath, string filename, bool revertNormals)
 		UpdateBoneIDs(pScene->mRootNode, &counter);
 
 		// 3. 업데이트 순서대로 뼈 이름 저장 [boneIdToName 셋팅]
-		m_aniData.boneIdToName.resize(m_aniData.boneNameToId.size());
-		for (pair<const string,int32_t>& i : m_aniData.boneNameToId)
-			m_aniData.boneIdToName[i.second] = i.first;
+		aniData.boneIdToName.resize(aniData.boneNameToId.size());
+		for (pair<const string,int32_t>& i : aniData.boneNameToId)
+			aniData.boneIdToName[i.second] = i.first;
 
 		// 4. 각 뼈의 부모 인덱스 저장 준비 [boneParents 셋팅]
-		m_aniData.boneParents.resize(m_aniData.boneNameToId.size(), -1);
+		aniData.boneParents.resize(aniData.boneNameToId.size(), -1);
 		
 		Matrix tr;
 		ProcessNode(pScene->mRootNode, pScene, tr);
@@ -197,7 +197,7 @@ void ModelLoader::Load(string basePath, string filename, bool revertNormals)
 	}
 	else // 파일 못읽었다면
 	{
-		std::cout << "Failed to read file: " << m_basePath + filename << std::endl;
+		std::cout << "Failed to read file: " << basePath + filename << std::endl;
 		auto errorDescription = importer.GetErrorString();
 		std::cout << "Assimp error: " << errorDescription << endl;
 	}
@@ -209,11 +209,11 @@ void ModelLoader::Load(string basePath, string filename, bool revertNormals)
 /// </summary>
 void ModelLoader::LoadAnimation(string basePath, string filename)
 {
-	m_basePath = basePath;
+	basePath = basePath;
 
 	Assimp::Importer importer;
 
-	const aiScene* pScene = importer.ReadFile(m_basePath + filename, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded);
+	const aiScene* pScene = importer.ReadFile(basePath + filename, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded);
 
 	if (pScene && pScene->HasAnimations()) 
 	{
@@ -221,7 +221,7 @@ void ModelLoader::LoadAnimation(string basePath, string filename)
 	}
 	else 
 	{
-		std::cout << "Failed to read animation from file: " << m_basePath + filename << std::endl;
+		std::cout << "Failed to read animation from file: " << basePath + filename << std::endl;
 		auto errorDescription = importer.GetErrorString();
 		std::cout << "Assimp error: " << errorDescription << endl;
 	}
@@ -238,7 +238,7 @@ const aiNode* ModelLoader::FindParent(const aiNode* node)
 
 	// 현재 노드 이름이 boneNameToId에 등록되어 있다면, 애니메이션에 실제로 사용되는 본이라면
 	// 이 노드가 우리가 찾는 부모 본임.
-	if (m_aniData.boneNameToId.count(node->mName.C_Str()) > 0)
+	if (aniData.boneNameToId.count(node->mName.C_Str()) > 0)
 		return node;
 
 	// 만약 상위 노드가 본으로 사용되지 않는다면 본으로 사용되는 노드를 찾기 위해 재귀로 루프
@@ -264,11 +264,11 @@ const aiNode* ModelLoader::FindParent(const aiNode* node)
 void ModelLoader::ProcessNode(aiNode* node, const aiScene* scene, DirectX::SimpleMath::Matrix tr)
 {
 	// 부모가 있고 && boneNameToID에 등록되었으며 && 부모 노드도 역시 bone으로 인식될 수 있다면
-	if (node->mParent && m_aniData.boneNameToId.count(node->mName.C_Str()) && FindParent(node->mParent)) 
+	if (node->mParent && aniData.boneNameToId.count(node->mName.C_Str()) && FindParent(node->mParent)) 
 	{
 		// 부모의 본 번호를 얻어 저장해둠
-		const int32_t boneId = m_aniData.boneNameToId[node->mName.C_Str()];
-		m_aniData.boneParents[boneId] = m_aniData.boneNameToId[FindParent(node->mParent)->mName.C_Str()];
+		const int32_t boneId = aniData.boneNameToId[node->mName.C_Str()];
+		aniData.boneParents[boneId] = aniData.boneNameToId[FindParent(node->mParent)->mName.C_Str()];
 	}
 
 	// 현재 로컬 행렬 * 부모 행렬로 노드의 WorldMatrix 구축, Transpose는 col -> row
@@ -286,7 +286,7 @@ void ModelLoader::ProcessNode(aiNode* node, const aiScene* scene, DirectX::Simpl
 		{
 			v.position = Vector3::Transform(v.position, m);
 		}
-		m_meshes.push_back(newMesh);											// 메시하나 구성완료하고 vector에 push
+		meshes.push_back(newMesh);											// 메시하나 구성완료하고 vector에 push
 	}
 
 	// 자식 노드 재귀 돌면서 메시 구성 시도, 본인 월드 좌표 행렬도 계산하라고 인자로 넘겨줌
@@ -321,7 +321,7 @@ PBRMeshData ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 
 		// 2. Normal Data 채움
 		vertex.normalModel.x = mesh->mNormals[i].x;
-		if (m_isGLTF) 
+		if (isGLTF) 
 		{
 			vertex.normalModel.y = mesh->mNormals[i].z;
 			vertex.normalModel.z = -mesh->mNormals[i].y;
@@ -332,7 +332,7 @@ PBRMeshData ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 			vertex.normalModel.z = mesh->mNormals[i].z;
 		}
 
-		if (m_revertNormals) 
+		if (revertNormals) 
 		{
 			vertex.normalModel *= -1.0f;
 		}
@@ -366,8 +366,8 @@ PBRMeshData ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		vector<vector<uint8_t>> boneIndices(vertices.size());				// 정점에 어떤 본이 영향을 주는지 정보
 
 		// 1회만 해도 되는데 안정성 때문에 계속
-		m_aniData.offsetMatrices.resize(m_aniData.boneNameToId.size());		// 본별 오프셋 행렬(바인드포즈 → 로컬 변환)
-		//m_aniData.boneTransforms.resize(m_aniData.boneNameToId.size());		// 런타임에 갱신되는 본 최종 변환
+		aniData.offsetMatrices.resize(aniData.boneNameToId.size());		// 본별 오프셋 행렬(바인드포즈 → 로컬 변환)
+		//aniData.boneTransforms.resize(aniData.boneNameToId.size());		// 런타임에 갱신되는 본 최종 변환
 
 		int count = 0;
 		// 메시에서 사용되는 본의 개수
@@ -377,14 +377,14 @@ PBRMeshData ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 			const aiBone* bone = mesh->mBones[i];
 
 			// 본의 이름으로 매핑된 인덱스를 가져옴
-			const uint32_t boneId = m_aniData.boneNameToId[bone->mName.C_Str()];
+			const uint32_t boneId = aniData.boneNameToId[bone->mName.C_Str()];
 
 			// 모델 공간 좌표 -> 본 로컬 좌표로 바꿔주는 행렬 저장
 			// 다른 메시에서 덮어쓰기가 발생할 수 있지만 같은 뼈에 속하므로 실제 값은 동일해 문제 없다.
 			// 전 메시에서 일관된 값이므로
-			m_aniData.offsetMatrices[boneId] = Matrix((float*)&bone->mOffsetMatrix).Transpose();
+			aniData.offsetMatrices[boneId] = Matrix((float*)&bone->mOffsetMatrix).Transpose();
 			//Matrix scale = Matrix::CreateScale(0.1f);
-			//m_aniData.offsetMatrices[boneId] = m_aniData.offsetMatrices[boneId] * scale;
+			//aniData.offsetMatrices[boneId] = aniData.offsetMatrices[boneId] * scale;
 
 
 			// 본이 영향을 주는 정점 개수만큼 반복
@@ -473,7 +473,7 @@ string ModelLoader::ReadTextureFilename(const aiScene* scene, aiMaterial* materi
 		material->GetTexture(type, 0, &filepath);
 
 		// 풀 파일 경로를 만들고
-		string fullPath = m_basePath + string(filesystem::path(filepath.C_Str()).filename().string());
+		string fullPath = basePath + string(filesystem::path(filepath.C_Str()).filename().string());
 
 		// 1. 실제로 파일이 존재하는지 확인
 		if (!filesystem::exists(fullPath)) 
@@ -516,7 +516,7 @@ string ModelLoader::ReadTextureFilename(const aiScene* scene, aiMaterial* materi
 void ModelLoader::UpdateTangents()
 {
 	// 메시 전부 순회
-	for (PBRMeshData& m : this->m_meshes)
+	for (PBRMeshData& m : this->meshes)
 	{
 		vector<XMFLOAT3> positions(m.vertices.size());
 		vector<XMFLOAT3> normals(m.vertices.size());
@@ -569,7 +569,7 @@ void ModelLoader::FindDeformingBones(const aiScene* scene)
 			{
 				// 발견한 본을 map에 등록, 초기값은 -1로 셋팅
 				const aiBone* bone = mesh->mBones[i];
-				m_aniData.boneNameToId[bone->mName.C_Str()] = -1;
+				aniData.boneNameToId[bone->mName.C_Str()] = -1;
 			}
 		}
 	}
@@ -594,9 +594,9 @@ void ModelLoader::UpdateBoneIDs(aiNode* node, int* counter)
 	if (node)
 	{
 		// node의 mName이 존재하면 이 노드는 변형에 쓰이는 뼈로 -1로 초기화된 값을 변경함
-		if (m_aniData.boneNameToId.count(node->mName.C_Str()))
+		if (aniData.boneNameToId.count(node->mName.C_Str()))
 		{
-			m_aniData.boneNameToId[node->mName.C_Str()] = *counter;
+			aniData.boneNameToId[node->mName.C_Str()] = *counter;
 			*counter += 1;
 		}
 

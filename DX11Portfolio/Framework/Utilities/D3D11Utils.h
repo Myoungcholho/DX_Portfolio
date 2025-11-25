@@ -29,8 +29,8 @@ public:
     (
         ComPtr<ID3D11Device>& device, const wstring& filename,
         const vector<D3D11_INPUT_ELEMENT_DESC>& inputElements,
-        ComPtr<ID3D11VertexShader>& m_vertexShader,
-        ComPtr<ID3D11InputLayout>& m_inputLayout,
+        ComPtr<ID3D11VertexShader>& vertexShader,
+        ComPtr<ID3D11InputLayout>& inputLayout,
         const vector<D3D_SHADER_MACRO> shaderMacros = {}
     );
 
@@ -38,27 +38,27 @@ public:
     (
         ComPtr<ID3D11Device>& device,
         const wstring& filename,
-        ComPtr<ID3D11HullShader>& m_hullShader
+        ComPtr<ID3D11HullShader>& hullShader
     );
 
     static void CreateDomainShader
     (
         ComPtr<ID3D11Device>& device,
         const wstring& filename,
-        ComPtr<ID3D11DomainShader>& m_domainShader
+        ComPtr<ID3D11DomainShader>& domainShader
     );
 
     static void CreateGeometryShader
     (
         ComPtr<ID3D11Device>& device, const wstring& filename,
-            ComPtr<ID3D11GeometryShader>& m_geometryShader
+            ComPtr<ID3D11GeometryShader>& geometryShader
     );
 
     static void CreatePixelShader
     (
         ComPtr<ID3D11Device>& device,
         const wstring& filename,
-        ComPtr<ID3D11PixelShader>& m_pixelShader
+        ComPtr<ID3D11PixelShader>& pixelShader
     );
 
     static void CreateIndexBuffer

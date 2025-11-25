@@ -103,7 +103,7 @@ void USkinnedMeshRenderProxy::InitBonesRT(int boneCount)
     boneCount = max(1, boneCount);
     vector<Matrix> initCPU(boneCount, Matrix());
 
-    boneBufferRT.m_cpu = initCPU;
+    boneBufferRT.cpuData = initCPU;
     boneBufferRT.Initialize(device.Get());
 
 }
@@ -115,7 +115,7 @@ void USkinnedMeshRenderProxy::UpdateBonesGPU()
 
 void USkinnedMeshRenderProxy::SetUpdateBones(const vector<Matrix>& bones)
 {
-    boneBufferRT.m_cpu = bones;
+    boneBufferRT.cpuData = bones;
 }
 
 void USkinnedMeshRenderProxy::SetUpdateBonesCPU(const vector<Matrix>& bones)

@@ -7,11 +7,11 @@ public:
 
     ImageFilter(ComPtr<ID3D11Device>& device,
         ComPtr<ID3D11DeviceContext>& context,
-        ComPtr<ID3D11PixelShader>& pixelShader, int width, int height);
+        ComPtr<ID3D11PixelShader>& InPixelShader, int width, int height);
 
     void Initialize(ComPtr<ID3D11Device>& device,
         ComPtr<ID3D11DeviceContext>& context,
-        ComPtr<ID3D11PixelShader>& pixelShader, int width,
+        ComPtr<ID3D11PixelShader>& InPixelShader, int width,
         int height);
 
     void UpdateConstantBuffers(ComPtr<ID3D11Device>& device,
@@ -42,14 +42,14 @@ public:
         float option4;
     };
 
-    ImageFilterConstData m_constData = {};
+    ImageFilterConstData constData = {};
 
 protected:
-    ComPtr<ID3D11PixelShader> m_pixelShader;
-    ComPtr<ID3D11Buffer> m_constBuffer;
-    D3D11_VIEWPORT m_viewport = {};
+    ComPtr<ID3D11PixelShader> pixelShader;
+    ComPtr<ID3D11Buffer> constBuffer;
+    D3D11_VIEWPORT viewport = {};
 
     // Do not delete pointers
-    std::vector<ID3D11ShaderResourceView*> m_shaderResources;
-    std::vector<ID3D11RenderTargetView*> m_renderTargets;
+    std::vector<ID3D11ShaderResourceView*> shaderResources;
+    std::vector<ID3D11RenderTargetView*> renderTargets;
 };

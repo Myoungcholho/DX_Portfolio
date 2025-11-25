@@ -43,7 +43,7 @@ void D3D::SaveAndBindTempDepthStencil()
 
 	//// 2. 원본 DSV정보는 유지할수있도록하기 위해 복사한 DSV를 사용한다
 	//const float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-	//vector<ID3D11RenderTargetView*> renderTargetViews = { m_floatRTV.Get() };
+	//vector<ID3D11RenderTargetView*> renderTargetViews = { floatRTV.Get() };
 	//DeviceContext->OMSetRenderTargets(UINT(renderTargetViews.size()), renderTargetViews.data(), Temp_DepthStencilView.Get());
 }
 
@@ -51,7 +51,7 @@ void D3D::RestoreOriginalDepthStencil()
 {
 	//// 1. 원래 쓰던 DSV를 OM에 바인딩
 	//const float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-	//vector<ID3D11RenderTargetView*> renderTargetViews = { m_floatRTV.Get() };
+	//vector<ID3D11RenderTargetView*> renderTargetViews = { floatRTV.Get() };
 	//DeviceContext->OMSetRenderTargets(UINT(renderTargetViews.size()), renderTargetViews.data(), DepthStencilView.Get());
 }
 
@@ -86,10 +86,10 @@ void D3D::CreateDevice()
 		0,
 		D3D11_SDK_VERSION,
 		&swapChainDesc,
-		SwapChain.GetAddressOf(),
-		Device.GetAddressOf(),
+		swapChain.GetAddressOf(),
+		device.GetAddressOf(),
 		nullptr,
-		DeviceContext.GetAddressOf()
+		deviceContext.GetAddressOf()
 	);
 	assert(SUCCEEDED(hr) && "Device creation failed");
 }
@@ -100,9 +100,9 @@ void D3D::CreateBuffers()
 	// 1. 스왑체인으로부터 백버퍼를 얻고 텍스처에 저장
 	// 2. 백버퍼로 RTV를 만듬
 	// 3. 내 GPU 드라이버가 제공하는 품질 수준 가능 범위 반환 및 float텍스처 생성
-	SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer.GetAddressOf()));
-	Device->CreateRenderTargetView(backBuffer.Get(), nullptr, m_backBufferRTV.GetAddressOf());
-	Device->CheckMultisampleQualityLevels(DXGI_FORMAT_R16G16B16A16_FLOAT, 4, &m_numQualityLevels);
+	swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer.GetAddressOf()));
+	device->CreateRenderTargetView(backBuffer.Get(), nullptr, backBufferRTV.GetAddressOf());
+	device->CheckMultisampleQualityLevels(DXGI_FORMAT_R16G16B16A16_FLOAT, 4, &numQualityLevels);
 	
 	// Scene용 Texture 생성
 	D3D11_TEXTURE2D_DESC d = {};
@@ -115,9 +115,9 @@ void D3D::CreateBuffers()
 	d.Usage = D3D11_USAGE_DEFAULT;
 	d.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
-	Device->CreateTexture2D(&d, nullptr, m_finalLDR.GetAddressOf());
-	Device->CreateRenderTargetView(m_finalLDR.Get(), nullptr, m_finalLDR_RTV.GetAddressOf());
-	Device->CreateShaderResourceView(m_finalLDR.Get(), nullptr, m_finalLDR_SRV.GetAddressOf());
+	device->CreateTexture2D(&d, nullptr, finalLDR.GetAddressOf());
+	device->CreateRenderTargetView(finalLDR.Get(), nullptr, finalLDR_RTV.GetAddressOf());
+	device->CreateShaderResourceView(finalLDR.Get(), nullptr, finalLDR_SRV.GetAddressOf());
 
 	CreateDepthBuffer();
 }
@@ -130,10 +130,10 @@ void D3D::CreateDepthBuffer()
 	desc.MipLevels = 1;
 	desc.ArraySize = 1;
 	desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	if (m_numQualityLevels > 0)
+	if (numQualityLevels > 0)
 	{
 		desc.SampleDesc.Count = 4;
-		desc.SampleDesc.Quality = m_numQualityLevels - 1;
+		desc.SampleDesc.Quality = numQualityLevels - 1;
 	}
 	else
 	{
@@ -145,8 +145,8 @@ void D3D::CreateDepthBuffer()
 	desc.CPUAccessFlags = 0;
 	desc.MiscFlags = 0;
 
-	Device->CreateTexture2D(&desc, 0, DSV_Texture.GetAddressOf());
-	Device->CreateDepthStencilView(DSV_Texture.Get(), 0, DepthStencilView.GetAddressOf());
+	device->CreateTexture2D(&desc, 0, DSV_Texture.GetAddressOf());
+	device->CreateDepthStencilView(DSV_Texture.Get(), 0, depthStencilView.GetAddressOf());
 
 	/*Device->CreateTexture2D(&depthStencilBufferDesc, 0, Temp_DSV_Texture.GetAddressOf());
 	Device->CreateDepthStencilView(Temp_DSV_Texture.Get(), 0, Temp_DepthStencilView.GetAddressOf());*/
@@ -158,14 +158,14 @@ void D3D::CreateDepthBuffer()
 	desc.SampleDesc.Count = 1;
 	desc.SampleDesc.Quality = 0;
 
-	Device->CreateTexture2D(&desc, NULL, &m_depthOnlyBuffer);
+	device->CreateTexture2D(&desc, NULL, &depthOnlyBuffer);
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
 	ZeroMemory(&dsvDesc, sizeof(dsvDesc));
 	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
 	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 
-	Device->CreateDepthStencilView(m_depthOnlyBuffer.Get(), &dsvDesc, m_depthOnlyDSV.GetAddressOf());
+	device->CreateDepthStencilView(depthOnlyBuffer.Get(), &dsvDesc, depthOnlyDSV.GetAddressOf());
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 	ZeroMemory(&srvDesc, sizeof(srvDesc));
@@ -173,18 +173,18 @@ void D3D::CreateDepthBuffer()
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = 1;
 
-	Device->CreateShaderResourceView(m_depthOnlyBuffer.Get(), &srvDesc, m_depthOnlySRV.GetAddressOf());
+	device->CreateShaderResourceView(depthOnlyBuffer.Get(), &srvDesc, depthOnlySRV.GetAddressOf());
 }
 
 
 void D3D::Present()
 {
-	HRESULT hr =  SwapChain->Present(1, 0);
+	HRESULT hr =  swapChain->Present(1, 0);
 	if (FAILED(hr))
 	{
 		if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_HUNG)
 		{
-			HRESULT reason = Device->GetDeviceRemovedReason();
+			HRESULT reason = device->GetDeviceRemovedReason();
 			switch (reason) 
 			{
 			case DXGI_ERROR_DEVICE_HUNG: OutputDebugStringA("Device HUNG\n"); break;
@@ -204,14 +204,14 @@ void D3D::ResizeScreen(float InWidth, float InHeight)
 	D3dDesc.Width = InWidth;
 	D3dDesc.Height = InHeight;
 
-	m_backBufferRTV.Reset();
+	backBufferRTV.Reset();
 	DSV_Texture.Reset();
-	DepthStencilView.Reset();
-	m_finalLDR_RTV.Reset();
-	m_finalLDR_SRV.Reset();
-	m_finalLDR.Reset();
+	depthStencilView.Reset();
+	finalLDR_RTV.Reset();
+	finalLDR_SRV.Reset();
+	finalLDR.Reset();
 
-	SwapChain->ResizeBuffers(0, (UINT)InWidth, (UINT)InHeight, DXGI_FORMAT_UNKNOWN, 0);
+	swapChain->ResizeBuffers(0, (UINT)InWidth, (UINT)InHeight, DXGI_FORMAT_UNKNOWN, 0);
 
 	CreateBuffers();
 	
@@ -222,7 +222,7 @@ void D3D::ResizeScreen(float InWidth, float InHeight)
 ID3D11Texture2D* D3D::GetRTVTexture()
 {
 	ComPtr<ID3D11Texture2D> texture;
-	m_backBufferRTV->GetResource(reinterpret_cast<ID3D11Resource**>(texture.GetAddressOf()));
+	backBufferRTV->GetResource(reinterpret_cast<ID3D11Resource**>(texture.GetAddressOf()));
 	return texture.Detach();
 }
 
@@ -234,19 +234,19 @@ D3D::D3D()
 
 D3D::~D3D()
 {
-	DepthStencilView.Reset();
+	depthStencilView.Reset();
 	DSV_Texture.Reset();
-	m_backBufferRTV.Reset();
-	m_finalLDR_RTV.Reset();
-	m_finalLDR_SRV.Reset();
-	m_finalLDR.Reset();
-	DeviceContext.Reset();
-	Device.Reset();
-	SwapChain.Reset();
+	backBufferRTV.Reset();
+	finalLDR_RTV.Reset();
+	finalLDR_SRV.Reset();
+	finalLDR.Reset();
+	deviceContext.Reset();
+	device.Reset();
+	swapChain.Reset();
 	//RasterizerState.Reset();
 }
 
 void D3D::GraphicsInit()
 {
-	Graphics::InitCommonStates(Device);
+	Graphics::InitCommonStates(device);
 }

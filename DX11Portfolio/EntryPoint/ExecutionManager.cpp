@@ -20,7 +20,7 @@ void ExecutionManager::CreateExecutables()
 	//obj->GetTransform()->SetPosition(Vector3(0, -4.5, 14.5));
 	//executes.push_back(obj);
 	
-	executes.push_back(new TextureGround());
+	//executes.push_back(new TextureGround());
 
 	// Light
 	LightCreate();

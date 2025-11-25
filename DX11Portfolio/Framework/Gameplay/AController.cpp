@@ -3,7 +3,7 @@
 
 AController::AController()
 {
-	m_name = "PlayerController";
+	name = "PlayerController";
 	controlRotation = Quaternion();
 }
 

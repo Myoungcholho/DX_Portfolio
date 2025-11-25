@@ -33,17 +33,17 @@ public:
     void UpdateBoneIDs(aiNode* node, int* counter);
 
 public:
-	string m_basePath;
-	vector<PBRMeshData> m_meshes;
+	string basePath;
+	vector<PBRMeshData> meshes;
 
-	AnimationData m_aniData;
+	AnimationData aniData;
 
-	bool m_isGLTF = false;
+	bool isGLTF = false;
 
 	// Assimp의 LH변환 + (모델에 박힌 루트 변환/음수 스케일) + 수동 축 스왑이 합성되면서
 	// 어떤 모델은 최종적으로 det>0 이고
 	// 어떤 모델은 det<0 이라 뒤집혀서 토글을 뒀다.
 	// det > 0 : 정상 방향 유지 | det < 0 : 뒤집힘 발생
 	// det는 그 변환이 공간의 부피를 얼마나 스케일하는지 알려주는 값
-	bool m_revertNormals = false;
+	bool revertNormals = false;
 };

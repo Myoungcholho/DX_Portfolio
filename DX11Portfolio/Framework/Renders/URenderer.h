@@ -25,22 +25,22 @@ public:
 	void Present();
 
 public:
-	float GetBloomStrength() { return m_postProcess.m_combineFilter.m_constData.strength; }
-	float GetExposure() { return m_postProcess.m_combineFilter.m_constData.option1; }
-	float GetGamma() { return m_postProcess.m_combineFilter.m_constData.option2; }
-	int GetFilter() { return m_postProcess.m_combineFilter.m_constData.filterType; }
-	float GetDepthScale() { return m_postEffectsConstsCPU.depthScale; }
-	float GetFogStrength() { return m_postEffectsConstsCPU.fogStrength; }
-	int GetPostFxMode() { return m_postEffectsConstsCPU.mode; }
+	float GetBloomStrength() { return postProcess.combineFilter.constData.strength; }
+	float GetExposure() { return postProcess.combineFilter.constData.option1; }
+	float GetGamma() { return postProcess.combineFilter.constData.option2; }
+	int GetFilter() { return postProcess.combineFilter.constData.filterType; }
+	float GetDepthScale() { return postEffectsConstsCPU.depthScale; }
+	float GetFogStrength() { return postEffectsConstsCPU.fogStrength; }
+	int GetPostFxMode() { return postEffectsConstsCPU.mode; }
 	bool GetWireRendering() { return bWireRender; }
 
-	void SetBloomStrength(float InValue) { m_postProcess.m_combineFilter.m_constData.strength = InValue; }
-	void SetExposure(float InValue){ m_postProcess.m_combineFilter.m_constData.option1 = InValue;}
-	void SetGamma(float InValue) { m_postProcess.m_combineFilter.m_constData.option2 = InValue;}
-	void SetFilter(int InValue) { m_postProcess.m_combineFilter.m_constData.filterType = InValue; }
-	void SetDepthScale(float InValue) { m_postEffectsConstsCPU.depthScale = InValue;}
-	void SetFogStrength(float InValue) { m_postEffectsConstsCPU.fogStrength = InValue;}
-	void SetPostFxMode(int InValue) { m_postEffectsConstsCPU.mode = InValue;}
+	void SetBloomStrength(float InValue) { postProcess.combineFilter.constData.strength = InValue; }
+	void SetExposure(float InValue){ postProcess.combineFilter.constData.option1 = InValue;}
+	void SetGamma(float InValue) { postProcess.combineFilter.constData.option2 = InValue;}
+	void SetFilter(int InValue) { postProcess.combineFilter.constData.filterType = InValue; }
+	void SetDepthScale(float InValue) { postEffectsConstsCPU.depthScale = InValue;}
+	void SetFogStrength(float InValue) { postEffectsConstsCPU.fogStrength = InValue;}
+	void SetPostFxMode(int InValue) { postEffectsConstsCPU.mode = InValue;}
 	void SetWireRendering(int InValue) { bWireRender = InValue; }
 
 	void SetGlobalConsts(ID3D11Buffer* globalConstsGPU);
@@ -78,67 +78,67 @@ private:
 	wstring Brdf_Name = path + L"FullSkyBrdf.dds";
 
 private:
-	PostEffects m_postEffects;
-	PostProcess m_postProcess;
+	PostEffects postEffects;
+	PostProcess postProcess;
 
 private:
-	D3D11_VIEWPORT Viewport;
+	D3D11_VIEWPORT viewport;
 
 private:
 	// 공통으로 사용하는 텍스처들
-	ComPtr<ID3D11ShaderResourceView> m_envSRV;
-	ComPtr<ID3D11ShaderResourceView> m_specularSRV;
-	ComPtr<ID3D11ShaderResourceView> m_irradianceSRV;
-	ComPtr<ID3D11ShaderResourceView> m_brdfSRV;
+	ComPtr<ID3D11ShaderResourceView> envSRV;
+	ComPtr<ID3D11ShaderResourceView> specularSRV;
+	ComPtr<ID3D11ShaderResourceView> irradianceSRV;
+	ComPtr<ID3D11ShaderResourceView> brdfSRV;
 
 private:
 	// 공통으로 사용하는 상수 데이터	
-	GlobalConstants m_globalConstsCPU;
-	GlobalConstants m_reflectGlobalConstsCPU;
-	GlobalConstants m_shadowGlobalConstsCPU[MAX_LIGHTS];
-	PostEffectsConstants m_postEffectsConstsCPU;
+	GlobalConstants globalConstsCPU;
+	GlobalConstants reflectGlobalConstsCPU;
+	GlobalConstants shadowGlobalConstsCPU[MAX_LIGHTS];
+	PostEffectsConstants postEffectsConstsCPU;
 
-	ComPtr<ID3D11Buffer> m_globalConstsGPU;
-	ComPtr<ID3D11Buffer> m_reflectGlobalConstsGPU;
-	ComPtr<ID3D11Buffer> m_shadowGlobalConstsGPU[MAX_LIGHTS];
-	ComPtr<ID3D11Buffer> m_postEffectsConstsGPU;
+	ComPtr<ID3D11Buffer> globalConstsGPU;
+	ComPtr<ID3D11Buffer> reflectGlobalConstsGPU;
+	ComPtr<ID3D11Buffer> shadowGlobalConstsGPU[MAX_LIGHTS];
+	ComPtr<ID3D11Buffer> postEffectsConstsGPU;
 
 private:
 	// PostProcess
-	ComPtr<ID3D11Texture2D> m_floatBuffer;
-	ComPtr<ID3D11ShaderResourceView> m_floatSRV;
-	ComPtr<ID3D11RenderTargetView> m_floatRTV;
+	ComPtr<ID3D11Texture2D> floatBuffer;
+	ComPtr<ID3D11ShaderResourceView> floatSRV;
+	ComPtr<ID3D11RenderTargetView> floatRTV;
 
-	ComPtr<ID3D11Texture2D> m_resolvedBuffer;
-	ComPtr<ID3D11RenderTargetView> m_resolvedRTV;
-	ComPtr<ID3D11ShaderResourceView> m_resolvedSRV;
+	ComPtr<ID3D11Texture2D> resolvedBuffer;
+	ComPtr<ID3D11RenderTargetView> resolvedRTV;
+	ComPtr<ID3D11ShaderResourceView> resolvedSRV;
 
-	ComPtr<ID3D11Texture2D> m_postEffectsBuffer;
-	ComPtr<ID3D11RenderTargetView> m_postEffectsRTV;
-	ComPtr<ID3D11ShaderResourceView> m_postEffectsSRV;
+	ComPtr<ID3D11Texture2D> postEffectsBuffer;
+	ComPtr<ID3D11RenderTargetView> postEffectsRTV;
+	ComPtr<ID3D11ShaderResourceView> postEffectsSRV;
 
-	ComPtr<ID3D11Texture2D> Temp_DSV_Texture;
-	ComPtr<ID3D11DepthStencilView> Temp_DepthStencilView;
+	ComPtr<ID3D11Texture2D> temp_DSV_Texture;
+	ComPtr<ID3D11DepthStencilView> temp_DepthStencilView;
 
 	// ShadowMap
-	int m_shadowWidth = 1280;
-	int m_shadowHeight = 1280;
-	ComPtr<ID3D11Texture2D> m_shadowBuffers[MAX_LIGHTS]; // No MSAA
-	ComPtr<ID3D11DepthStencilView> m_shadowDSVs[MAX_LIGHTS];
-	ComPtr<ID3D11ShaderResourceView> m_shadowSRVs[MAX_LIGHTS];
+	int shadowWidth = 1280;
+	int shadowHeight = 1280;
+	ComPtr<ID3D11Texture2D> shadowBuffers[MAX_LIGHTS]; // No MSAA
+	ComPtr<ID3D11DepthStencilView> shadowDSVs[MAX_LIGHTS];
+	ComPtr<ID3D11ShaderResourceView> shadowSRVs[MAX_LIGHTS];
 
 private:
-	StructuredBuffer<InstanceData> m_instances;			// 공용 인스턴스 SB (SRV)
-	UINT m_instanceCapacity = 0;						// 담을 수 있는 인스턴스 개수
+	StructuredBuffer<InstanceData> instances;			// 공용 인스턴스 SB (SRV)
+	UINT instanceCapacity = 0;						// 담을 수 있는 인스턴스 개수
 
 	void EnsureInstanceCapacity(ID3D11Device* device, size_t needed);
 
 private:
-	StructuredBuffer<SkinnedInstanceDataGPU> m_skinnedInstances;	// transform, material 등
-	UINT m_skinnedInstanceCapacity = 0;
+	StructuredBuffer<SkinnedInstanceDataGPU> skinnedInstances;	// transform, material 등
+	UINT skinnedInstanceCapacity = 0;
 
-	StructuredBuffer<Matrix> m_bonePalettes;					// 모든 인스턴스의 본 팔레트 모음
-	UINT m_bonePaletteCapacity = 0;
+	StructuredBuffer<Matrix> bonePalettes;					// 모든 인스턴스의 본 팔레트 모음
+	UINT bonePaletteCapacity = 0;
 
 	void EnsureSkinnedInstanceCapacity(ID3D11Device* device, size_t needed);
 	void EnsureBonePaletteCapacity(ID3D11Device* device, size_t needed);

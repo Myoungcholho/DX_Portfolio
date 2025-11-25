@@ -12,5 +12,5 @@ public:
     void Render(ComPtr<ID3D11DeviceContext>& context);
 
 private:
-    shared_ptr<Mesh> m_mesh;
+    shared_ptr<Mesh> mesh;
 };

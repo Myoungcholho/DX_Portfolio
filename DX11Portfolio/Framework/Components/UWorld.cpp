@@ -66,8 +66,8 @@ void UWorld::ProxySnapshot()
 		}
 	}
 
-	if(m_renderManager)
-		m_renderManager->EnqueueProxies(move(proxies),move(lights));
+	if(RenderManager)
+		RenderManager->EnqueueProxies(move(proxies),move(lights));
 }
 
 // World가 명시적으로 파괴될 때 호출

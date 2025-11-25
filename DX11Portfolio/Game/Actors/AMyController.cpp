@@ -8,6 +8,6 @@ extern "C" void AMyController_Anchor() {}
 
 AMyController::AMyController()
 {
-	m_name = "AMyController";
+	name = "AMyController";
 	printf("AMyController createda!\n");
 }

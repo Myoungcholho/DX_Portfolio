@@ -12,18 +12,18 @@ URenderer::URenderer()
 {
 	device = D3D::Get()->GetDeviceCom();
 	context = D3D::Get()->GetDeviceContextCom();
-	numQualityLevels = D3D::Get()->m_numQualityLevels;
-	useMSAA = D3D::Get()->m_useMSAA;
+	numQualityLevels = D3D::Get()->numQualityLevels;
+	useMSAA = D3D::Get()->useMSAA;
 
 	float width = D3D::GetDesc().Width;
 	float height = D3D::GetDesc().Height;
 
-	Viewport.TopLeftX = 0;
-	Viewport.TopLeftY = 0;
-	Viewport.Width = width;
-	Viewport.Height = height;
-	Viewport.MinDepth = 0;
-	Viewport.MaxDepth = 1;
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.Width = width;
+	viewport.Height = height;
+	viewport.MinDepth = 0;
+	viewport.MaxDepth = 1;
 
 
 	D3D11_TEXTURE2D_DESC desc = {};
@@ -50,30 +50,30 @@ URenderer::URenderer()
 	}
 
 	// 1. HDR용 Float RenderTarget
-	ThrowIfFailed(device->CreateTexture2D(&desc, NULL, m_floatBuffer.GetAddressOf()));
-	ThrowIfFailed(device->CreateShaderResourceView(m_floatBuffer.Get(), NULL, m_floatSRV.GetAddressOf()));
-	ThrowIfFailed(device->CreateRenderTargetView(m_floatBuffer.Get(), NULL, m_floatRTV.GetAddressOf()));
+	ThrowIfFailed(device->CreateTexture2D(&desc, NULL, floatBuffer.GetAddressOf()));
+	ThrowIfFailed(device->CreateShaderResourceView(floatBuffer.Get(), NULL, floatSRV.GetAddressOf()));
+	ThrowIfFailed(device->CreateRenderTargetView(floatBuffer.Get(), NULL, floatRTV.GetAddressOf()));
 
 	// 2. Resolve용 단일샘플 텍스처
 	desc.SampleDesc.Count = 1;
 	desc.SampleDesc.Quality = 0;
 
-	ThrowIfFailed(device->CreateTexture2D(&desc, NULL, m_resolvedBuffer.GetAddressOf()));
-	ThrowIfFailed(device->CreateShaderResourceView(m_resolvedBuffer.Get(), NULL, m_resolvedSRV.GetAddressOf()));
-	ThrowIfFailed(device->CreateRenderTargetView(m_resolvedBuffer.Get(), NULL, m_resolvedRTV.GetAddressOf()));
+	ThrowIfFailed(device->CreateTexture2D(&desc, NULL, resolvedBuffer.GetAddressOf()));
+	ThrowIfFailed(device->CreateShaderResourceView(resolvedBuffer.Get(), NULL, resolvedSRV.GetAddressOf()));
+	ThrowIfFailed(device->CreateRenderTargetView(resolvedBuffer.Get(), NULL, resolvedRTV.GetAddressOf()));
 
 	// 3. PostEffect용
-	ThrowIfFailed(device->CreateTexture2D(&desc, NULL, m_postEffectsBuffer.GetAddressOf()));
-	ThrowIfFailed(device->CreateShaderResourceView(m_postEffectsBuffer.Get(), NULL, m_postEffectsSRV.GetAddressOf()));
-	ThrowIfFailed(device->CreateRenderTargetView(m_postEffectsBuffer.Get(), NULL, m_postEffectsRTV.GetAddressOf()));
+	ThrowIfFailed(device->CreateTexture2D(&desc, NULL, postEffectsBuffer.GetAddressOf()));
+	ThrowIfFailed(device->CreateShaderResourceView(postEffectsBuffer.Get(), NULL, postEffectsSRV.GetAddressOf()));
+	ThrowIfFailed(device->CreateRenderTargetView(postEffectsBuffer.Get(), NULL, postEffectsRTV.GetAddressOf()));
 
 	// 4. Shadow용
 	desc.Format = DXGI_FORMAT_R32_TYPELESS;
 	desc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
-	desc.Width = m_shadowWidth;
-	desc.Height = m_shadowHeight;
+	desc.Width = shadowWidth;
+	desc.Height = shadowHeight;
 	for (int i = 0; i < MAX_LIGHTS; ++i)
-		ThrowIfFailed(device->CreateTexture2D(&desc, NULL, m_shadowBuffers[i].GetAddressOf()));
+		ThrowIfFailed(device->CreateTexture2D(&desc, NULL, shadowBuffers[i].GetAddressOf()));
 	
 	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
 	ZeroMemory(&dsvDesc, sizeof(dsvDesc));
@@ -81,7 +81,7 @@ URenderer::URenderer()
 	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	
 	for (int i = 0; i < MAX_LIGHTS; ++i)
-		ThrowIfFailed(device->CreateDepthStencilView(m_shadowBuffers[i].Get(), &dsvDesc, m_shadowDSVs[i].GetAddressOf()));
+		ThrowIfFailed(device->CreateDepthStencilView(shadowBuffers[i].Get(), &dsvDesc, shadowDSVs[i].GetAddressOf()));
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 	ZeroMemory(&srvDesc, sizeof(srvDesc));
@@ -90,7 +90,7 @@ URenderer::URenderer()
 	srvDesc.Texture2D.MipLevels = 1;
 
 	for (int i = 0; i < MAX_LIGHTS; ++i)
-		ThrowIfFailed(device->CreateShaderResourceView(m_shadowBuffers[i].Get(), &srvDesc, m_shadowSRVs[i].GetAddressOf()));
+		ThrowIfFailed(device->CreateShaderResourceView(shadowBuffers[i].Get(), &srvDesc, shadowSRVs[i].GetAddressOf()));
 
 	// SkinnedInstance용
 	D3D11Utils::CreateConstBuffer(device, skinnedBatchConstsCPU, skinnedBatchConstsGPU);
@@ -112,27 +112,27 @@ URenderer::~URenderer()
 /// </summary>
 void URenderer::Init()
 {
-	D3D11Utils::CreateConstBuffer(device, m_globalConstsCPU, m_globalConstsGPU);
-	D3D11Utils::CreateConstBuffer(device, m_reflectGlobalConstsCPU, m_reflectGlobalConstsGPU);
-	D3D11Utils::CreateConstBuffer(device, m_postEffectsConstsCPU, m_postEffectsConstsGPU);
+	D3D11Utils::CreateConstBuffer(device, globalConstsCPU, globalConstsGPU);
+	D3D11Utils::CreateConstBuffer(device, reflectGlobalConstsCPU, reflectGlobalConstsGPU);
+	D3D11Utils::CreateConstBuffer(device, postEffectsConstsCPU, postEffectsConstsGPU);
 	for (int i = 0; i < MAX_LIGHTS; i++) 
 	{
-		D3D11Utils::CreateConstBuffer(device, m_shadowGlobalConstsCPU[i], m_shadowGlobalConstsGPU[i]);
+		D3D11Utils::CreateConstBuffer(device, shadowGlobalConstsCPU[i], shadowGlobalConstsGPU[i]);
 	}
 
-	D3D11Utils::CreateDDSTexture(device, EnvHDR_Name.c_str(),true, m_envSRV);
-	D3D11Utils::CreateDDSTexture(device, Specular_Name.c_str(), true, m_specularSRV);
-	D3D11Utils::CreateDDSTexture(device, DiffuseHDR_Name.c_str(), true,m_irradianceSRV);
-	D3D11Utils::CreateDDSTexture(device, Brdf_Name.c_str(),false, m_brdfSRV);
+	D3D11Utils::CreateDDSTexture(device, EnvHDR_Name.c_str(),true, envSRV);
+	D3D11Utils::CreateDDSTexture(device, Specular_Name.c_str(), true, specularSRV);
+	D3D11Utils::CreateDDSTexture(device, DiffuseHDR_Name.c_str(), true,irradianceSRV);
+	D3D11Utils::CreateDDSTexture(device, Brdf_Name.c_str(),false, brdfSRV);
 
-	m_postEffects.Initialize
+	postEffects.Initialize
 	(
 		device, context
 	);
 
-	m_postProcess.Initialize
+	postProcess.Initialize
 	(	device, context, 
-		{ m_postEffectsSRV }, { D3D::Get()->GetFinalLDR_RTV() },
+		{ postEffectsSRV }, { D3D::Get()->GetFinalLDR_RTV() },
 		D3D::Get()->GetDesc().Width, D3D::Get()->GetDesc().Height, 
 		4
 	);
@@ -149,11 +149,11 @@ void URenderer::UpdateGlobalLights(const vector<LightData>& lights)
 	const size_t n = min(lights.size(), size_t(MAX_LIGHTS));
 
 	for (size_t i = 0; i < n; ++i) 
-		m_globalConstsCPU.lights[i] = lights[i];
+		globalConstsCPU.lights[i] = lights[i];
 
 	// 잔여 삭제
 	for (size_t i = n; i < MAX_LIGHTS; ++i) 
-		m_globalConstsCPU.lights[i] = {};
+		globalConstsCPU.lights[i] = {};
 }
 
 /// <summary>
@@ -165,19 +165,19 @@ void URenderer::UpdateGlobalLights(const vector<LightData>& lights)
 /// <param name="refl"> 반사 행렬 </param>
 void URenderer::UpdateGlobalConstants(const Vector3& eyeWorld, const Matrix& viewRow, const Matrix& projRow, const Matrix& refl)
 {
-	m_globalConstsCPU.eyeWorld = eyeWorld;
-	m_globalConstsCPU.view = viewRow.Transpose();
-	m_globalConstsCPU.proj = projRow.Transpose();
-	m_globalConstsCPU.invProj = projRow.Invert().Transpose();
-	m_globalConstsCPU.viewProj = (viewRow * projRow).Transpose();
-	m_globalConstsCPU.invViewProj = m_globalConstsCPU.viewProj.Invert();
+	globalConstsCPU.eyeWorld = eyeWorld;
+	globalConstsCPU.view = viewRow.Transpose();
+	globalConstsCPU.proj = projRow.Transpose();
+	globalConstsCPU.invProj = projRow.Invert().Transpose();
+	globalConstsCPU.viewProj = (viewRow * projRow).Transpose();
+	globalConstsCPU.invViewProj = globalConstsCPU.viewProj.Invert();
 
-	m_reflectGlobalConstsCPU = m_globalConstsCPU;
-	m_reflectGlobalConstsCPU.view = (refl * viewRow).Transpose();
-	m_reflectGlobalConstsCPU.viewProj = (refl * viewRow * projRow).Transpose();
+	reflectGlobalConstsCPU = globalConstsCPU;
+	reflectGlobalConstsCPU.view = (refl * viewRow).Transpose();
+	reflectGlobalConstsCPU.viewProj = (refl * viewRow * projRow).Transpose();
 
-	D3D11Utils::UpdateBuffer(device, context, m_globalConstsCPU, m_globalConstsGPU);
-	D3D11Utils::UpdateBuffer(device, context, m_reflectGlobalConstsCPU, m_reflectGlobalConstsGPU);
+	D3D11Utils::UpdateBuffer(device, context, globalConstsCPU, globalConstsGPU);
+	D3D11Utils::UpdateBuffer(device, context, reflectGlobalConstsCPU, reflectGlobalConstsGPU);
 }
 
 /// <summary>
@@ -214,7 +214,7 @@ void URenderer::RenderFrame(const URenderQueue& queue)
 void URenderer::BindCommonResources()
 {
 	// Viewport설정
-	D3D::Get()->GetDeviceContext()->RSSetViewports(1, &Viewport);
+	D3D::Get()->GetDeviceContext()->RSSetViewports(1, &viewport);
 
 	// 모든 샘플러를 공통으로 사용
 	context->VSSetSamplers(0, UINT(Graphics::sampleStates.size()), Graphics::sampleStates.data());
@@ -223,10 +223,10 @@ void URenderer::BindCommonResources()
 	// 공통 텍스처 상수버퍼로 Push
 	vector<ID3D11ShaderResourceView*> commonSRVs =
 	{
-		m_envSRV.Get(),
-		m_specularSRV.Get(),
-		m_irradianceSRV.Get(),
-		m_brdfSRV.Get()
+		envSRV.Get(),
+		specularSRV.Get(),
+		irradianceSRV.Get(),
+		brdfSRV.Get()
 	};
 	context->PSSetShaderResources(10, UINT(commonSRVs.size()), commonSRVs.data());
 }
@@ -236,7 +236,7 @@ void URenderer::BindCommonResources()
 /// </summary>
 void URenderer::RenderDepthOnly(const URenderQueue& queue)
 {
-	SetGlobalConsts(m_globalConstsGPU.Get());
+	SetGlobalConsts(globalConstsGPU.Get());
 
 	// Harzard 방지 PS에서 언바인딩
 	D3D11Utils::UnbindIfBoundPS(context.Get(), D3D::Get()->GetDepthOnly_SRV().Get());
@@ -271,12 +271,12 @@ void URenderer::RenderShadowMap(const URenderQueue& queue)
 
 	for (int i = 0; i < MAX_LIGHTS; i++)
 	{
-		if (m_globalConstsCPU.lights[i].type & LIGHT_SHADOW)
+		if (globalConstsCPU.lights[i].type & LIGHT_SHADOW)
 		{
-			context->OMSetRenderTargets(0, NULL, m_shadowDSVs[i].Get());
-			context->ClearDepthStencilView(m_shadowDSVs[i].Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+			context->OMSetRenderTargets(0, NULL, shadowDSVs[i].Get());
+			context->ClearDepthStencilView(shadowDSVs[i].Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-			SetGlobalConsts(m_shadowGlobalConstsGPU[i].Get());
+			SetGlobalConsts(shadowGlobalConstsGPU[i].Get());
 			
 			/*for (URenderProxy* comp : queue.GetOpaqueList())
 			{
@@ -310,35 +310,35 @@ void URenderer::RenderShadowMap(const URenderQueue& queue)
 		}
 	}
 
-	D3D::Get()->GetDeviceContext()->RSSetViewports(1, &Viewport);		// viewport 복구
+	D3D::Get()->GetDeviceContext()->RSSetViewports(1, &viewport);		// viewport 복구
 }
 
 void URenderer::BeginFrame()
 {
 	// 메인 렌더링 셋팅
 	const float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-	vector<ID3D11RenderTargetView*> rtvs = { m_floatRTV.Get() };
+	vector<ID3D11RenderTargetView*> rtvs = { floatRTV.Get() };
 
 	for (size_t i = 0; i < rtvs.size(); ++i)
 	{
 		context->ClearRenderTargetView(rtvs[i], clearColor);
 	}
 
-	D3D11Utils::UnbindIfBoundPS(context.Get(), m_floatSRV.Get());
+	D3D11Utils::UnbindIfBoundPS(context.Get(), floatSRV.Get());
 
 	context->OMSetRenderTargets(UINT(rtvs.size()), rtvs.data(), D3D::Get()->GetDepthStencilView().Get());
 	context->ClearDepthStencilView(D3D::Get()->GetDepthStencilView().Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	//context->OMSetRenderTargets(UINT(rtvs.size()), rtvs.data(), D3D::Get()->GetDepthOnly_DSV().Get());
 	
 	// ShadowMap 전달
-	vector<ID3D11ShaderResourceView*> shadowSRVs;
+	vector<ID3D11ShaderResourceView*> shadowSRVsSnapShot;
 
 	for (int i = 0; i < MAX_LIGHTS; ++i)
-		shadowSRVs.push_back(m_shadowSRVs[i].Get());
+		shadowSRVsSnapShot.push_back(shadowSRVs[i].Get());
 
-	context->PSSetShaderResources(15, UINT(shadowSRVs.size()), shadowSRVs.data());
+	context->PSSetShaderResources(15, UINT(shadowSRVsSnapShot.size()), shadowSRVsSnapShot.data());
 
-	SetGlobalConsts(m_globalConstsGPU.Get());
+	SetGlobalConsts(globalConstsGPU.Get());
 }
 
 void URenderer::RenderSkyBox(const URenderQueue& queue)
@@ -426,13 +426,13 @@ void URenderer::RenderOpaqueInstanced(const URenderQueue& queue)
 		EnsureInstanceCapacity(device.Get(), instanceCount);
 
 		// 2. CPU배열 채우기
-		memcpy(m_instances.m_cpu.data(), batch.instances.data(), instanceCount * sizeof(InstanceData));
+		memcpy(instances.cpuData.data(), batch.instances.data(), instanceCount * sizeof(InstanceData));
 
 		// 3. GPU 업로드
-		m_instances.Upload(context.Get());
+		instances.Upload(context.Get());
 
 		// 4. 셰이더에 바인딩
-		ID3D11ShaderResourceView* vsSrvs[1] = { m_instances.GetSRV() };
+		ID3D11ShaderResourceView* vsSrvs[1] = { instances.GetSRV() };
 		context->VSSetShaderResources(8, 1, vsSrvs);
 		context->PSSetShaderResources(8, 1, vsSrvs);
 
@@ -480,17 +480,17 @@ void URenderer::RenderSkinnedInstanced(const URenderQueue& queue)
 		const size_t instanceCount = batch.instances.size();
 		const uint32_t maxBoneCount = batch.maxBoneCount;
 
-		skinnedBatchConstsCPU.g_maxBoneCount = maxBoneCount;
+		skinnedBatchConstsCPU.maxBoneCount = maxBoneCount;
 		D3D11Utils::UpdateBuffer(device, context, skinnedBatchConstsCPU, skinnedBatchConstsGPU);
 
 		// 1. 인스턴스 데이터 업로드
 		EnsureSkinnedInstanceCapacity(device.Get(), instanceCount);
 		for (size_t i = 0; i < instanceCount; i++)
 		{
-			m_skinnedInstances.m_cpu[i].meshConstsCPU = batch.instances[i].meshConstsCPU;
-			m_skinnedInstances.m_cpu[i].materialConstsCPU = batch.instances[i].materialConstsCPU;
+			skinnedInstances.cpuData[i].meshConstsCPU = batch.instances[i].meshConstsCPU;
+			skinnedInstances.cpuData[i].materialConstsCPU = batch.instances[i].materialConstsCPU;
 		}
-		m_skinnedInstances.Upload(context.Get());
+		skinnedInstances.Upload(context.Get());
 
 		// 2. 본 팔레트 업로드
 		EnsureBonePaletteCapacity(device.Get(), instanceCount * maxBoneCount);
@@ -499,19 +499,19 @@ void URenderer::RenderSkinnedInstanced(const URenderQueue& queue)
 			const auto* palette = batch.instances[i].bonePaletteCPU;
 			const size_t boneCount = palette->size();
 
-			memcpy(&m_bonePalettes.m_cpu[i * maxBoneCount],
+			memcpy(&bonePalettes.cpuData[i * maxBoneCount],
 				palette->data(),
 				boneCount * sizeof(Matrix));
 
 			for (size_t j = boneCount; j < maxBoneCount; j++)
-				m_bonePalettes.m_cpu[i * maxBoneCount + j] = Matrix();
+				bonePalettes.cpuData[i * maxBoneCount + j] = Matrix();
 		}
-		m_bonePalettes.Upload(context.Get());
+		bonePalettes.Upload(context.Get());
 
 		// 3. 셰이더 바인딩
 		ID3D11ShaderResourceView* srvs[2] = {
-			m_skinnedInstances.GetSRV(),
-			m_bonePalettes.GetSRV()
+			skinnedInstances.GetSRV(),
+			bonePalettes.GetSRV()
 		};
 		context->VSSetShaderResources(8, 2, srvs);
 		context->PSSetShaderResources(8, 1, srvs);
@@ -544,24 +544,24 @@ void URenderer::RenderSkinnedInstanced(const URenderQueue& queue)
 
 void URenderer::OnResize()
 {
-	numQualityLevels = D3D::Get()->m_numQualityLevels;
-	useMSAA = D3D::Get()->m_useMSAA;
+	numQualityLevels = D3D::Get()->numQualityLevels;
+	useMSAA = D3D::Get()->useMSAA;
 
 	// width, height 변경된거 재설정하고
 	// QualityLevels가 1이상이라면 Count는 4로 고정사용중
-	Viewport.TopLeftX = 0; Viewport.TopLeftY = 0;
-	Viewport.Width = float(D3D::Get()->GetDesc().Width);
-	Viewport.Height = float(D3D::Get()->GetDesc().Height);
-	Viewport.MinDepth = 0.0f; Viewport.MaxDepth = 1.0f;
-	context->RSSetViewports(1, &Viewport);
+	viewport.TopLeftX = 0; viewport.TopLeftY = 0;
+	viewport.Width = float(D3D::Get()->GetDesc().Width);
+	viewport.Height = float(D3D::Get()->GetDesc().Height);
+	viewport.MinDepth = 0.0f; viewport.MaxDepth = 1.0f;
+	context->RSSetViewports(1, &viewport);
 
 	// Harzard 예방
 	D3D11Utils::UnbindPSRange(context.Get(), 0, 32);
 	context->OMSetRenderTargets(0, nullptr, nullptr);
 
-	m_floatSRV.Reset();   m_floatRTV.Reset();   m_floatBuffer.Reset();
-	m_resolvedSRV.Reset(); m_resolvedRTV.Reset(); m_resolvedBuffer.Reset();
-	m_postEffectsSRV.Reset(); m_postEffectsRTV.Reset(); m_postEffectsBuffer.Reset();
+	floatSRV.Reset();   floatRTV.Reset();   floatBuffer.Reset();
+	resolvedSRV.Reset(); resolvedRTV.Reset(); resolvedBuffer.Reset();
+	postEffectsSRV.Reset(); postEffectsRTV.Reset(); postEffectsBuffer.Reset();
 	
 
 	D3D11_TEXTURE2D_DESC desc = {};
@@ -585,26 +585,26 @@ void URenderer::OnResize()
 	}
 
 	// 1. HDR 재생성
-	ThrowIfFailed(device->CreateTexture2D(&desc, nullptr, m_floatBuffer.GetAddressOf()));
-	ThrowIfFailed(device->CreateRenderTargetView(m_floatBuffer.Get(), nullptr, m_floatRTV.GetAddressOf()));
-	ThrowIfFailed(device->CreateShaderResourceView(m_floatBuffer.Get(), nullptr, m_floatSRV.GetAddressOf()));
+	ThrowIfFailed(device->CreateTexture2D(&desc, nullptr, floatBuffer.GetAddressOf()));
+	ThrowIfFailed(device->CreateRenderTargetView(floatBuffer.Get(), nullptr, floatRTV.GetAddressOf()));
+	ThrowIfFailed(device->CreateShaderResourceView(floatBuffer.Get(), nullptr, floatSRV.GetAddressOf()));
 
 	// 2. 리졸브용
 	desc.SampleDesc.Count = 1;
 	desc.SampleDesc.Quality = 0;
-	ThrowIfFailed(device->CreateTexture2D(&desc, nullptr, m_resolvedBuffer.GetAddressOf()));
-	ThrowIfFailed(device->CreateRenderTargetView(m_resolvedBuffer.Get(), nullptr, m_resolvedRTV.GetAddressOf()));
-	ThrowIfFailed(device->CreateShaderResourceView(m_resolvedBuffer.Get(), nullptr, m_resolvedSRV.GetAddressOf()));
+	ThrowIfFailed(device->CreateTexture2D(&desc, nullptr, resolvedBuffer.GetAddressOf()));
+	ThrowIfFailed(device->CreateRenderTargetView(resolvedBuffer.Get(), nullptr, resolvedRTV.GetAddressOf()));
+	ThrowIfFailed(device->CreateShaderResourceView(resolvedBuffer.Get(), nullptr, resolvedSRV.GetAddressOf()));
 
 	// 3. posteffects용
-	ThrowIfFailed(device->CreateTexture2D(&desc, nullptr, m_postEffectsBuffer.GetAddressOf()));
-	ThrowIfFailed(device->CreateRenderTargetView(m_postEffectsBuffer.Get(), nullptr, m_postEffectsRTV.GetAddressOf()));
-	ThrowIfFailed(device->CreateShaderResourceView(m_postEffectsBuffer.Get(), nullptr, m_postEffectsSRV.GetAddressOf()));
+	ThrowIfFailed(device->CreateTexture2D(&desc, nullptr, postEffectsBuffer.GetAddressOf()));
+	ThrowIfFailed(device->CreateRenderTargetView(postEffectsBuffer.Get(), nullptr, postEffectsRTV.GetAddressOf()));
+	ThrowIfFailed(device->CreateShaderResourceView(postEffectsBuffer.Get(), nullptr, postEffectsSRV.GetAddressOf()));
 
 	// 포스트프로세스 재설정
-	m_postProcess.OnResize
+	postProcess.OnResize
 	(device, context,
-		{ m_postEffectsSRV }, { D3D::Get()->GetFinalLDR_RTV() },
+		{ postEffectsSRV }, { D3D::Get()->GetFinalLDR_RTV() },
 		D3D::Get()->GetDesc().Width, D3D::Get()->GetDesc().Height,
 		4
 	);
@@ -617,8 +617,8 @@ void URenderer::SetShadowViewport()
 	ZeroMemory(&shadowViewport, sizeof(D3D11_VIEWPORT));
 	shadowViewport.TopLeftX = 0;
 	shadowViewport.TopLeftY = 0;
-	shadowViewport.Width = float(m_shadowWidth);
-	shadowViewport.Height = float(m_shadowHeight);
+	shadowViewport.Width = float(shadowWidth);
+	shadowViewport.Height = float(shadowHeight);
 	shadowViewport.MinDepth = 0.0f;
 	shadowViewport.MaxDepth = 1.0f;
 
@@ -632,7 +632,7 @@ void URenderer::BuildShadowGlobalConsts()
 {
 	for (int i = 0; i < MAX_LIGHTS; ++i)
 	{
-		const LightData& light = m_globalConstsCPU.lights[i];
+		const LightData& light = globalConstsCPU.lights[i];
 
 		if ((light.type & LIGHT_SHADOW) == false)
 			continue;
@@ -647,18 +647,18 @@ void URenderer::BuildShadowGlobalConsts()
 		Matrix lightViewRow = XMMatrixLookAtLH(light.position, light.position + light.direction, up);
 		Matrix lightProjRow = XMMatrixPerspectiveFovLH(XMConvertToRadians(120.0f), 1.0f, 0.01f, 100.0f);
 
-		m_shadowGlobalConstsCPU[i].eyeWorld = light.position;
-		m_shadowGlobalConstsCPU[i].view = lightViewRow.Transpose();
-		m_shadowGlobalConstsCPU[i].proj = lightProjRow.Transpose();
-		m_shadowGlobalConstsCPU[i].invProj = lightProjRow.Invert().Transpose();
-		m_shadowGlobalConstsCPU[i].viewProj = (lightViewRow * lightProjRow).Transpose();
+		shadowGlobalConstsCPU[i].eyeWorld = light.position;
+		shadowGlobalConstsCPU[i].view = lightViewRow.Transpose();
+		shadowGlobalConstsCPU[i].proj = lightProjRow.Transpose();
+		shadowGlobalConstsCPU[i].invProj = lightProjRow.Invert().Transpose();
+		shadowGlobalConstsCPU[i].viewProj = (lightViewRow * lightProjRow).Transpose();
 
-		m_globalConstsCPU.lights[i].viewProj = m_shadowGlobalConstsCPU[i].viewProj;
-		m_globalConstsCPU.lights[i].invProj = m_shadowGlobalConstsCPU[i].invProj;
+		globalConstsCPU.lights[i].viewProj = shadowGlobalConstsCPU[i].viewProj;
+		globalConstsCPU.lights[i].invProj = shadowGlobalConstsCPU[i].invProj;
 
-		D3D11Utils::UpdateBuffer(device, context, m_shadowGlobalConstsCPU[i], m_shadowGlobalConstsGPU[i]);
+		D3D11Utils::UpdateBuffer(device, context, shadowGlobalConstsCPU[i], shadowGlobalConstsGPU[i]);
 	}
-	D3D11Utils::UpdateBuffer(device, context, m_globalConstsCPU, m_globalConstsGPU);
+	D3D11Utils::UpdateBuffer(device, context, globalConstsCPU, globalConstsGPU);
 }
 
 
@@ -670,55 +670,55 @@ void URenderer::RenderPostProcess()
 	context->ClearRenderTargetView(D3D::Get()->GetBackBufferRTV().Get(), clearColor);
 
 	// Harzard방지, Resolve전 SRV가 바인딩 되어있다면 해제
-	D3D11Utils::UnbindIfBoundPS(context.Get(), m_resolvedSRV.Get());
+	D3D11Utils::UnbindIfBoundPS(context.Get(), resolvedSRV.Get());
 
 	context->ResolveSubresource
 	(
-		m_resolvedBuffer.Get(),				 // 대상 (싱글샘플 텍스처)
+		resolvedBuffer.Get(),				 // 대상 (싱글샘플 텍스처)
 		0,									 // 대상 서브리소스 index
-		m_floatBuffer.Get(),				 // 소스 (MSAA 텍스처)
+		floatBuffer.Get(),				 // 소스 (MSAA 텍스처)
 		0,									 // 소스 서브리소스 index
 		DXGI_FORMAT_R16G16B16A16_FLOAT		 // 포맷 일치해야 함
 	);
 
 	// PostEffects
 	Graphics::postEffectsPSO.Apply(context.Get());
-	D3D11Utils::UpdateBuffer(device,context, m_postEffectsConstsCPU, m_postEffectsConstsGPU);
+	D3D11Utils::UpdateBuffer(device,context, postEffectsConstsCPU, postEffectsConstsGPU);
 
 	// ----------------그림자 맵 확인------------------------
-	/*SetGlobalConsts(m_shadowGlobalConstsGPU[1].Get());
+	/*SetGlobalConsts(shadowGlobalConstsGPU[1].Get());
 	vector<ID3D11ShaderResourceView*> postEffectsSRVs = 
 	{
-		m_resolvedSRV.Get(), m_shadowSRVs[1].Get() 
+		resolvedSRV.Get(), shadowSRVs[1].Get() 
 	};
 	context->PSSetShaderResources(20, UINT(postEffectsSRVs.size()),postEffectsSRVs.data());
-	context->OMSetRenderTargets(1, m_postEffectsRTV.GetAddressOf(), NULL);
-	context->PSSetConstantBuffers(3, 1,m_postEffectsConstsGPU.GetAddressOf());
-	m_postEffects.Render(context);*/
+	context->OMSetRenderTargets(1, postEffectsRTV.GetAddressOf(), NULL);
+	context->PSSetConstantBuffers(3, 1,postEffectsConstsGPU.GetAddressOf());
+	postEffects.Render(context);*/
 
 	// -------------------------------------------------------
 		
 	D3D11Utils::UnbindPSRange(context.Get(), 20, 8);
-	D3D11Utils::UnbindIfBoundPS(context.Get(), m_postEffectsSRV.Get());
+	D3D11Utils::UnbindIfBoundPS(context.Get(), postEffectsSRV.Get());
 
 	vector<ID3D11ShaderResourceView*> postEffectsSRVs =
 	{
-		m_resolvedSRV.Get(), D3D::Get()->GetDepthOnly_SRV().Get()
+		resolvedSRV.Get(), D3D::Get()->GetDepthOnly_SRV().Get()
 	};
 
 	context->PSSetShaderResources(20, UINT(postEffectsSRVs.size()), postEffectsSRVs.data());
 
-	context->OMSetRenderTargets(1, m_postEffectsRTV.GetAddressOf(), NULL);
-	context->PSSetConstantBuffers(3, 1, m_postEffectsConstsGPU.GetAddressOf());
-	m_postEffects.Render(context);
+	context->OMSetRenderTargets(1, postEffectsRTV.GetAddressOf(), NULL);
+	context->PSSetConstantBuffers(3, 1, postEffectsConstsGPU.GetAddressOf());
+	postEffects.Render(context);
 
 	// -------------------------------------------------------
 
 	// PostProcess
 	Graphics::postProcessingPSO.Apply(context.Get());
 
-	m_postProcess.m_combineFilter.UpdateConstantBuffers(device, context);
-	m_postProcess.Render(context);
+	postProcess.combineFilter.UpdateConstantBuffers(device, context);
+	postProcess.Render(context);
 }
 
 void URenderer::Present()
@@ -730,32 +730,32 @@ void URenderer::Present()
 
 void URenderer::EnsureInstanceCapacity(ID3D11Device* device, size_t needed)
 {
-	if (m_instanceCapacity >= needed && m_instances.m_gpu) return;		// 크기가 만약 넉넉하다면 리턴
+	if (instanceCapacity >= needed && instances.gpuData) return;		// 크기가 만약 넉넉하다면 리턴
 
 	const size_t newCap = NextPow2(needed > 0 ? needed : 1);
-	m_instances.m_cpu.resize(newCap);									// cpu데이터 공간 확보
-	m_instances.Initialize(device);										// cpu데이터 공간을 기반으로 SRV생성
-	m_instanceCapacity = static_cast<UINT>(newCap);
+	instances.cpuData.resize(newCap);									// cpu데이터 공간 확보
+	instances.Initialize(device);										// cpu데이터 공간을 기반으로 SRV생성
+	instanceCapacity = static_cast<UINT>(newCap);
 }
 
 void URenderer::EnsureSkinnedInstanceCapacity(ID3D11Device* device, size_t needed)
 {
-	if (m_skinnedInstanceCapacity >= needed && m_skinnedInstances.m_gpu)
+	if (skinnedInstanceCapacity >= needed && skinnedInstances.gpuData)
 		return;
 
 	const size_t newCap = NextPow2(needed > 0 ? needed : 1);
-	m_skinnedInstances.m_cpu.resize(newCap);
-	m_skinnedInstances.Initialize(device);
-	m_skinnedInstanceCapacity = static_cast<UINT>(newCap);
+	skinnedInstances.cpuData.resize(newCap);
+	skinnedInstances.Initialize(device);
+	skinnedInstanceCapacity = static_cast<UINT>(newCap);
 }
 
 void URenderer::EnsureBonePaletteCapacity(ID3D11Device* device, size_t needed)
 {
-	if (m_bonePaletteCapacity >= needed && m_bonePalettes.m_gpu)
+	if (bonePaletteCapacity >= needed && bonePalettes.gpuData)
 		return;
 
 	const size_t newCap = NextPow2(needed > 0 ? needed : 1);
-	m_bonePalettes.m_cpu.resize(newCap);
-	m_bonePalettes.Initialize(device);
-	m_bonePaletteCapacity = static_cast<UINT>(newCap);
+	bonePalettes.cpuData.resize(newCap);
+	bonePalettes.Initialize(device);
+	bonePaletteCapacity = static_cast<UINT>(newCap);
 }

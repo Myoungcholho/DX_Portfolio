@@ -27,12 +27,7 @@ void USkyboxComponent::OnGUI()
 
 void USkyboxComponent::RenderNormal(ComPtr<ID3D11DeviceContext>& context)
 {
-    /*for (const auto& mesh : m_meshes)
-    {
-        context->GSSetConstantBuffers(0, 1, m_meshConstsGPU.GetAddressOf());
-        context->IASetVertexBuffers(0, 1, mesh->vertexBuffer.GetAddressOf(), &mesh->stride, &mesh->offset);
-        context->Draw(mesh->vertexCount, 0);
-    }*/
+    
 }
 
 shared_ptr<URenderProxy> USkyboxComponent::GetRenderProxy()

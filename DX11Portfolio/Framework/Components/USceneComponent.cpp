@@ -52,19 +52,18 @@ void USceneComponent::UpdateWorldTransform()
     {
 #ifdef TransformTest
         cout << "--------------------------------------------------\n";
-        cout << "Parent Before :" << m_parent->mName << "\n";
-        cout << "Pos :" << m_parent->m_worldTransform.GetPosition().x << "," << m_parent->m_worldTransform.GetPosition().y << "," << m_parent->m_worldTransform.GetPosition().z << "\n";
-        cout << "Rot :" << m_parent->m_worldTransform.GetRotation().x << "," << m_parent->m_worldTransform.GetRotation().y << "," << m_parent->m_worldTransform.GetRotation().z << "\n";
-        cout << "Scale :" << m_parent->m_worldTransform.GetScale().x << "," << m_parent->m_worldTransform.GetScale().y << "," << m_parent->m_worldTransform.GetScale().z << "\n";
+        cout << "Parent Before :" << parent->mName << "\n";
+        cout << "Pos :" << parent->worldTransform.GetPosition().x << "," << parent->worldTransform.GetPosition().y << "," << parent->worldTransform.GetPosition().z << "\n";
+        cout << "Rot :" << parent->worldTransform.GetRotation().x << "," << parent->worldTransform.GetRotation().y << "," << parent->worldTransform.GetRotation().z << "\n";
+        cout << "Scale :" << parent->worldTransform.GetScale().x << "," << parent->worldTransform.GetScale().y << "," << parent->worldTransform.GetScale().z << "\n";
 #endif
-
         worldTransform = localTransform * parent->worldTransform;    // World행렬을 부모행렬과 상대행렬의 곱으로 구성
 
 #ifdef TransformTest
         cout << "Name after :" << mName << "\n";
-        cout << "Pos :" << m_worldTransform.GetPosition().x << "," << m_worldTransform.GetPosition().y << "," << m_worldTransform.GetPosition().z << "\n";
-        cout << "Rot :" << m_worldTransform.GetRotation().x << "," << m_worldTransform.GetRotation().y << "," << m_worldTransform.GetRotation().z << "\n";
-        cout << "Scale :" << m_worldTransform.GetScale().x << "," << m_worldTransform.GetScale().y << "," << m_worldTransform.GetScale().z << "\n";
+        cout << "Pos :" << worldTransform.GetPosition().x << "," << worldTransform.GetPosition().y << "," << worldTransform.GetPosition().z << "\n";
+        cout << "Rot :" << worldTransform.GetRotation().x << "," << worldTransform.GetRotation().y << "," << worldTransform.GetRotation().z << "\n";
+        cout << "Scale :" << worldTransform.GetScale().x << "," << worldTransform.GetScale().y << "," << worldTransform.GetScale().z << "\n";
 #endif
     }
     else

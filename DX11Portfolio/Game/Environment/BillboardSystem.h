@@ -18,6 +18,6 @@ public:
 
 private:
 	vector<BillboardInstance*> BillboardInstances;
-	BillboardRenderer_GS m_renderer;
-	vector<BillboardPoint> m_points;
+	BillboardRenderer_GS renderer;
+	vector<BillboardPoint> points;
 };

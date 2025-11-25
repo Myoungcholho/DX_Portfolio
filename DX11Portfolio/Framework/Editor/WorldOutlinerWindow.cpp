@@ -30,7 +30,7 @@ void WorldOutlinerWindow::Run()
 
 void WorldOutlinerWindow::OnGUI()
 {
-	if (!m_world)
+	if (!world)
 	{
 		ImGui::TextDisabled("No world.");
 		return;
@@ -46,7 +46,7 @@ void WorldOutlinerWindow::OnGUI()
 	ImGui::Checkbox("Hierarchy", &mUseHierarchy);
 	ImGui::Separator();
 
-	const auto& actors = m_world->GetActorsOf();
+	const auto& actors = world->GetActorsOf();
 
 	if (mUseHierarchy) {
 		// 트리 모드: 루트만 찍고, 재귀로 자식 출력

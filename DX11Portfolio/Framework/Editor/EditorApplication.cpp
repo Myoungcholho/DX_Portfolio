@@ -11,8 +11,8 @@ Vector2 EditorApplication::mViewportBounds[2] = {};
 Vector2 EditorApplication::mViewportSize;
 bool EditorApplication::mViewportFocused = false;
 bool EditorApplication::mViewportHovered = false;
-UWorld* EditorApplication::m_world = nullptr;
-URenderer* EditorApplication::m_renderer = nullptr;
+UWorld* EditorApplication::world = nullptr;
+URenderer* EditorApplication::renderer = nullptr;
 
 bool EditorApplication::Initialize()
 {
@@ -23,14 +23,14 @@ bool EditorApplication::Initialize()
 	inspector->Initialize();
 
 	WorldOutlinerWindow* outliner = new WorldOutlinerWindow();
-	outliner->SetWorld(m_world);
+	outliner->SetWorld(world);
 	mEditorWindows.insert(std::make_pair(L"Outliner", outliner));
 
 	ComponentHierarchyWindow* componentWindow = new ComponentHierarchyWindow();
 	mEditorWindows.insert(std::make_pair(L"Seleted Actor", componentWindow));
 
 	RendererSettingsWindow* rendererWindow = new RendererSettingsWindow();
-	rendererWindow->SetRenderer(m_renderer);
+	rendererWindow->SetRenderer(renderer);
 	mEditorWindows.insert(std::make_pair(L"RendererWindow", rendererWindow));
 
 	return true;

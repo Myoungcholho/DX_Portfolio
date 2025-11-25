@@ -3,15 +3,15 @@
 
 APlayer::APlayer()
 {
-	m_name = "Player";
-	m_staticMeshComponent = make_shared<UStaticMeshComponent>();
-	root = m_staticMeshComponent;
-	AddComponent(m_staticMeshComponent);
+	name = "Player";
+	staticMeshComponent = make_shared<UStaticMeshComponent>();
+	root = staticMeshComponent;
+	AddComponent(staticMeshComponent);
 }
 
 void APlayer::Initialize()
 {
-	m_staticMeshComponent->Init();
+	staticMeshComponent->Init();
 
 	//int a = 50;
 	//cout << a;
@@ -26,7 +26,7 @@ void APlayer::Tick()
 	//if (tick >= 50000 && bData == false)
 	//{
 	//	bData = true;
-	//	vector<AActor*> actors = m_world->GetActorsOf();
+	//	vector<AActor*> actors = world->GetActorsOf();
 	//	
 	//	for (AActor* actor : actors)
 	//	{
@@ -40,5 +40,5 @@ void APlayer::Tick()
 
 shared_ptr<UStaticMeshComponent> APlayer::GetStaticMeshComponent()
 {
-	return m_staticMeshComponent;
+	return staticMeshComponent;
 }

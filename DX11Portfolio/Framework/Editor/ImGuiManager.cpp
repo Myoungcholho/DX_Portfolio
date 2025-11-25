@@ -24,7 +24,7 @@ ImGuiManager::ImGuiManager()
 
 ImGuiManager::~ImGuiManager()
 {
-	for (auto& buffer : m_drawDataBuffers)
+	for (auto& buffer : drawDataBuffers)
 		FreeDrawData(buffer);
 
 	ImGui_ImplDX11_Shutdown();
@@ -85,7 +85,7 @@ void ImGuiManager::Initialize()
 	ImGui::NewFrame();
 	ImGui::Render();
 
-	m_drawDataBuffers[0] = CloneDrawData(ImGui::GetDrawData());
+	drawDataBuffers[0] = CloneDrawData(ImGui::GetDrawData());
 }
 
 /// <summary>
@@ -143,13 +143,13 @@ void ImGuiManager::EndFrame()
 	///////////////////////////////////////////////////////////////////////////
 
 	{
-		std::lock_guard<std::mutex> lock(m_drawDataMutex);
+		std::lock_guard<std::mutex> lock(drawDataMutex);
 
-		FreeDrawData(m_drawDataBuffers[m_writeIndex]);
-		m_drawDataBuffers[m_writeIndex] = CloneDrawData(ImGui::GetDrawData());
+		FreeDrawData(drawDataBuffers[writeIndex]);
+		drawDataBuffers[writeIndex] = CloneDrawData(ImGui::GetDrawData());
 
 		// ?�음 ?�레?�에 ??버퍼�??�환
-		m_writeIndex = (m_writeIndex + 1) % 3;
+		writeIndex = (writeIndex + 1) % 3;
 	}
 }
 
@@ -158,16 +158,16 @@ void ImGuiManager::EndFrame()
 /// </summary>
 void ImGuiManager::RenderDrawData(ID3D11DeviceContext* context)
 {
-	std::lock_guard<std::mutex> lock(m_drawDataMutex);
+	std::lock_guard<std::mutex> lock(drawDataMutex);
 
 	// 최신 writeIndex 기�??�로 ?�더링할 index 결정
-	int nextRenderIndex = (m_writeIndex + 2) % 3; // writeIndex 바로 ???�레??
-	ImDrawData* drawData = m_drawDataBuffers[nextRenderIndex];
+	int nextRenderIndex = (writeIndex + 2) % 3; // writeIndex 바로 ???�레??
+	ImDrawData* drawData = drawDataBuffers[nextRenderIndex];
 
 	if (drawData)
 	{
 		ImGui_ImplDX11_RenderDrawData(drawData);
-		m_renderedIndex = nextRenderIndex;
+		renderedIndex = nextRenderIndex;
 
 		//// 멀??뷰포?��? 켜져 ?�다�??�브 창들 ?�더링도 ?�행
 		//if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)

@@ -19,7 +19,7 @@ void USkyboxRenderProxy::Init(shared_ptr<const CPUMeshAsset> asset)
 
 void USkyboxRenderProxy::UpdateConstantBuffers(ComPtr<ID3D11Device>& device, ComPtr<ID3D11DeviceContext>& context)
 {
-    // m_meshConstsCpu의 값 업데이트는 CPU에서 Set으로 밀어주고있다.
+    // meshConstsCpu의 값 업데이트는 CPU에서 Set으로 밀어주고있다.
 
     D3D11Utils::UpdateBuffer(device, context, meshConstsCPU, meshConstsGPU);
     D3D11Utils::UpdateBuffer(device, context, materialConstsCPU, materialConstsGPU);

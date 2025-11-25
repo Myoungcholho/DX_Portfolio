@@ -22,18 +22,18 @@ public:
 	void UpdateConstantBuffer() {}
 
 public:
-	//shared_ptr<Transform> GetTransform() { return m_mirror->GetTransform(); }
+	//shared_ptr<Transform> GetTransform() { return mirror->GetTransform(); }
 
 private:
-	shared_ptr<Model> m_mirror;
+	shared_ptr<Model> mirror;
 
 private:
-	Plane m_mirrorPlane;
-	float m_mirrorAlpha = 0.5f;
+	Plane mirrorPlane;
+	float mirrorAlpha = 0.5f;
 	
 private:
 	Matrix reflectionRow;
 
 private:
-	string Name;
+	string name;
 };

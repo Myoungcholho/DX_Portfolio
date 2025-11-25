@@ -9,9 +9,9 @@ vector<PBRMeshData> GeometryGenerator::ReadFromFile(string basePath, string file
     ModelLoader modelLoader;
     modelLoader.Load(basePath, filename, revertNormals);
 
-    GeometryGenerator::Normalize(Vector3(0.0f), 1.0f, modelLoader.m_meshes, modelLoader.m_aniData);
+    GeometryGenerator::Normalize(Vector3(0.0f), 1.0f, modelLoader.meshes, modelLoader.aniData);
 
-    return modelLoader.m_meshes;
+    return modelLoader.meshes;
 }
 
 auto GeometryGenerator::ReadAnimationFromFile(string basePath, string filename, bool revertNormals) 
@@ -22,9 +22,9 @@ auto GeometryGenerator::ReadAnimationFromFile(string basePath, string filename, 
     ModelLoader modelLoader;
     modelLoader.Load(basePath, filename, revertNormals);
 
-    GeometryGenerator::Normalize(Vector3(0.0f), 1.0f, modelLoader.m_meshes, modelLoader.m_aniData);
+    GeometryGenerator::Normalize(Vector3(0.0f), 1.0f, modelLoader.meshes, modelLoader.aniData);
 
-    return { modelLoader.m_meshes, modelLoader.m_aniData };
+    return { modelLoader.meshes, modelLoader.aniData };
 }
 
 void GeometryGenerator::Normalize(const Vector3 center, const float longestLength, vector<PBRMeshData>& meshes, AnimationData& aniData)

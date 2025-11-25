@@ -13,7 +13,7 @@ public:
 	shared_ptr<UStaticMeshComponent> GetStaticMeshComponent();
 
 private:
-	shared_ptr<UStaticMeshComponent> m_staticMeshComponent;
+	shared_ptr<UStaticMeshComponent> staticMeshComponent;
 
 
 private:

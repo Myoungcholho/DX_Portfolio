@@ -15,8 +15,8 @@ public:
 	AActor();
 
 public:
-	void SetName(const string& name) { m_name = name; }
-	const string& GetName() const { return m_name; }
+	void SetName(const string& InName) { name = InName; }
+	const string& GetName() const { return name; }
 	void SetWorld(UWorld* world);
 	UWorld* GetWorld() const;
 	vector<shared_ptr<UActorComponent>>& GetComponents() { return Components; }
@@ -49,7 +49,7 @@ public:
 protected:
 	vector<shared_ptr<UActorComponent>> Components;
 	shared_ptr<USceneComponent> root = nullptr;
-	string m_name;
+	string name;
 	UWorld* world = nullptr;
 
 protected:

@@ -9,18 +9,18 @@ InspectorWindow::InspectorWindow()
 
 InspectorWindow::~InspectorWindow()
 {
-	if (m_InspectorHandle.IsValid())
-		EditorSelection::OnSelected.Remove(m_InspectorHandle);
-    if (m_InspectorComponentHandle.IsValid())
-        EditorSelection::OnSelectedComponent.Remove(m_InspectorComponentHandle);
+	if (InspectorHandle.IsValid())
+		EditorSelection::OnSelected.Remove(InspectorHandle);
+    if (InspectorComponentHandle.IsValid())
+        EditorSelection::OnSelectedComponent.Remove(InspectorComponentHandle);
 
 	mEditors.clear();
 }
 
 void InspectorWindow::Initialize()
 {
-	m_InspectorHandle = EditorSelection::OnSelected.AddDynamic(this, &InspectorWindow::OnUpdateTarget, "InspectorWindow::OnUpdateTarget");
-    m_InspectorComponentHandle = EditorSelection::OnSelectedComponent.AddDynamic(this, &InspectorWindow::OnUpdateTarget, "InspectorWindow::OnUpdateTarget");
+	InspectorHandle = EditorSelection::OnSelected.AddDynamic(this, &InspectorWindow::OnUpdateTarget, "InspectorWindow::OnUpdateTarget");
+    InspectorComponentHandle = EditorSelection::OnSelectedComponent.AddDynamic(this, &InspectorWindow::OnUpdateTarget, "InspectorWindow::OnUpdateTarget");
 }
 
 void InspectorWindow::Run()

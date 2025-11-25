@@ -22,14 +22,14 @@ void BillboardSystem::Initialize()
 		BillboardInstances.push_back(data);
 		pos.x += dx;
 	}
-	m_renderer.Initialize();
+	renderer.Initialize();
 }
 
 void BillboardSystem::Tick()
 {
 	for (BillboardInstance* d : BillboardInstances)
 		d->Tick();
-	m_renderer.Tick();
+	renderer.Tick();
 }
 
 void BillboardSystem::UpdateGUI()
@@ -43,6 +43,6 @@ void BillboardSystem::Render()
 	for (BillboardInstance* d : BillboardInstances)
 	{
 		d->Render();
-		m_renderer.Render(d);
+		renderer.Render(d);
 	}
 }

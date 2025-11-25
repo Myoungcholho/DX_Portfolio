@@ -18,7 +18,7 @@ void EditorGizmoSystem::Draw(const Matrix& view, const Matrix& proj, ImVec2 view
 	if (sc == nullptr)
 		return;
 
-	Matrix target = sc->GetWorldMatrix();			// m_worldTransform의 worldMatrix 행렬 반환.
+	Matrix target = sc->GetWorldMatrix();			// worldTransform의 worldMatrix 행렬 반환.
 
 	ImGuizmo::BeginFrame();
 	ImGuizmo::SetDrawlist();

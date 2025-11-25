@@ -55,8 +55,8 @@ public:
 	static void OpenScene(const std::filesystem::path& path);
 	
 public:
-	static void SetWorld(UWorld* world) { m_world = world; }
-	static void SetRenderer(URenderer* renderer) { m_renderer = renderer; }
+	static void SetWorld(UWorld* InWorld) { world = InWorld; }
+	static void SetRenderer(URenderer* InRenderer) { renderer = InRenderer; }
 
 private:
 	static bool imGguiInitialize();
@@ -75,6 +75,6 @@ private:
 	static std::map<std::wstring, EditorWindow*> mEditorWindows;
 
 private:
-	static UWorld* m_world;
-	static URenderer* m_renderer;
+	static UWorld* world;
+	static URenderer* renderer;
 };

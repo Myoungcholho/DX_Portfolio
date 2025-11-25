@@ -3,19 +3,19 @@
 
 ASkinnedTestActor::ASkinnedTestActor()
 {
-	m_name = "SkinnedTest";
-	m_skeletalMeshComponent = make_shared<USkeletalMeshComponent>();
-	root = m_skeletalMeshComponent;
-	AddComponent(m_skeletalMeshComponent);
+	name = "SkinnedTest";
+	skeletalMeshComponent = make_shared<USkeletalMeshComponent>();
+	root = skeletalMeshComponent;
+	AddComponent(skeletalMeshComponent);
 }
 
 void ASkinnedTestActor::Initialize()
 {
-	m_skeletalMeshComponent->Init();
+	skeletalMeshComponent->Init();
 
 }
 
 shared_ptr<USkeletalMeshComponent> ASkinnedTestActor::GetSkeletalMeshComponent()
 {
-	return m_skeletalMeshComponent;
+	return skeletalMeshComponent;
 }

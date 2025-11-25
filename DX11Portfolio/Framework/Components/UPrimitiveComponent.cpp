@@ -9,5 +9,5 @@ void UPrimitiveComponent::RefreshConstantsCPU()
 	meshConstsCPU.InvTranspose = meshConstsCPU.InvTranspose.Transpose().Invert();
 
 	//GPU 업데이트는 렌더링 직전에 Proxy에서 수행하므로 여기선 생략
-	//D3D11Utils::UpdateBuffer(device, context, m_meshConstsCPU, m_meshConstsGPU);
+	//D3D11Utils::UpdateBuffer..
 }

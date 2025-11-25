@@ -12,17 +12,17 @@ public:
     void Render(BillboardInstance* data) override;
 
 private:
-    BillboardPointCBuffer m_constantData;
+    BillboardPointCBuffer constantData;
     
 private:
-    ComPtr<ID3D11VertexShader> m_vertexShader;
-    ComPtr<ID3D11GeometryShader> m_geometryShader;
-    ComPtr<ID3D11PixelShader> m_pixelShader;
-    ComPtr<ID3D11InputLayout> m_inputLayout;
+    ComPtr<ID3D11VertexShader> vertexShader;
+    ComPtr<ID3D11GeometryShader> geometryShader;
+    ComPtr<ID3D11PixelShader> pixelShader;
+    ComPtr<ID3D11InputLayout> inputLayout;
 
-    ComPtr<ID3D11Buffer> m_constantBuffer;
-    ComPtr<ID3D11ShaderResourceView> m_textureArraySRV;
+    ComPtr<ID3D11Buffer> constantBuffer;
+    ComPtr<ID3D11ShaderResourceView> textureArraySRV;
 
-    ComPtr<ID3D11Texture2D> m_texArray;
-    ComPtr<ID3D11ShaderResourceView> m_texArraySRV;
+    ComPtr<ID3D11Texture2D> texArray;
+    ComPtr<ID3D11ShaderResourceView> texArraySRV;
 };

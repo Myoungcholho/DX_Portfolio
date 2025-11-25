@@ -18,7 +18,7 @@ void TextureGround::Initialize()
 	//worldInvConstantBufferData.InvTranspose = Matrix();
 
 	//D3D::Get()->CreateConstantBuffer(worldInvConstantBufferData, worldInvConstantBuffer);
-	
+	//
 
 	//D3D::Get()->CreateConstantBuffer(heightMapConstantBufferData, heightMapConstantBuffer);
 	//D3D::Get()->CreateConstantBuffer(cameraConstantBufferData, cameraConstantBuffer);
@@ -30,8 +30,8 @@ void TextureGround::Initialize()
 	//// Vertex & Index Buffer
 	//D3D::Get()->CreateVertexBuffer(ground.vertices, vertexBuffer);
 	//D3D::Get()->CreateIndexBuffer(ground.indices, indexBuffer);
-	//m_vertexCount = UINT(ground.vertices.size());
-	//m_indexCount = UINT(ground.indices.size());
+	//vertexCount = UINT(ground.vertices.size());
+	//indexCount = UINT(ground.indices.size());
 
 	//// Texture Read
 	//if (ground.albedoTextureFilename.empty() == false)
@@ -55,23 +55,23 @@ void TextureGround::Initialize()
 	//}
 
 	//// InputLayout
-	/*vector<D3D11_INPUT_ELEMENT_DESC> basicInputElements = 
-	{
-		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
-		 D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12,
-		 D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24,
-		 D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32,
-		 D3D11_INPUT_PER_VERTEX_DATA, 0},
-	};*/
+	///*vector<D3D11_INPUT_ELEMENT_DESC> basicInputElements = 
+	//{
+	//	{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
+	//	 D3D11_INPUT_PER_VERTEX_DATA, 0},
+	//	{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12,
+	//	 D3D11_INPUT_PER_VERTEX_DATA, 0},
+	//	{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24,
+	//	 D3D11_INPUT_PER_VERTEX_DATA, 0},
+	//	{"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32,
+	//	 D3D11_INPUT_PER_VERTEX_DATA, 0},
+	//};*/
 	//
-	//D3D::Get()->CreateVertexShaderAndInputLayout(L"BasicShader/BasicVertexShader.hlsl", basicInputElements,m_vertexShader, m_inputLayout);
-	//D3D::Get()->CreateVertexShaderAndInputLayout(L"BasicShader/BasicVertexShaderPASS.hlsl", basicInputElements, m_vertexShaderPASS, m_inputLayout);
-	//D3D::Get()->CreateHullShader(L"BasicShader/BasicHullShader.hlsl", m_hullShader);
-	//D3D::Get()->CreateDomainShader(L"BasicShader/BasicDomainShader.hlsl", m_domainShader);
-	//D3D::Get()->CreatePixelShader(L"BasicShader/BasicPixelShader.hlsl", m_pixelShader);
+	//D3D::Get()->CreateVertexShaderAndInputLayout(L"BasicShader/BasicVertexShader.hlsl", basicInputElements,vertexShader, inputLayout);
+	//D3D::Get()->CreateVertexShaderAndInputLayout(L"BasicShader/BasicVertexShaderPASS.hlsl", basicInputElements, vertexShaderPASS, inputLayout);
+	//D3D::Get()->CreateHullShader(L"BasicShader/BasicHullShader.hlsl", hullShader);
+	//D3D::Get()->CreateDomainShader(L"BasicShader/BasicDomainShader.hlsl", domainShader);
+	//D3D::Get()->CreatePixelShader(L"BasicShader/BasicPixelShader.hlsl", pixelShader);
 }
 
 void TextureGround::Destroy()
@@ -152,8 +152,8 @@ void TextureGround::UpdateGUI()
 
 void TextureGround::Render()
 {
-	//OldRender();
-	TSRender();
+	////OldRender();
+	//TSRender();
 }
 
 void TextureGround::OldRender()
@@ -164,14 +164,14 @@ void TextureGround::OldRender()
 	//UINT offset = 0;
 
 	//// VS
-	//context->VSSetShader(m_vertexShader.Get(), 0, 0);
+	//context->VSSetShader(vertexShader.Get(), 0, 0);
 	//context->VSSetShaderResources(0, 1, heightTextureResourceView.GetAddressOf());
 	//context->VSSetSamplers(0, 1, GraphicsDevice::Get()->GetLinearWrapSampler());
 	//context->VSSetConstantBuffers(0, 1, worldInvConstantBuffer.GetAddressOf());
 	//context->VSSetConstantBuffers(2, 1, heightMapConstantBuffer.GetAddressOf());
 
 	//// PS
-	//context->PSSetShader(m_pixelShader.Get(), 0, 0);
+	//context->PSSetShader(pixelShader.Get(), 0, 0);
 	//vector<ID3D11ShaderResourceView*> resViews =
 	//{
 	//	Engine::Get()->GetTextureManager()->Get(L"SkyBox_Diffuse"),
@@ -189,13 +189,13 @@ void TextureGround::OldRender()
 	//context->PSSetConstantBuffers(4, 1, renderOptionsConstantBuffer.GetAddressOf());
 
 	//// IA
-	//context->IASetInputLayout(m_inputLayout.Get());
+	//context->IASetInputLayout(inputLayout.Get());
 	//context->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
 	//context->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 	//context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	//// Draw
-	//context->DrawIndexed(m_indexCount, 0, 0);
+	//context->DrawIndexed(indexCount, 0, 0);
 }
 
 void TextureGround::TSRender()
@@ -206,16 +206,16 @@ void TextureGround::TSRender()
 	//UINT offset = 0;
 
 	//// VS
-	//context->VSSetShader(m_vertexShaderPASS.Get(), 0, 0);
+	//context->VSSetShader(vertexShaderPASS.Get(), 0, 0);
 
 	//// HS
-	//context->HSSetShader(m_hullShader.Get(), 0, 0);
+	//context->HSSetShader(hullShader.Get(), 0, 0);
 	//context->HSSetConstantBuffers(0, 1, cameraConstantBuffer.GetAddressOf());
 	//context->HSSetConstantBuffers(2, 1, worldInvConstantBuffer.GetAddressOf());
 	//context->HSSetConstantBuffers(3, 1, objectCenterConstantBuffer.GetAddressOf());
 
 	//// DS
-	//context->DSSetShader(m_domainShader.Get(), 0, 0);
+	//context->DSSetShader(domainShader.Get(), 0, 0);
 	//vector<ID3D11ShaderResourceView*> dsResViews =
 	//{
 	//	heightTextureResourceView.Get(),
@@ -226,7 +226,7 @@ void TextureGround::TSRender()
 	//context->DSSetConstantBuffers(2, 1, heightMapConstantBuffer.GetAddressOf());
 
 	//// PS
-	//context->PSSetShader(m_pixelShader.Get(), 0, 0);
+	//context->PSSetShader(pixelShader.Get(), 0, 0);
 	//vector<ID3D11ShaderResourceView*> resViews =
 	//{
 	//	Engine::Get()->GetTextureManager()->Get(L"SkyBox_Diffuse"),
@@ -244,13 +244,13 @@ void TextureGround::TSRender()
 	//context->PSSetConstantBuffers(4, 1, renderOptionsConstantBuffer.GetAddressOf());
 
 	//// IA
-	//context->IASetInputLayout(m_inputLayout.Get());
+	//context->IASetInputLayout(inputLayout.Get());
 	//context->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
 	//context->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 	//context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
 
 	//// Draw
-	//context->DrawIndexed(m_indexCount, 0, 0);
+	//context->DrawIndexed(indexCount, 0, 0);
 
 	//// HS/DS ÇØÁ¦
 	//context->HSSetShader(nullptr, 0, 0);

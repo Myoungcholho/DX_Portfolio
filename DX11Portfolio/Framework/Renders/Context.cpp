@@ -140,10 +140,10 @@ void CContext::Render()
 void CContext::RenderConstantBuffer()
 {
 	// View Projection ConstantBuffer·Î Àü¼Û
-	//D3D::Get()->GetDeviceContext()->VSSetConstantBuffers(1, 1, m_constantBuffer.GetAddressOf());
-	//D3D::Get()->GetDeviceContext()->GSSetConstantBuffers(1, 1, m_constantBuffer.GetAddressOf());
-	//D3D::Get()->GetDeviceContext()->HSSetConstantBuffers(1, 1, m_constantBuffer.GetAddressOf());
-	//D3D::Get()->GetDeviceContext()->DSSetConstantBuffers(1, 1, m_constantBuffer.GetAddressOf());
+	//D3D::Get()->GetDeviceContext()->VSSetConstantBuffers(1, 1, constantBuffer.GetAddressOf());
+	//D3D::Get()->GetDeviceContext()->GSSetConstantBuffers(1, 1, constantBuffer.GetAddressOf());
+	//D3D::Get()->GetDeviceContext()->HSSetConstantBuffers(1, 1, constantBuffer.GetAddressOf());
+	//D3D::Get()->GetDeviceContext()->DSSetConstantBuffers(1, 1, constantBuffer.GetAddressOf());
 }
 
 void CContext::RenderMirrorConstantBuffer()

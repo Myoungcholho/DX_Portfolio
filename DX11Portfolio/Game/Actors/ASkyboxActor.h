@@ -12,5 +12,5 @@ public:
 	shared_ptr<USkyboxComponent> GetSkyboxComponent();
 
 private:
-	shared_ptr<USkyboxComponent> m_skyboxComponent;
+	shared_ptr<USkyboxComponent> skyboxComponent;
 };

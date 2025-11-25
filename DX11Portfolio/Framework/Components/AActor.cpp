@@ -24,7 +24,7 @@ static void DetachForeignDescendants(USceneComponent* node, AActor* self)
 
 AActor::AActor()
 {
-	m_name = "Actor_" + to_string(s_actorID++);
+	name = "Actor_" + to_string(s_actorID++);
 }
 
 shared_ptr<UActorComponent> AActor::AddComponent(shared_ptr<UActorComponent> comp)

@@ -2,43 +2,43 @@
 #include"Mirror.h"
 
 //Mirror::Mirror(string name) 
-//	: Name(name)
+//	: name(name)
 //{
 //	auto mesh = GeomtryGenerator::MakeSquare(0.48f);
-//	m_mirror = make_shared<Model>(vector<PBRMeshData>{mesh}, Name);
+//	mirror = make_shared<Model>(vector<PBRMeshData>{mesh}, name);
 //}
 //
 //void Mirror::Initialize()
 //{
-//	m_mirror->Initialize();
+//	mirror->Initialize();
 //
-//	m_mirror->m_basicPixelConstData.material.albedo = Vector3(0.3f);
-//	m_mirror->m_basicPixelConstData.material.emission = Vector3(0.0f);
-//	m_mirror->m_basicPixelConstData.material.metallic = 0.7f;
-//	m_mirror->m_basicPixelConstData.material.roughness = 0.2f;
+//	mirror->basicPixelConstData.material.albedo = Vector3(0.3f);
+//	mirror->basicPixelConstData.material.emission = Vector3(0.0f);
+//	mirror->basicPixelConstData.material.metallic = 0.7f;
+//	mirror->basicPixelConstData.material.roughness = 0.2f;
 //
-//	m_mirrorPlane = Plane(m_mirror->GetTransform()->GetPosition(), m_mirror->GetTransform()->GetForward());
+//	mirrorPlane = Plane(mirror->GetTransform()->GetPosition(), mirror->GetTransform()->GetForward());
 //}
 //
 //void Mirror::Tick()
 //{
-//	m_mirror->Tick();
+//	mirror->Tick();
 //	// 거울은 Light 따로?
 //}
 //
 //void Mirror::UpdateConstantBuffer()
 //{
-//	m_mirrorPlane = Plane(m_mirror->GetTransform()->GetPosition(), m_mirror->GetTransform()->GetForward());
-//	reflectionRow = Matrix::CreateReflection(m_mirrorPlane);
+//	mirrorPlane = Plane(mirror->GetTransform()->GetPosition(), mirror->GetTransform()->GetForward());
+//	reflectionRow = Matrix::CreateReflection(mirrorPlane);
 //	CContext::Get()->UpdateMirror(reflectionRow);
 //}
 //
 //void Mirror::UpdateGUI()
 //{
-//	m_mirror->UpdateGUI();
+//	mirror->UpdateGUI();
 //}
 //
 //void Mirror::Render()
 //{
-//	m_mirror->Render();
+//	mirror->Render();
 //}

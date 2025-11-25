@@ -57,10 +57,10 @@ private:
     vector<FGuiText> Contents;
 
 private:
-    std::mutex m_drawDataMutex;
-    ImDrawData* m_drawDataBuffers[3] = { nullptr, nullptr, nullptr };
-    int m_writeIndex = 1;     // 게임 쓰레드가 쓸 인덱스
-    int m_renderedIndex = 0;  // 렌더 쓰레드가 그릴 인덱스
+    std::mutex drawDataMutex;
+    ImDrawData* drawDataBuffers[3] = { nullptr, nullptr, nullptr };
+    int writeIndex = 1;     // 게임 쓰레드가 쓸 인덱스
+    int renderedIndex = 0;  // 렌더 쓰레드가 그릴 인덱스
 
 private:
     ImDrawData* CloneDrawData(ImDrawData* src);

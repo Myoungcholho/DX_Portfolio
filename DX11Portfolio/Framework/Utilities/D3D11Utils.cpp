@@ -37,8 +37,8 @@ void CheckResult(HRESULT hr, ID3DBlob* errorBlob)
 void D3D11Utils::CreateVertexShaderAndInputLayout(
 	ComPtr<ID3D11Device>& device, const wstring& filename, 
 	const vector<D3D11_INPUT_ELEMENT_DESC>& inputElements, 
-	ComPtr<ID3D11VertexShader>& m_vertexShader, 
-	ComPtr<ID3D11InputLayout>& m_inputLayout,
+	ComPtr<ID3D11VertexShader>& vertexShader, 
+	ComPtr<ID3D11InputLayout>& inputLayout,
 	const vector<D3D_SHADER_MACRO> shaderMacros)
 {
 	ComPtr<ID3DBlob> shaderBlob;
@@ -55,14 +55,14 @@ void D3D11Utils::CreateVertexShaderAndInputLayout(
 	CheckResult(hr, errorBlob.Get());
 
 	device->CreateVertexShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), NULL,
-		&m_vertexShader);
+		&vertexShader);
 
 	device->CreateInputLayout(inputElements.data(), UINT(inputElements.size()),
 		shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(),
-		&m_inputLayout);
+		&inputLayout);
 }
 
-void D3D11Utils::CreateHullShader(ComPtr<ID3D11Device>& device, const wstring& filename, ComPtr<ID3D11HullShader>& m_hullShader)
+void D3D11Utils::CreateHullShader(ComPtr<ID3D11Device>& device, const wstring& filename, ComPtr<ID3D11HullShader>& hullShader)
 {
 	ComPtr<ID3DBlob> shaderBlob;
 	ComPtr<ID3DBlob> errorBlob;
@@ -76,10 +76,10 @@ void D3D11Utils::CreateHullShader(ComPtr<ID3D11Device>& device, const wstring& f
 		D3DCompileFromFile(fileName.c_str(), 0, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "hs_5_0", compileFlags, 0, &shaderBlob, &errorBlob);
 	CheckResult(hr, errorBlob.Get());
 
-	device->CreateHullShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), NULL, &m_hullShader);
+	device->CreateHullShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), NULL, &hullShader);
 }
 
-void D3D11Utils::CreateDomainShader(ComPtr<ID3D11Device>& device, const wstring& filename, ComPtr<ID3D11DomainShader>& m_domainShader)
+void D3D11Utils::CreateDomainShader(ComPtr<ID3D11Device>& device, const wstring& filename, ComPtr<ID3D11DomainShader>& domainShader)
 {
 	ComPtr<ID3DBlob> shaderBlob;
 	ComPtr<ID3DBlob> errorBlob;
@@ -92,10 +92,10 @@ void D3D11Utils::CreateDomainShader(ComPtr<ID3D11Device>& device, const wstring&
 		D3DCompileFromFile(fileName.c_str(), 0, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "ds_5_0", compileFlags, 0, &shaderBlob, &errorBlob);
 	CheckResult(hr, errorBlob.Get());
 
-	device->CreateDomainShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), NULL, &m_domainShader);
+	device->CreateDomainShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), NULL, &domainShader);
 }
 
-void D3D11Utils::CreateGeometryShader(ComPtr<ID3D11Device>& device, const wstring& filename, ComPtr<ID3D11GeometryShader>& m_geometryShader)
+void D3D11Utils::CreateGeometryShader(ComPtr<ID3D11Device>& device, const wstring& filename, ComPtr<ID3D11GeometryShader>& geometryShader)
 {
 	ComPtr<ID3DBlob> shaderBlob;
 	ComPtr<ID3DBlob> errorBlob;
@@ -108,10 +108,10 @@ void D3D11Utils::CreateGeometryShader(ComPtr<ID3D11Device>& device, const wstrin
 
 	CheckResult(hr, errorBlob.Get());
 
-	device->CreateGeometryShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), NULL, &m_geometryShader);
+	device->CreateGeometryShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), NULL, &geometryShader);
 }
 
-void D3D11Utils::CreatePixelShader(ComPtr<ID3D11Device>& device, const wstring& filename, ComPtr<ID3D11PixelShader>& m_pixelShader)
+void D3D11Utils::CreatePixelShader(ComPtr<ID3D11Device>& device, const wstring& filename, ComPtr<ID3D11PixelShader>& pixelShader)
 {
 	ComPtr<ID3DBlob> shaderBlob;
 	ComPtr<ID3DBlob> errorBlob;
@@ -124,7 +124,7 @@ void D3D11Utils::CreatePixelShader(ComPtr<ID3D11Device>& device, const wstring& 
 
 	CheckResult(hr, errorBlob.Get());
 
-	device->CreatePixelShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), NULL, &m_pixelShader);
+	device->CreatePixelShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), NULL, &pixelShader);
 }
 
 void D3D11Utils::CreateIndexBuffer(ComPtr<ID3D11Device>& device, const vector<uint32_t>& indices, ComPtr<ID3D11Buffer>& indexBuffer)
@@ -145,7 +145,8 @@ void D3D11Utils::CreateIndexBuffer(ComPtr<ID3D11Device>& device, const vector<ui
 }
 
 
-void ReadEXRImage(const std::string filename, std::vector<uint8_t>& image, int& width, int& height, DXGI_FORMAT& pixelFormat) {
+void ReadEXRImage(const std::string filename, std::vector<uint8_t>& image, int& width, int& height, DXGI_FORMAT& pixelFormat) 
+{
 
 	const std::wstring wFilename(filename.begin(), filename.end());
 

@@ -16,12 +16,9 @@ public:
 
 public:
 	void OnUpdateTarget();
-	FDelegateHandle m_InspectorHandle;
-	FDelegateHandle m_InspectorComponentHandle;
+	FDelegateHandle InspectorHandle;
+	FDelegateHandle InspectorComponentHandle;
 
 private:
 	std::vector<unique_ptr<Editor>> mEditors;
-	
-	//FDelegateHandle m_seletedHandle;
-	//FDelegateHandle m_lightHandle;
 };

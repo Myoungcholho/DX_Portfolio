@@ -56,7 +56,7 @@ float3 DiffuseIBL(float3 albedo, float3 normalWorld, float3 pixelToEye,
     float3 kd = lerp(1.0 - F, 0.0, metallic);
     float3 irradiance = irradianceIBLTex.SampleLevel(linearWrapSampler, normalWorld, 0).rgb;
     
-    return kd * albedo * irradiance;
+    return kd * (albedo / 3.141592) * irradiance;
 }
 
 float3 SpecularIBL(float3 albedo, float3 normalWorld, float3 pixelToEye,
@@ -223,7 +223,7 @@ PixelShaderOutput main(PixelShaderInputInstance input)
             float3 F0 = lerp(Fdielectric, albedo, metallic);
             float3 F = SchlickFresnel(F0, max(0.0, dot(halfway, pixelToEye)));
             float3 kd = lerp(float3(1, 1, 1) - F, float3(0, 0, 0), metallic);
-            float3 diffuseBRDF = kd * albedo;
+            float3 diffuseBRDF = kd * (albedo / 3.141592);
 
             float D = NdfGGX(NdotH, roughness);
             float3 G = SchlickGGX(NdotI, NdotO, roughness);

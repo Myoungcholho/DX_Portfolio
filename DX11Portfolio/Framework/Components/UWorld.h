@@ -38,7 +38,7 @@ public:
     vector<AActor*> GetActorsOf() const;
 
 public:
-    void SetRenderManager(URenderManager* manager) { m_renderManager = manager; }
+    void SetRenderManager(URenderManager* manager) { RenderManager = manager; }
 
 public:
     void MarkActorForDestroy(AActor* actor);
@@ -52,5 +52,5 @@ private:
     vector<AActor*> PendingDestroy;
 
 private:
-    URenderManager* m_renderManager = nullptr;
+    URenderManager* RenderManager = nullptr;
 };

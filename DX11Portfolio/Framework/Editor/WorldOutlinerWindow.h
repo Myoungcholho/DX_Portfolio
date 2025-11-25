@@ -15,7 +15,7 @@ public:
 	void Run() override;
 
 public:
-	void SetWorld(UWorld* world) { m_world = world; }
+	void SetWorld(UWorld* InWorld) { world = InWorld; }
 
 private:
 	void DrawActorNode(AActor* a);
@@ -26,5 +26,5 @@ private:
 	char mSearch[128] = { 0 };			// 검색 필터
 
 private:
-	UWorld* m_world;
+	UWorld* world;
 };

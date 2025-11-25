@@ -12,5 +12,5 @@ public:
 	shared_ptr<USkeletalMeshComponent> GetSkeletalMeshComponent();
 
 private:
-	shared_ptr<USkeletalMeshComponent> m_skeletalMeshComponent;
+	shared_ptr<USkeletalMeshComponent> skeletalMeshComponent;
 };

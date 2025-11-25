@@ -3,11 +3,11 @@
 
 void BillboardInstance::Initialize(vector<BillboardPoint>& points)
 {
-	m_points = points;
+	points = points;
 	transform = make_shared<Transform>();
 
 	// VertexBuffer 持失, 
-	//D3D::Get()->CreateVertexBuffer(m_points, m_vertexBuffer);
+	//D3D::Get()->CreateVertexBuffer(points, vertexBuffer);
 
 	// VS, GS Cbuffer 持失
 	WorldMatrixData.World = Matrix();
@@ -52,15 +52,15 @@ void BillboardInstance::Render()
 
 const std::vector<BillboardPoint>& BillboardInstance::GetPoints() const
 {
-	return m_points;
+	return points;
 }
 
 ComPtr<ID3D11Buffer> BillboardInstance::GetVertexBuffer()
 {
-	return m_vertexBuffer;
+	return vertexBuffer;
 }
 
 size_t BillboardInstance::GetPointCount()
 {
-	return m_points.size();
+	return points.size();
 }

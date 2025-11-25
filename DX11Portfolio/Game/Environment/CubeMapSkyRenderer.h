@@ -18,7 +18,7 @@ public:
 
 
 private:
-	CubeMapping m_cubeMapping;
+	CubeMapping cubeMapping;
 
 private:
 	WorldInvConstantBuffer worldInvConstantBufferData;

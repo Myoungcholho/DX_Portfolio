@@ -14,9 +14,9 @@ public:
 	void Run() override;
 
 public:
-	void SetRenderer(URenderer* renderer) { m_renderer = renderer; }
+	void SetRenderer(URenderer* InRenderer) { renderer = InRenderer; }
 
 
 private:
-	URenderer* m_renderer = nullptr;
+	URenderer* renderer = nullptr;
 };

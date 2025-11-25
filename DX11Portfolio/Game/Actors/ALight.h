@@ -12,5 +12,5 @@ public:
 	shared_ptr<ULightComponent> GetLightComponent();
 
 private:
-	shared_ptr<ULightComponent> m_lightComponent;
+	shared_ptr<ULightComponent> lightComponent;
 };

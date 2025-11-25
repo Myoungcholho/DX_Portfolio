@@ -15,7 +15,7 @@ public:
     Model(ComPtr<ID3D11Device>& device, ComPtr<ID3D11DeviceContext>& context,
         const std::string& basePath, const std::string& filename);
     Model(ComPtr<ID3D11Device>& device, ComPtr<ID3D11DeviceContext>& context,
-        const std::vector<PBRMeshData>& meshes);
+        const std::vector<PBRMeshData>& InMeshes);
 
     void Initialize(ComPtr<ID3D11Device>& device,
         ComPtr<ID3D11DeviceContext>& context,
@@ -23,7 +23,7 @@ public:
 
     void Initialize(ComPtr<ID3D11Device>& device,
         ComPtr<ID3D11DeviceContext>& context,
-        const std::vector<PBRMeshData>& meshes);
+        const std::vector<PBRMeshData>& InMeshes);
 
     void UpdateConstantBuffers(ComPtr<ID3D11Device>& device,
         ComPtr<ID3D11DeviceContext>& context);
@@ -35,18 +35,18 @@ public:
     void UpdateWorldRow(const Matrix& worldRow);
 
 public:
-    Matrix m_worldRow = Matrix();   // Model(Object) To World 행렬
-    Matrix m_worldITRow = Matrix(); // InverseTranspose
+    Matrix worldRow = Matrix();   // Model(Object) To World 행렬
+    Matrix worldITRow = Matrix(); // InverseTranspose
 
-    WorldInvConstantBuffer m_meshConstsCPU;
-    MaterialConstants m_materialConstsCPU;
+    WorldInvConstantBuffer meshConstsCPU;
+    MaterialConstants materialConstsCPU;
 
-    bool m_drawNormals = false;
-    bool m_isVisible = true;
+    bool drawNormals = false;
+    bool isVisible = true;
 
-    std::vector<shared_ptr<Mesh>> m_meshes;
+    std::vector<shared_ptr<Mesh>> meshes;
 
 private:
-    ComPtr<ID3D11Buffer> m_meshConstsGPU;
-    ComPtr<ID3D11Buffer> m_materialConstsGPU;
+    ComPtr<ID3D11Buffer> meshConstsGPU;
+    ComPtr<ID3D11Buffer> materialConstsGPU;
 };

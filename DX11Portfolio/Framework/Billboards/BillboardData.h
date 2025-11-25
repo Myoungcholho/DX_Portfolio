@@ -31,6 +31,6 @@ private:
     ComPtr<ID3D11Buffer> TreeIndexBuffer;
 
 private:
-    vector<BillboardPoint> m_points;
-    ComPtr<ID3D11Buffer> m_vertexBuffer;
+    vector<BillboardPoint> points;
+    ComPtr<ID3D11Buffer> vertexBuffer;
 };

@@ -112,9 +112,9 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 			//"MeleeAttack.fbx",
 			//"ComboAttack.fbx",
 			"Idle.fbx",
-			"EquipUnderarm.fbx",
-			"MeleeKick.fbx",
-			"RunForward.fbx",
+			//"EquipUnderarm.fbx",
+			//"MeleeKick.fbx",
+			//"RunForward.fbx",
 		};
 
 		shared_ptr<AnimationData> aniData = make_shared<AnimationData>();
@@ -152,9 +152,9 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 		vector<string> clipNames =
 		{
 			"Idle.fbx", 
-			"Walking60.fbx",
-			"backward60.fbx",
-			"left60.fbx", "right60.fbx", "Run60.fbx",
+			//"Walking60.fbx",
+			//"backward60.fbx",
+			//"left60.fbx", "right60.fbx", "Run60.fbx",
 			//"RootWalking.fbx",
 			//"CoverToStand.fbx"
 			//"Walking60_InPlace.fbx",

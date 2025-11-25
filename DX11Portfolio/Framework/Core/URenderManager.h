@@ -15,7 +15,7 @@ public:
 	~URenderManager();
 
 public:
-	URenderer* GetRenderer() const { return m_renderer.get(); }
+	URenderer* GetRenderer() const { return renderer.get(); }
 
 public:
 	void Init();
@@ -30,20 +30,20 @@ private:
 	void RenderLoop();
 
 private:
-	thread m_renderThread;
-	atomic<bool> m_shouldExit = false;
+	thread renderThread;
+	atomic<bool> shouldExit = false;
 
-	mutex m_mutex;
-	condition_variable m_condition;
+	mutex mtx;
+	condition_variable condition;
 
-	vector<shared_ptr<URenderProxy>> m_renderQueues[2];
-	vector<LightData> m_renderLightData[2];
+	vector<shared_ptr<URenderProxy>> renderQueues[2];
+	vector<LightData> renderLightData[2];
 
-	int m_writeIndex = 0;
-	int m_readIndex = 1;
-	bool m_renderReady = false;
+	int writeIndex = 0;
+	int readIndex = 1;
+	bool renderReady = false;
 
 private:
-	unique_ptr<URenderer> m_renderer;
+	unique_ptr<URenderer> renderer;
 
 };

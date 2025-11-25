@@ -54,8 +54,8 @@ public:
 	FDynamicMulticastDelegate OnReSizeDelegate;
 
 public:
-	UINT m_numQualityLevels = 0;
-	bool m_useMSAA = true;
+	UINT numQualityLevels = 0;
+	bool useMSAA = true;
 
 private:
 	D3D();
@@ -71,36 +71,36 @@ private:
 	static D3DDesc D3dDesc;
 
 public:
-	ID3D11Device* GetDevice() { return Device.Get(); }
-	ID3D11DeviceContext* GetDeviceContext() { return DeviceContext.Get(); }
-	ComPtr<ID3D11Device> GetDeviceCom() const { return Device; }
-	ComPtr<ID3D11DeviceContext> GetDeviceContextCom() const { return DeviceContext; }
+	ID3D11Device* GetDevice() { return device.Get(); }
+	ID3D11DeviceContext* GetDeviceContext() { return deviceContext.Get(); }
+	ComPtr<ID3D11Device> GetDeviceCom() const { return device; }
+	ComPtr<ID3D11DeviceContext> GetDeviceContextCom() const { return deviceContext; }
 
-	ComPtr<ID3D11RenderTargetView> GetBackBufferRTV(){ return m_backBufferRTV; }
-	ComPtr<ID3D11DepthStencilView> GetDepthStencilView(){ return DepthStencilView; }
+	ComPtr<ID3D11RenderTargetView> GetBackBufferRTV(){ return backBufferRTV; }
+	ComPtr<ID3D11DepthStencilView> GetDepthStencilView(){ return depthStencilView; }
 
-	ComPtr<ID3D11RenderTargetView> GetFinalLDR_RTV() { return m_finalLDR_RTV;}
-	ComPtr<ID3D11ShaderResourceView> GetFinalLDR_SRV() { return m_finalLDR_SRV; }
+	ComPtr<ID3D11RenderTargetView> GetFinalLDR_RTV() { return finalLDR_RTV;}
+	ComPtr<ID3D11ShaderResourceView> GetFinalLDR_SRV() { return finalLDR_SRV; }
 
-	ComPtr<ID3D11DepthStencilView> GetDepthOnly_DSV() { return m_depthOnlyDSV; }
-	ComPtr<ID3D11ShaderResourceView> GetDepthOnly_SRV() { return m_depthOnlySRV; }
+	ComPtr<ID3D11DepthStencilView> GetDepthOnly_DSV() { return depthOnlyDSV; }
+	ComPtr<ID3D11ShaderResourceView> GetDepthOnly_SRV() { return depthOnlySRV; }
 
 private:
-	ComPtr<IDXGISwapChain> SwapChain;
-	ComPtr<ID3D11RenderTargetView> m_backBufferRTV;
+	ComPtr<IDXGISwapChain> swapChain;
+	ComPtr<ID3D11RenderTargetView> backBufferRTV;
 	ComPtr<ID3D11Texture2D> DSV_Texture;
-	ComPtr<ID3D11DepthStencilView> DepthStencilView;
+	ComPtr<ID3D11DepthStencilView> depthStencilView;
 
 	// Depth Buffer 관련
-	ComPtr<ID3D11Texture2D> m_depthOnlyBuffer;
-	ComPtr<ID3D11DepthStencilView> m_depthOnlyDSV;
-	ComPtr<ID3D11ShaderResourceView> m_depthOnlySRV;
+	ComPtr<ID3D11Texture2D> depthOnlyBuffer;
+	ComPtr<ID3D11DepthStencilView> depthOnlyDSV;
+	ComPtr<ID3D11ShaderResourceView> depthOnlySRV;
 
 	// SceneView를 위해
-	ComPtr<ID3D11Texture2D> m_finalLDR;
-	ComPtr<ID3D11RenderTargetView> m_finalLDR_RTV;
-	ComPtr<ID3D11ShaderResourceView> m_finalLDR_SRV;
+	ComPtr<ID3D11Texture2D> finalLDR;
+	ComPtr<ID3D11RenderTargetView> finalLDR_RTV;
+	ComPtr<ID3D11ShaderResourceView> finalLDR_SRV;
 
-	ComPtr<ID3D11Device> Device;
-	ComPtr<ID3D11DeviceContext> DeviceContext;
+	ComPtr<ID3D11Device> device;
+	ComPtr<ID3D11DeviceContext> deviceContext;
 };
