@@ -257,6 +257,7 @@ Quat ↔ Euler 변환을 수학적으로 다뤄 보며
 
 - 결과  
 <img width="446" height="284" alt="image" src="https://github.com/user-attachments/assets/d6701af8-2ce2-4c9d-9145-91f55a9ecbd3" />
+
 인덱스 스왑 시점의 극히 짧은 잠금만으로도 데이터 일관성을 유지하면서,  
 락으로 인한 스톨을 최소화해 GT/RT 분리 이후에도 안정적인 프레임을 유지하는 구조를 만들 수 있었습니다.  
 
@@ -361,8 +362,7 @@ CPU 측 본 팔레트 계산 시간을 프레임 예산 안으로 줄였습니�
 ### 4. CPU·GPU 타임 비례 이상 징후 포착
 
 - 문제 상황  
-
-  <img width="461" height="110" alt="image" src="https://github.com/user-attachments/assets/bef2c646-d665-4921-985f-aee132da5e4c" />
+<img width="461" height="110" alt="image" src="https://github.com/user-attachments/assets/bef2c646-d665-4921-985f-aee132da5e4c" />
 
 CPU / GPU 프레임 타임을 시각화해 거리 기반 Tick에 따른 병목을 분석하던 중,  
 CPU(Game)와 GPU 시간이 거의 비례해서 같이 움직이는 이상 징후가 있었습니다.
@@ -374,8 +374,7 @@ CPU(Game) 부하를 줄였을 뿐인데 GPU 시간도 함께 감소하는 것은
 실제 GPU 부하가 줄었다기보다 **측정 방식에 문제가 있을 가능성**을 의심하게 만들었습니다.
 
 - 해결
-
-  <img width="629" height="181" alt="image" src="https://github.com/user-attachments/assets/55675cba-4be9-4d23-a658-b08ff153b109" />
+<img width="629" height="181" alt="image" src="https://github.com/user-attachments/assets/55675cba-4be9-4d23-a658-b08ff153b109" />
 
 
 타임라인을 다시 점검한 결과, GPU 타임스탬프를 `Present()` 이후에 찍고 있었고,  
@@ -387,9 +386,7 @@ CPU(Game) 시간과 비슷하게 보이는 왜곡이 발생하고 있었습니�
 `Present()` 호출 직전 시점에 GPU 타임스탬프를 찍도록 위치를 조정했습니다.
 
 - 결과
-
-  <img width="827" height="206" alt="image" src="https://github.com/user-attachments/assets/13e03291-599e-4167-9052-b5f25e53a587" />
-
+<img width="827" height="206" alt="image" src="https://github.com/user-attachments/assets/13e03291-599e-4167-9052-b5f25e53a587" />
 
 타이밍 측정 위치를 수정한 뒤에는  
 CPU(Game) ≒ 50ms, CPU(Render) ≒ 14ms, GPU ≒ 26ms 수준으로  
@@ -439,7 +436,7 @@ TPS가 다른 두 클립을 섞을 때 목표 포즈가 키 프레임 단위로�
 얻은 두 클립의 보간 포즈를 다시 블렌딩하는 형식으로 바꾸었습니다.
 
 - 결과  
-
+![Animation](https://github.com/user-attachments/assets/558f1dd6-fe3e-4737-9404-e6bc26424e2c)
 30 → 60 TPS 전환에서도 목표 포즈가 계단식으로 바뀌지 않고  
 시간에 따라 연속적으로 변화하게 되어,  
 이전처럼 화면에 미세한 떨림이 발생하지 않게 되었습니다.  
