@@ -1,14 +1,5 @@
-# 📘목차
-- [프로젝트 개요 - DirectX 11 자체 게임 엔진](#프로젝트-개요)
-- [개발 계기](#개발-계기)
-- [아쉬웠던 점](#아쉬웠던-점)
-- [프로젝트에서 얻은 것](#프로젝트에서-얻은-것)
-- [구현 내용](#구현-내용)
-- [문제 해결 경험(트러블 슈팅)](#문제-해결-경험트러블-슈팅)
-- [핵심 주요 코드](#핵심-주요-코드)
-
-# 📘프로젝트 개요 - DirectX 11 자체 게임 엔진
-- 소개 영상: [포트폴리오 영상 하이퍼링크](https://www.youtube.com/watch?v=CVj2y5PXsnw)
+# 📘DirectX 11 자체 게임 엔진
+- 소개 영상: [포트폴리오 영상](https://www.youtube.com/watch?v=CVj2y5PXsnw)
 - 개발 기간: 2025.05 ~ 2025.10 (156일)
 - 개발 인원: 1명
 - 핵심 요약: 언리얼 아키텍처를 참고해 재구현한 자체 게임 엔진
@@ -17,6 +8,13 @@
   - 실행 및 디버깅 툴: VS2022, RenderDoc, Deleaker, IBLMaker
   - 라이브러리: DX11, ImGuiDocking, DirectXTex, Assimp, SimpleMath
 
+# 📘목차
+- [개발 계기](#개발-계기)
+- [아쉬웠던 점](#아쉬웠던-점)
+- [프로젝트에서 얻은 것](#프로젝트에서-얻은-것)
+- [구현 내용](#구현-내용)
+- [문제 해결 경험(트러블 슈팅)](#문제-해결-경험트러블-슈팅)
+- [핵심 주요 코드](#핵심-주요-코드)
 
 # 📘개발 계기
 ### 1. 상용 엔진에서 제공하는 기능들의 내부 구현에 대한 호기심
@@ -258,7 +256,7 @@ Quat ↔ Euler 변환을 수학적으로 다뤄 보며
 필요한 순간에만 짧게 동기화를 보장하는 설계로 정리했습니다.
 
 - 결과  
-
+<img width="446" height="284" alt="image" src="https://github.com/user-attachments/assets/d6701af8-2ce2-4c9d-9145-91f55a9ecbd3" />
 인덱스 스왑 시점의 극히 짧은 잠금만으로도 데이터 일관성을 유지하면서,  
 락으로 인한 스톨을 최소화해 GT/RT 분리 이후에도 안정적인 프레임을 유지하는 구조를 만들 수 있었습니다.  
 
@@ -321,11 +319,13 @@ Pawn처럼 컴포넌트 유무와 상관없이 위치/회전을 안정적으로 
 ### 3. 인스턴싱 도입 전 Static / Skeletal 프레임 저하 원인 파악
 
 - 문제 상황  
+<img width="426" height="122" alt="image" src="https://github.com/user-attachments/assets/588c3f09-b8c8-4022-b4ba-7514054077bf" />
 
 동일한 스켈탈 애니메이션 모델 100개를 렌더링했을 때  
 FPS가 약 **40.9**까지 하락하는 문제가 발생했습니다.
 
 - 원인 분석  
+<img width="362" height="121" alt="image" src="https://github.com/user-attachments/assets/f5905d9b-ad01-400a-b7eb-f821da3a4b1b" />
 
 프로파일링 결과, 한 캐릭터의 애니메이션/본 팔레트 계산에 약 0.15ms,  
 100개 기준 약 15.2ms가 소모되어 **CPU 애니/팔레트 계산이 병목**이었고,  
@@ -333,6 +333,7 @@ FPS가 약 **40.9**까지 하락하는 문제가 발생했습니다.
 동시에 개별 `DrawIndexed` 호출이 많아 **GPU 드로우콜 병목**도 존재하는 것을 확인했습니다.
 
 - 해결  
+<img width="347" height="77" alt="image" src="https://github.com/user-attachments/assets/63839d1d-9c11-446a-ac33-7b8e4c42f495" />
 
 먼저 애니메이션 계산을 FixedUpdate에서 Tick/URO 방식으로 전환해  
 모든 프레임을 정밀 계산하지 않고 보간·보정을 사용함으로써  
@@ -361,6 +362,8 @@ CPU 측 본 팔레트 계산 시간을 프레임 예산 안으로 줄였습니�
 
 - 문제 상황  
 
+  <img width="461" height="110" alt="image" src="https://github.com/user-attachments/assets/bef2c646-d665-4921-985f-aee132da5e4c" />
+
 CPU / GPU 프레임 타임을 시각화해 거리 기반 Tick에 따른 병목을 분석하던 중,  
 CPU(Game)와 GPU 시간이 거의 비례해서 같이 움직이는 이상 징후가 있었습니다.
 
@@ -370,7 +373,10 @@ CPU(Game)와 GPU 시간이 거의 비례해서 같이 움직이는 이상 징후
 CPU(Game) 부하를 줄였을 뿐인데 GPU 시간도 함께 감소하는 것은,  
 실제 GPU 부하가 줄었다기보다 **측정 방식에 문제가 있을 가능성**을 의심하게 만들었습니다.
 
-- 해결  
+- 해결
+
+  <img width="629" height="181" alt="image" src="https://github.com/user-attachments/assets/55675cba-4be9-4d23-a658-b08ff153b109" />
+
 
 타임라인을 다시 점검한 결과, GPU 타임스탬프를 `Present()` 이후에 찍고 있었고,  
 이 구간에 프레임 페이싱 대기가 포함되면서 GPU 시간이  
@@ -380,7 +386,10 @@ CPU(Game) 시간과 비슷하게 보이는 왜곡이 발생하고 있었습니�
 이에 GPU 실제 렌더링 시간만 측정할 수 있도록  
 `Present()` 호출 직전 시점에 GPU 타임스탬프를 찍도록 위치를 조정했습니다.
 
-- 결과  
+- 결과
+
+  <img width="827" height="206" alt="image" src="https://github.com/user-attachments/assets/13e03291-599e-4167-9052-b5f25e53a587" />
+
 
 타이밍 측정 위치를 수정한 뒤에는  
 CPU(Game) ≒ 50ms, CPU(Render) ≒ 14ms, GPU ≒ 26ms 수준으로  
