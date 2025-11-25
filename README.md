@@ -1,4 +1,9 @@
 # 📘DirectX 11 자체 게임 엔진
+<br>
+<img align="right" width="420"
+     src="https://github.com/user-attachments/assets/6be7f5a3-344d-4635-8365-18ef474563fc"
+     alt="DirectX 11 Engine Editor Screenshot" />
+
 - 소개 영상: [포트폴리오 영상](https://www.youtube.com/watch?v=CVj2y5PXsnw)
 - 개발 기간: 2025.05 ~ 2025.10 (156일)
 - 개발 인원: 1명
@@ -7,6 +12,8 @@
   - 언어: C++, HLSL
   - 실행 및 디버깅 툴: VS2022, RenderDoc, Deleaker, IBLMaker
   - 라이브러리: DX11, ImGuiDocking, DirectXTex, Assimp, SimpleMath
+
+<br clear="both"/>
 
 # 📘목차
 - [개발 계기](#개발-계기)
@@ -320,7 +327,7 @@ Pawn처럼 컴포넌트 유무와 상관없이 위치/회전을 안정적으로 
 ### 3. 인스턴싱 도입 전 Static / Skeletal 프레임 저하 원인 파악
 
 - 문제 상황  
-<img width="426" height="122" alt="image" src="https://github.com/user-attachments/assets/588c3f09-b8c8-4022-b4ba-7514054077bf" />
+<img width="362" height="121" alt="image" src="https://github.com/user-attachments/assets/588c3f09-b8c8-4022-b4ba-7514054077bf" />
 
 동일한 스켈탈 애니메이션 모델 100개를 렌더링했을 때  
 FPS가 약 **40.9**까지 하락하는 문제가 발생했습니다.
@@ -334,7 +341,7 @@ FPS가 약 **40.9**까지 하락하는 문제가 발생했습니다.
 동시에 개별 `DrawIndexed` 호출이 많아 **GPU 드로우콜 병목**도 존재하는 것을 확인했습니다.
 
 - 해결  
-<img width="347" height="77" alt="image" src="https://github.com/user-attachments/assets/63839d1d-9c11-446a-ac33-7b8e4c42f495" />
+<img width="362" height="121" alt="image" src="https://github.com/user-attachments/assets/63839d1d-9c11-446a-ac33-7b8e4c42f495" />
 
 먼저 애니메이션 계산을 FixedUpdate에서 Tick/URO 방식으로 전환해  
 모든 프레임을 정밀 계산하지 않고 보간·보정을 사용함으로써  
@@ -374,7 +381,7 @@ CPU(Game) 부하를 줄였을 뿐인데 GPU 시간도 함께 감소하는 것은
 실제 GPU 부하가 줄었다기보다 **측정 방식에 문제가 있을 가능성**을 의심하게 만들었습니다.
 
 - 해결
-<img width="629" height="181" alt="image" src="https://github.com/user-attachments/assets/55675cba-4be9-4d23-a658-b08ff153b109" />
+<img width="461" height="110" alt="image" src="https://github.com/user-attachments/assets/55675cba-4be9-4d23-a658-b08ff153b109" />
 
 
 타임라인을 다시 점검한 결과, GPU 타임스탬프를 `Present()` 이후에 찍고 있었고,  
@@ -386,7 +393,7 @@ CPU(Game) 시간과 비슷하게 보이는 왜곡이 발생하고 있었습니�
 `Present()` 호출 직전 시점에 GPU 타임스탬프를 찍도록 위치를 조정했습니다.
 
 - 결과
-<img width="827" height="206" alt="image" src="https://github.com/user-attachments/assets/13e03291-599e-4167-9052-b5f25e53a587" />
+<img width="461" height="110" alt="image" src="https://github.com/user-attachments/assets/13e03291-599e-4167-9052-b5f25e53a587" />
 
 타이밍 측정 위치를 수정한 뒤에는  
 CPU(Game) ≒ 50ms, CPU(Render) ≒ 14ms, GPU ≒ 26ms 수준으로  
