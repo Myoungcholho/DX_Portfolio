@@ -1,14 +1,14 @@
-# 목차
+# 📘목차
 ### DirectX 11 자체 게임 엔진
 
-- 개발 계기
-- 아쉬웠던 점
-- 얻은 것
-- 구현한 것
-- 문제 해결 경험(트러블 슈팅)
-- 주요 코드 링크
+- [개발 계기](#개발-계기)
+- [아쉬웠던 점](#아쉬웠던-점)
+- [프로젝트에서 얻은 것](#프로젝트에서-얻은-것)
+- [구현 내용](#구현-내용)
+- [문제 해결 경험(트러블 슈팅)](#문제-해결-경험트러블-슈팅)
+- [주요 코드 링크](#주요-코드-링크)
 
-# DirectX 11 자체 게임 엔진
+# 📘DirectX 11 자체 게임 엔진
 - 소개 영상: [포트폴리오 영상 하이퍼링크](https://www.youtube.com/watch?v=CVj2y5PXsnw)
 - 개발 기간: 2025.05 ~ 2025.10 (156일)
 - 개발 인원: 1명
@@ -19,7 +19,7 @@
   - 라이브러리: DX11, ImGuiDocking, DirectXTex, Assimp, SimpleMath
 
 
-# 개발 계기
+# 📘개발 계기
 ### 1. 상용 엔진에서 제공하는 기능들의 내부 구현에 대한 호기심
 
 상용 엔진에서 버튼·체크박스 한 번으로 끝나는 기능들이  
@@ -39,7 +39,7 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
 엔진 레벨 설계가 클라이언트 개발 효율로 이어진다는 걸 체감했고,  
 이 철학을 DX11 자체 엔진 구조로 직접 옮겨 체득하고자 했습니다.
 
-# 아쉬웠던 점
+# 📘아쉬웠던 점
 ### 1. 성능·확장성을 고려하지 못한 초기 설계와 구조 개편
 
 처음 DX11 엔진을 설계할 때 인스턴싱을 충분히 고려하지 않아, 단일 렌더 기준 구조로 출발한 점이 아쉬웠습니다.  
@@ -104,7 +104,7 @@ Renderer는 GPU 리소스 수명 관리와 드로우 호출만 담당하도록 �
 다른 시스템을 설계할 때도  
 “역할과 경계를 먼저 나누고 들어가는 습관”이 몸에 배게 되었습니다.
 
-# 프로젝트에서 얻은 것
+# 📘프로젝트에서 얻은 것
 ### 1. 드로우콜 렌더링 파이프라인 감각
 
 도형을 직접 그려 보고, 하나하나 드로우콜을 날려 보면서  
@@ -172,7 +172,7 @@ Quat ↔ Euler 변환을 수학적으로 다뤄 보며
 회전 표현에 대한 직관과 문제 해결 능력을 키울 수 있었습니다.
 
 
-# 구현 내용
+# 📘구현 내용
 ### 1. 코어 아키텍처 & 실행 구조
 
 - GT/RT 분리 아키텍처 (MailBox 기반 스냅샷 소비 모델)
@@ -234,7 +234,7 @@ Quat ↔ Euler 변환을 수학적으로 다뤄 보며
 
 
 
-# 문제 해결 경험(트러블 슈팅)
+# 📘문제 해결 경험(트러블 슈팅)
 ### 1. 더블 버퍼의 락 회피 시도와 최소 잠금 전환
 
 - 문제 상황  
@@ -453,5 +453,11 @@ Unity에서 봤던 애니메이션 키프레임/보간 구조 경험을 떠올�
 그 위에 경험을 쌓아 가며 문제를 해결하는 태도를 유지하고자 합니다.
 
 
-# 핵심 주요 코드
-
+# 📘핵심 주요 코드
+- [전체 코드 (EntryPoint / Framework / Game – Actor 파생 클래스 구현)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio)
+- [코어 (Core – 엔진 기반 시스템, 실행 구조)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio/Framework/Core)
+- [에디터 (Editor – ImGui 에디터, WorldOutliner, Inspector)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio/Framework/Editor)
+- [Gameplay (Controller / Pawn 등 플레이 로직)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio/Framework/Gameplay)
+- [컴포넌트 (Scene / Primitive / Render Components)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio/Framework/Components)
+- [액터들 (Game/Actors – 플레이어, 몬스터 등)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio/Game/Actors)
+- [자원 관리 매니저 (CPU/GPU/애니메이션 리소스 매니저)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio/Framework/Manager)
