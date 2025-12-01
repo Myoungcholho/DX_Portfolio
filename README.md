@@ -4,12 +4,13 @@
      src="https://github.com/user-attachments/assets/dffc2176-d743-4aae-90b8-446c3935ae4a"
      alt="DirectX 11 Engine Editor Screenshot" />
 
-DX11 기반으로 언리얼 엔진 아키텍처를 재구현하며,  
-렌더링·애니메이션·GT/RT 분리 구조를 갖춘 자체 게임 엔진을 개발했습니다.
-
-개발 과정에서 대량 렌더링 병목과 애니메이션 처리 최적화 문제를  
-프로파일링 툴들을 적극 활용해
-스켈레탈 100개 씬 기준 **40.9 FPS → 112.1 FPS(약 174% 향상)** 까지 성능을 끌어올렸습니다.
+> WinMain 부터 DirectX11 기반의 자체 게임 엔진을 바닥부터 직접 설계 및 구현했습니다.  
+> 엔진 아키텍처 구축 과정에서 언리얼 엔진의 내부 구조를 분석하여 핵심 개념을 익혀  
+> 저만의 엔진으로 재해석하였습니다.
+>
+> 또한 렌더링 기법 활용을 위한 셰이더까지 직접 설계하고 구현하였고  
+> 메모리 관리를 위한 CPU/GPU 병목 분석 프로파일링 기능과  
+> GameThread/RenderingTread 분리, 인스턴싱 등 최적화도 성공적으로 진행하였습니다.
 
 <br clear="both"/>
 
@@ -30,25 +31,19 @@ DX11 기반으로 언리얼 엔진 아키텍처를 재구현하며,
 - [개발 계기](#개발-계기)
 - [핵심 주요 코드](#핵심-주요-코드)
 
-# 📘핵심 성과
-
 
 
 
 # 📘구현 요약 내용
-| [🧱 Core Architecture](#core) | 1. GameThread / RenderThread </br> 2. 델리게이트 이벤트 시스템 </br> 3. 에디터 조작 명령 반영 명령 큐 |
+| 상세 설명 링크 | 구현 요약 |
 |----------------------|------------------|
+| [🧱 Core Architecture](#core) | 1. GameThread / RenderThread </br> 2. 델리게이트 이벤트 시스템 </br> 3. 에디터 조작 명령 반영 명령 큐 |
 | [🌍 World / Object](#world) | 1. 언리얼 구조 분석하여 유사한 아키텍처 구조로 설계|
 | [🎨 Rendering](#rendering) | 1. 렌더링 매니저 구현 </br> 2. 2. |
 | [🕺 Animation](#animation) | ----------------|
 | [📦 Asset](#asset) | ----------------|
 | [🛠 Editor](#editor) | ----------------|
 | [📊 profiling](#profiling) | ----------------|
-
-
-
-
-
 
 
 
@@ -186,6 +181,8 @@ GameThread/RenderThread 분리 후 렌더 리소스 공유자원에 대한 레�
 
 ### 2. Actor 자체 Transform 도입과 Root 이관 <a id="ts-transform"></a>
 
+(문제상황이 안읽힘, 디폴트 컴포넌트의 언급이 있어야할 것 같다)
+
 - 문제 상황  
 
 초기 설계에서는 Actor가 자체 Transform을 갖지 않고,  
@@ -231,6 +228,8 @@ Pawn처럼 컴포넌트 유무와 상관없이 위치/회전을 안정적으로 
 ---
 
 ### 3. 인스턴싱 도입 전 Static / Skeletal 프레임 저하 원인 파악 <a id="ts-instancing"></a>
+
+
 
 - 문제 상황  
 <img width="362" height="121" alt="image" src="https://github.com/user-attachments/assets/588c3f09-b8c8-4022-b4ba-7514054077bf" />
