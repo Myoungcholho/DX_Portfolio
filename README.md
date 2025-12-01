@@ -376,7 +376,8 @@ FPS가 약 **40.9**까지 하락하는 문제가 발생했습니다.
 동시에 개별 `DrawIndexed` 호출이 많아 **GPU 드로우콜 병목**도 존재하는 것을 확인했습니다.
 
 - 해결  
-<img width="362" height="121" alt="image" src="https://github.com/user-attachments/assets/63839d1d-9c11-446a-ac33-7b8e4c42f495" />
+
+<img width="362" height="121" alt="image" src="https://github.com/user-attachments/assets/33dad103-e126-43b6-9dae-20134c2f2887" />
 
 먼저 애니메이션 계산을 FixedUpdate에서 Tick/URO 방식으로 전환해  
 모든 프레임을 정밀 계산하지 않고 보간·보정을 사용함으로써  
@@ -387,9 +388,7 @@ CPU 측 본 팔레트 계산 시간을 프레임 예산 안으로 줄였습니�
 
 - 결과  
 
-애니 계산 구조 변경으로 CPU 병목이 해소되었고,  
-인스턴싱으로 GPU 드로우콜 병목을 제거해  
-기존 40.9 FPS였던 장면을 수직 동기화 기준인 75 FPS까지 끌어올릴 수 있었습니다.
+40.9 FPS -> 112.1 FPS(약 174%)의 프레임 향상 결과를 얻었습니다.
 
 - 배운 점  
 1. 프레임 저하는 CPU / GPU 중 어느 한쪽 문제가 아니라,  
