@@ -35,7 +35,7 @@ DX11 기반으로 언리얼 엔진 아키텍처를 재구현하며,
 
 
 
-# 📘구현 내용
+# 📘구현 요약 내용
 | [🧱 Core Architecture](#core) | 1. GameThread / RenderThread </br> 2. 델리게이트 이벤트 시스템 </br> 3. 에디터 조작 명령 반영 명령 큐 |
 |----------------------|------------------|
 | [🌍 World / Object](#world) | 1. 언리얼 구조 분석하여 유사한 아키텍처 구조로 설계|
@@ -46,62 +46,7 @@ DX11 기반으로 언리얼 엔진 아키텍처를 재구현하며,
 | [📊 profiling](#profiling) | ----------------|
 
 
-<h3 id="core">1. 코어 아키텍처 & 실행 구조</h3>
 
-- GT/RT 분리 아키텍처 (MailBox 기반 스냅샷 소비 모델)
-- `std::function` 기반 델리게이트/이벤트 시스템
-- CommandQueue 구조로 에디터–게임 간 동기 호출로 인한 스톨 제거(체크)
-
----
-
-<h3 id="world">2. 월드·객체 구조 & 트랜스폼</h3>
-
-- Transform 시스템 (월드/로컬 변환 및 위치 정보 관리)
-- GameInstance / UWorld / SceneComponent / PrimitiveComponent / RenderProxy 구조
-- AActor / StaticMeshComponent / SkeletalMeshComponent 구성
-- Pawn / Controller / GameMode 계층
-- ClassID 기반 Actor 런타임 스폰 팩토리 (리플렉션 없이 타입 등록/생성)
-- 전역 입력 시스템 (마우스·키보드 입력을 Controller로 라우팅) (체크)
-
----
-
-<h3 id="rendering">3. 렌더링 파이프라인 & 그래픽스</h3>
-
-- 그래픽 파이프라인 상태 집합 객체(PSO) 설계  
-  (Shader·Blend·Rasterizer·Depth 상태 일체 관리)
-- RenderManager(패스 구성) / RenderQueue(배치·정렬) / Renderer(드로우 호출) 역할 분리
-- HDR RenderTarget 파이프라인, MSAA, ToneMapping
-- Fog / Bloom / Shadow / PBR 라이팅
-
----
-
-<h3 id="animation">4. 애니메이션 시스템</h3>
-
-- 애니메이션 재생 시스템 (AnimationClip 기반 재생·루프·이동 관리)
-- AnimInstance (UAnimInstance와 유사한 상태·블렌딩 로직 전담 계층)
-- 애니메이션 블렌딩 (키프레임 보간 기반 블렌딩)
-- 카메라 거리 기반 Tick 최적화 (Update Rate Optimization)
-
----
-
-<h3 id="asset">5. 에셋 & 자원 관리</h3>
-
-- .fbx 파일 로드 파이프라인 (메시·본·애니메이션 데이터 파싱)
-- CPU / GPU / 애니메이션 자원 공유 관리 클래스
-
----
-
-<h3 id="editor">6. 에디터 & 툴링</h3>
-
-- ImGui Docking 기반 에디터 UI
-- WorldOutliner / ActorOutliner / InspectorWindow를 통한 런타임 액터/컴포넌트 편집
-
----
-
-<h3 id="profiling">7. 프로파일링</h3>
-
-- 프레임/섹션 단위 측정 프로파일링 시스템
-- CPU / GPU 타임스탬프 기반 프로파일링 시스템
 
 
 
@@ -129,6 +74,7 @@ DX11 기반으로 언리얼 엔진 아키텍처를 재구현하며,
 GameThread/RenderThread 분리 후 렌더 리소스 공유자원에 대한 레이스 컨디션 문제가 발생하여 
 프레임 경계의 스왑 구간에만 잠금을 거는 구조로 바꿔 안정성과 성능을 동시에 잡았습니다.
 
+[상세설명](#ts-double-buffer)
 
 </ul>
 </div>
@@ -522,6 +468,64 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
 언리얼의 복잡하지만 개발자 친화적인 구조를 보며  
 엔진 레벨 설계가 클라이언트 개발 효율로 이어진다는 걸 체감했고,  
 이 철학을 DX11 자체 엔진 구조로 직접 옮겨 체득하고자 했습니다.
+
+# 📘구현 상세 내용
+<h3 id="core">1. 코어 아키텍처 & 실행 구조</h3>
+
+- GT/RT 분리 아키텍처 (MailBox 기반 스냅샷 소비 모델)
+- `std::function` 기반 델리게이트/이벤트 시스템
+- CommandQueue 구조로 에디터–게임 간 동기 호출로 인한 스톨 제거(체크)
+
+---
+
+<h3 id="world">2. 월드·객체 구조 & 트랜스폼</h3>
+
+- Transform 시스템 (월드/로컬 변환 및 위치 정보 관리)
+- GameInstance / UWorld / SceneComponent / PrimitiveComponent / RenderProxy 구조
+- AActor / StaticMeshComponent / SkeletalMeshComponent 구성
+- Pawn / Controller / GameMode 계층
+- ClassID 기반 Actor 런타임 스폰 팩토리 (리플렉션 없이 타입 등록/생성)
+- 전역 입력 시스템 (마우스·키보드 입력을 Controller로 라우팅) (체크)
+
+---
+
+<h3 id="rendering">3. 렌더링 파이프라인 & 그래픽스</h3>
+
+- 그래픽 파이프라인 상태 집합 객체(PSO) 설계  
+  (Shader·Blend·Rasterizer·Depth 상태 일체 관리)
+- RenderManager(패스 구성) / RenderQueue(배치·정렬) / Renderer(드로우 호출) 역할 분리
+- HDR RenderTarget 파이프라인, MSAA, ToneMapping
+- Fog / Bloom / Shadow / PBR 라이팅
+
+---
+
+<h3 id="animation">4. 애니메이션 시스템</h3>
+
+- 애니메이션 재생 시스템 (AnimationClip 기반 재생·루프·이동 관리)
+- AnimInstance (UAnimInstance와 유사한 상태·블렌딩 로직 전담 계층)
+- 애니메이션 블렌딩 (키프레임 보간 기반 블렌딩)
+- 카메라 거리 기반 Tick 최적화 (Update Rate Optimization)
+
+---
+
+<h3 id="asset">5. 에셋 & 자원 관리</h3>
+
+- .fbx 파일 로드 파이프라인 (메시·본·애니메이션 데이터 파싱)
+- CPU / GPU / 애니메이션 자원 공유 관리 클래스
+
+---
+
+<h3 id="editor">6. 에디터 & 툴링</h3>
+
+- ImGui Docking 기반 에디터 UI
+- WorldOutliner / ActorOutliner / InspectorWindow를 통한 런타임 액터/컴포넌트 편집
+
+---
+
+<h3 id="profiling">7. 프로파일링</h3>
+
+- 프레임/섹션 단위 측정 프로파일링 시스템
+- CPU / GPU 타임스탬프 기반 프로파일링 시스템
 
 # 📘핵심 주요 코드
 - [전체 코드 (EntryPoint / Framework / Game – Actor 파생 클래스 구현)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio)
