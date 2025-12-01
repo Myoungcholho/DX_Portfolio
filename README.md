@@ -8,7 +8,7 @@ DX11 기반으로 언리얼 엔진 아키텍처를 재구현하며,
 렌더링·애니메이션·GT/RT 분리 구조를 갖춘 자체 게임 엔진을 개발했습니다.
 
 개발 과정에서 대량 렌더링 병목과 애니메이션 처리 최적화 문제를  
-프로파일링 기반 구조 개선으로 해결했고,  
+프로파일링 툴들을 적극 활용해
 스켈레탈 100개 씬 기준 **40.9 FPS → 112.1 FPS(약 174% 향상)** 까지 성능을 끌어올렸습니다.
 
 <br clear="both"/>
@@ -36,14 +36,21 @@ DX11 기반으로 언리얼 엔진 아키텍처를 재구현하며,
 
 
 # 📘구현 내용
-| [🧱 Core Architecture](#core) | [🌍 World / Object](#world) | [🎨 Rendering](#rendering) | [🕺 Animation](#animation) | [📦 Asset](#asset) | [🛠 Editor](#editor) | [📊 profiling](#profiling) |
-|----------------------|------------------|---------------|---------------|-----------|------------|----------|
+| [🧱 Core Architecture](#core) | 1. GameThread / RenderThread </br> 2. 델리게이트 이벤트 시스템 </br> 3. 에디터 조작 명령 반영 명령 큐 |
+|----------------------|------------------|
+| [🌍 World / Object](#world) | 1. 언리얼 구조 분석하여 유사한 아키텍처 구조로 설계|
+| [🎨 Rendering](#rendering) | 1. 렌더링 매니저 구현 </br> 2. 2. |
+| [🕺 Animation](#animation) | ----------------|
+| [📦 Asset](#asset) | ----------------|
+| [🛠 Editor](#editor) | ----------------|
+| [📊 profiling](#profiling) | ----------------|
+
 
 <h3 id="core">1. 코어 아키텍처 & 실행 구조</h3>
 
 - GT/RT 분리 아키텍처 (MailBox 기반 스냅샷 소비 모델)
 - `std::function` 기반 델리게이트/이벤트 시스템
-- CommandQueue 구조로 에디터–게임 간 동기 호출로 인한 스톨 제거
+- CommandQueue 구조로 에디터–게임 간 동기 호출로 인한 스톨 제거(체크)
 
 ---
 
@@ -54,7 +61,7 @@ DX11 기반으로 언리얼 엔진 아키텍처를 재구현하며,
 - AActor / StaticMeshComponent / SkeletalMeshComponent 구성
 - Pawn / Controller / GameMode 계층
 - ClassID 기반 Actor 런타임 스폰 팩토리 (리플렉션 없이 타입 등록/생성)
-- 전역 입력 시스템 (마우스·키보드 입력을 Controller로 라우팅)
+- 전역 입력 시스템 (마우스·키보드 입력을 Controller로 라우팅) (체크)
 
 ---
 
@@ -108,6 +115,87 @@ DX11 기반으로 언리얼 엔진 아키텍처를 재구현하며,
 - [3. Static/Skeletal 대량 렌더링 프레임 저하 — CPU/GPU 병목 분석 & 인스턴싱 적용](#ts-instancing)
 - [4. CPU·GPU 타임 왜곡 — Present() 측정 시점 오류 수정](#ts-present)
 - [5. 애니 블렌딩 덜덜거림 — 정수 기반 샘플링 → 시간 보간 방식 개선](#ts-animation)
+
+<div align="center">
+
+<table>
+<tr>
+
+<td width="350" style="border:2px solid #ffb3b3; border-radius:12px; background:#ffe1e1;">
+<h3 id="ts-double-buffer">📂 더블 버퍼 레이스 컨디션 해결</h3>
+<div align="left">
+<ul>
+
+GameThread/RenderThread 분리 후 렌더 리소스 공유자원에 대한 레이스 컨디션 문제가 발생하여 
+프레임 경계의 스왑 구간에만 잠금을 거는 구조로 바꿔 안정성과 성능을 동시에 잡았습니다.
+
+
+</ul>
+</div>
+</td>
+
+<td width="350" style="border:2px solid #ffd27f; border-radius:12px; background:#fff1d6;">
+<h3>📚 학년자료</h3>
+<div align="left">
+<ul>
+<li>수업자료</li>
+<li>주간학습안내</li>
+<li>평가 계획</li>
+</ul>
+</div>
+</td>
+
+<td width="350" style="border:2px solid #c3c3ff; border-radius:12px; background:#e9e9ff;">
+<h3>🧾 기본자료</h3>
+<div align="left">
+<ul>
+<li>양식, 표준 문서</li>
+<li>각종 계획서</li>
+</ul>
+</div>
+</td>
+
+</tr>
+</table>
+
+<br>
+
+<table>
+<tr>
+
+<td width="350" style="border:2px solid #a8ddff; border-radius:12px; background:#e6f6ff;">
+<h3>📘 수합자료</h3>
+<div align="left">
+<ul>
+<li>출석부</li>
+<li>시간표</li>
+</ul>
+</div>
+</td>
+
+<td width="350" style="border:2px solid #c8ffa8; border-radius:12px; background:#ebffdf;">
+<h3>📂 정보자료</h3>
+<div align="left">
+<ul>
+<li>업무 안내</li>
+<li>양식 & 규정</li>
+</ul>
+</div>
+</td>
+
+<td width="350" style="border:2px solid #ffb0e4; border-radius:12px; background:#ffe7f7;">
+<h3>🔗 바로가기</h3>
+<div align="left">
+<ul>
+<li>사이트 링크</li>
+</ul>
+</div>
+</td>
+
+</tr>
+</table>
+
+</div>
 
 ---
 
