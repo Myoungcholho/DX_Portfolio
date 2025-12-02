@@ -24,14 +24,12 @@
 
 
 # 📘목차
-- [핵심 성과](#핵심-성과)
-- [구현 내용](#구현-내용)
+- [구현 요약 내용](#구현-요약-내용)
 - [문제 해결 경험(트러블 슈팅)](#문제-해결-경험트러블-슈팅)
 - [프로젝트에서 얻은 것](#프로젝트에서-얻은-것)
 - [개발 계기](#개발-계기)
+- [구현 상세 내용](#구현-상세-내용)
 - [핵심 주요 코드](#핵심-주요-코드)
-
-
 
 
 # 📘구현 요약 내용
@@ -39,22 +37,15 @@
 |----------------------|------------------|
 | [🧱 Core Architecture](#core) | 1. GameThread / RenderThread </br> 2. 델리게이트 이벤트 시스템 </br> 3. 에디터 조작 명령 반영 명령 큐 |
 | [🌍 World / Object](#world) | 1. 언리얼 구조 분석하여 유사한 아키텍처 구조로 설계|
-| [🎨 Rendering](#rendering) | 1. 렌더링 매니저 구현 </br> 2. 2. |
-| [🕺 Animation](#animation) | ----------------|
-| [📦 Asset](#asset) | ----------------|
-| [🛠 Editor](#editor) | ----------------|
-| [📊 profiling](#profiling) | ----------------|
+| [🎨 Rendering](#rendering) | 1. 렌더링 파이프라인 구현 </br> 2. 그래픽스 구현 |
+| [🕺 Animation](#animation) | 1. 애니메이션 시스템 </br> 2. 업데이트 최적화 |
+| [📦 Asset](#asset) | 1. 파일 로드 파이프라인 </br> 2. 자원 공유 관리 클래스|
+| [🛠 Editor](#editor) | 1. (World/Actor)Outliner </br> 2. Inspector/SceneView |
+| [📊 profiling](#profiling) | 1. 섹션 평균 프로파일링 </br> 2. CPU/GPU 타임스탬프 |
 
 
 
 # 📘문제 해결 경험(트러블 슈팅)
-
-**요약**
-- [1. 더블 버퍼 레이스 컨디션 해결 — 최소 잠금 + 스냅샷 구조](#ts-double-buffer)
-- [2. Actor.Transform 도입 — RootComponent 의존 구조 문제 해결](#ts-transform)
-- [3. Static/Skeletal 대량 렌더링 프레임 저하 — CPU/GPU 병목 분석 & 인스턴싱 적용](#ts-instancing)
-- [4. CPU·GPU 타임 왜곡 — Present() 측정 시점 오류 수정](#ts-present)
-- [5. 애니 블렌딩 덜덜거림 — 정수 기반 샘플링 → 시간 보간 방식 개선](#ts-animation)
 
 <div align="center">
 
@@ -62,36 +53,43 @@
 <tr>
 
 <td width="350" style="border:2px solid #ffb3b3; border-radius:12px; background:#ffe1e1;">
-<h3 id="ts-double-buffer">📂 더블 버퍼 레이스 컨디션 해결</h3>
+<h3>📂 Editor-Game 간 RaceCondition 문제 해결</h3>
 <div align="left">
 <ul>
 
-GameThread/RenderThread 분리 후 렌더 리소스 공유자원에 대한 레이스 컨디션 문제가 발생하여 
-프레임 경계의 스왑 구간에만 잠금을 거는 구조로 바꿔 안정성과 성능을 동시에 잡았습니다.
+Editor-GameThread간 RaceCondition 문제가 발생해  
+CommandQueue를 도입해 최소화 Lock으로 해결했습니다.
 
-[상세설명](#ts-double-buffer)
+[상세설명](#t0)
 
 </ul>
 </div>
 </td>
 
 <td width="350" style="border:2px solid #ffd27f; border-radius:12px; background:#fff1d6;">
-<h3>📚 학년자료</h3>
+<h3>📚 공유 자원으로 인한 불필요한 복사 해결 </h3>
 <div align="left">
 <ul>
-<li>수업자료</li>
-<li>주간학습안내</li>
-<li>평가 계획</li>
+
+인스턴스당 자원을 복사해 엔진이 느려지는 문제를  
+공유 자원 관리 클래스를 만들어 해결했습니다.
+
+[상세설명](#t1)
+
 </ul>
 </div>
 </td>
 
 <td width="350" style="border:2px solid #c3c3ff; border-radius:12px; background:#e9e9ff;">
-<h3>🧾 기본자료</h3>
+<h3>🧾 CPU/GPU 병목 해결 </h3>
 <div align="left">
 <ul>
-<li>양식, 표준 문서</li>
-<li>각종 계획서</li>
+
+대량 씬 렌더링 상황에서 프레임 저하를 해결하기 위해
+인스턴싱, Tick 최적화를 통해 프레임 향상시켰습니다.
+
+[상세설명](#t2)
+
 </ul>
 </div>
 </td>
@@ -105,30 +103,40 @@ GameThread/RenderThread 분리 후 렌더 리소스 공유자원에 대한 레�
 <tr>
 
 <td width="350" style="border:2px solid #a8ddff; border-radius:12px; background:#e6f6ff;">
-<h3>📘 수합자료</h3>
+<h3>📘 프로파일러 이상 징후 해결</h3>
 <div align="left">
 <ul>
-<li>출석부</li>
-<li>시간표</li>
+
+프로파일러에서 시간 이상 징후문제가 발생해
+원인 단위로 접근해 문제를 해결했습니다.
+
+[상세설명](#t3)
+
 </ul>
 </div>
 </td>
 
 <td width="350" style="border:2px solid #c8ffa8; border-radius:12px; background:#ebffdf;">
-<h3>📂 정보자료</h3>
+<h3>📂 애니메이션 샘플링 문제 해결</h3>
 <div align="left">
 <ul>
-<li>업무 안내</li>
-<li>양식 & 규정</li>
+
+애니메이션의 TickPerSec가 다른 상황에서 블렌딩 시 떨림 문제가 발생했고
+키 프레임 보간 방식을 사용해 문제를 해결했습니다.
+
+[상세설명](#t4)
+
 </ul>
 </div>
 </td>
 
 <td width="350" style="border:2px solid #ffb0e4; border-radius:12px; background:#ffe7f7;">
-<h3>🔗 바로가기</h3>
+<h3>🔗 - </h3>
 <div align="left">
 <ul>
-<li>사이트 링크</li>
+
+
+
 </ul>
 </div>
 </td>
@@ -140,7 +148,7 @@ GameThread/RenderThread 분리 후 렌더 리소스 공유자원에 대한 레�
 
 ---
 
-## 1. Editor–GameThread 간 데이터 충돌 해결 구조 설계 <a id="ts-double-buffer"></a>
+## 1. Editor–GameThread 간 데이터 충돌 해결 구조 설계 <a id="t0"></a>
 
 ### 🧩문제
 
@@ -171,7 +179,7 @@ GameThread/RenderThread 분리 후 렌더 리소스 공유자원에 대한 레�
 
 ---
 
-### 2. Asset 공유 구조 적용 – 중복 로딩 제거로 로딩 병목 해결 <a id="ts-transform"></a>
+### 2. Asset 공유 구조 적용 – 중복 로딩 제거로 로딩 병목 해결 <a id="t1"></a>
 
 ### 🧩문제
 
@@ -209,7 +217,7 @@ GameThread/RenderThread 분리 후 렌더 리소스 공유자원에 대한 레�
 
 ---
 
-### 3. 인스턴싱 도입 전 Static / Skeletal 프레임 저하 원인 파악 <a id="ts-instancing"></a>
+### 3. 인스턴싱 도입 전 Static / Skeletal 프레임 저하 원인 파악 <a id="t2"></a>
 
 ### 🧩문제
 
@@ -241,11 +249,12 @@ GameThread/RenderThread 분리 후 렌더 리소스 공유자원에 대한 레�
 
 ---
 
-### 4. CPU·GPU 타임 비례 이상 징후 포착 <a id="ts-present"></a>
+### 4. CPU·GPU 타임 비례 이상 징후 포착 <a id="t3"></a>
 
 ### 🧩문제
 
 <img width="461" height="110" alt="image" src="https://github.com/user-attachments/assets/bef2c646-d665-4921-985f-aee132da5e4c" />
+
 - 거리 기반 Tick 실험 중 CPU(Game) / GPU 프레임 타임을 시각화했을 때, 두 값이 거의 비례해 같이 움직이는 이상 징후가 있었다는 점
 
 ### 🔍원인 분석  
@@ -256,6 +265,7 @@ GameThread/RenderThread 분리 후 렌더 리소스 공유자원에 대한 레�
 ### 🛠해결  
 
 <img width="461" height="110" alt="image" src="https://github.com/user-attachments/assets/55675cba-4be9-4d23-a658-b08ff153b109" />
+
 - 렌더링 타임라인을 다시 점검해 보니 GPU 타임스탬프를 Present() 이후에 찍고 있어, 프레임 페이싱 대기 시간이 GPU 시간에 섞여 있었다는 점
 - GPU 실제 렌더링 시간만 측정하도록, Present() 호출 직전에 GPU 타임스탬프를 찍도록 측정 위치를 조정
 
@@ -272,7 +282,7 @@ GameThread/RenderThread 분리 후 렌더 리소스 공유자원에 대한 레�
 
 ---
 
-### 5. 정수 기반 샘플링의 한계 – 블렌딩 시 덜덜거림 발생 <a id="ts-animation"></a>
+### 5. 정수 기반 샘플링의 한계 – 블렌딩 시 덜덜거림 발생 <a id="t4"></a>
 
 ### 🧩문제
 
@@ -287,7 +297,7 @@ GameThread/RenderThread 분리 후 렌더 리소스 공유자원에 대한 레�
 
 ### 🛠해결  
 
-<img width="571" height="177" alt="image" src="https://github.com/user-attachments/assets/424df55e-9547-4764-962b-124a2df4e573" />
+<img width="570" height="177" alt="image" src="https://github.com/user-attachments/assets/424df55e-9547-4764-962b-124a2df4e573" />
 
 - 시간 기반 보간(lerp) 샘플링으로 변경
 - 키프레임 사이 값을 보간 → 보간된 포즈끼리 블렌딩
