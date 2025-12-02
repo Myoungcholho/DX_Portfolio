@@ -35,13 +35,13 @@
 # 📘구현 요약 내용
 | 상세 설명 링크 | 구현 요약 |
 |----------------------|------------------|
-| [🧱 Core Architecture](#core) | 1. GameThread / RenderThread </br> 2. 델리게이트 이벤트 시스템 </br> 3. 에디터 조작 명령 반영 명령 큐 |
+| [🧱 Core Architecture](#core) | 1. GameThread / RenderThread </br> 2. 델리게이트 이벤트 시스템 |
 | [🌍 World / Object](#world) | 1. 언리얼 구조 분석하여 유사한 아키텍처 구조로 설계|
-| [🎨 Rendering](#rendering) | 1. 렌더링 파이프라인 구현 </br> 2. 그래픽스 구현 |
-| [🕺 Animation](#animation) | 1. 애니메이션 시스템 </br> 2. 업데이트 최적화 |
-| [📦 Asset](#asset) | 1. 파일 로드 파이프라인 </br> 2. 자원 공유 관리 클래스|
-| [🛠 Editor](#editor) | 1. (World/Actor)Outliner </br> 2. Inspector/SceneView |
-| [📊 profiling](#profiling) | 1. 섹션 평균 프로파일링 </br> 2. CPU/GPU 타임스탬프 |
+| [🎨 Rendering](#rendering) | 1. 렌더링 파이프라인 구현 </br> 2. PBR, MSAA, Lod, Fog, PCF 그림자, ToneMapping 등 다양한 그래픽스 기법 적용 |
+| [🕺 Animation](#animation) | 1. 거리기반 애니메이션 최적화 애니메이션 보간 및 셰이더 작성 AnimInstance 설계 </br> 2. 거리 기반 애니메이션 업데이트 최적화 |
+| [📦 Asset](#asset) | 1. fbx 파일 임포트 시스템 </br> 2. 파일 관리 시스템 |
+| [🛠 Editor](#editor) | 1. Outliner, Inspector, SceneView 등 에디터 위젯 설계 </br> 2. 명령 큐 시스템을 구축하여 에디터 조작 안정화 |
+| [📊 Profiling](#profiling) | 1. 구간별 CPU 사용량 및 레이턴시 프로파일링 시스템 구축 </br> 2. CPU/GPU 타임스탬프 시스템 |
 
 
 
@@ -86,7 +86,7 @@ CommandQueue 기반 구조로 전환하여 Lock 최소화 방식으로 해결했
 <ul>
 
 대규모 씬 렌더링 환경에서 발생한 프레임 저하를
-인스턴싱 및 Tick 최적화로 해결했습니다.
+인스턴싱 및 거리 기반 Tick 최적화로 해결했습니다.
 
 [상세설명](#t2)
 
@@ -251,7 +251,7 @@ TPS가 다른 애니메이션을 블렌딩할 때 발생한 미세 떨림 현상
 
 <img width="461" height="110" alt="image" src="https://github.com/user-attachments/assets/bef2c646-d665-4921-985f-aee132da5e4c" />
 
-- 거리 기반 Tick 실험 중 CPU(Game) / GPU 프레임 타임을 시각화했을 때, 두 값이 거의 비례해 같이 움직이는 이상 징후가 있었다는 점
+- CPU(Game) / GPU 프레임 타임을 시각화했을 때, 두 값이 거의 비례해 같이 움직이는 이상 징후가 있었다는 점
 
 ### 🔍원인 분석  
 
