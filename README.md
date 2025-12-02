@@ -57,8 +57,8 @@
 <div align="left">
 <ul>
 
-Editor-GameThread간 RaceCondition 문제가 발생해  
-CommandQueue를 도입해 최소화 Lock으로 해결했습니다.
+Editor–GameThread 간 RaceCondition이 발생해
+CommandQueue 기반 구조로 전환하여 Lock 최소화 방식으로 해결했습니다.
 
 [상세설명](#t0)
 
@@ -71,8 +71,8 @@ CommandQueue를 도입해 최소화 Lock으로 해결했습니다.
 <div align="left">
 <ul>
 
-인스턴스당 자원을 복사해 엔진이 느려지는 문제를  
-공유 자원 관리 클래스를 만들어 해결했습니다.
+인스턴스마다 자원을 중복 로드해 발생하던 지연을
+자원 관리 매니저 도입으로 해결했습니다.
 
 [상세설명](#t1)
 
@@ -85,8 +85,8 @@ CommandQueue를 도입해 최소화 Lock으로 해결했습니다.
 <div align="left">
 <ul>
 
-대량 씬 렌더링 상황에서 프레임 저하를 해결하기 위해
-인스턴싱, Tick 최적화를 통해 프레임 향상시켰습니다.
+대규모 씬 렌더링 환경에서 발생한 프레임 저하를
+인스턴싱 및 Tick 최적화로 해결했습니다.
 
 [상세설명](#t2)
 
@@ -107,8 +107,8 @@ CommandQueue를 도입해 최소화 Lock으로 해결했습니다.
 <div align="left">
 <ul>
 
-프로파일러에서 시간 이상 징후문제가 발생해
-원인 단위로 접근해 문제를 해결했습니다.
+GPU/CPU 타임이 비정상적으로 동일하게 측정되는 문제를
+원인을 찾아 문제를 해결했습니다.
 
 [상세설명](#t3)
 
@@ -121,8 +121,8 @@ CommandQueue를 도입해 최소화 Lock으로 해결했습니다.
 <div align="left">
 <ul>
 
-애니메이션의 TickPerSec가 다른 상황에서 블렌딩 시 떨림 문제가 발생했고
-키 프레임 보간 방식을 사용해 문제를 해결했습니다.
+TPS가 다른 애니메이션을 블렌딩할 때 발생한 미세 떨림 현상을
+시간 기반 보간 방식 적용으로 해결했습니다.
 
 [상세설명](#t4)
 
@@ -152,24 +152,21 @@ CommandQueue를 도입해 최소화 Lock으로 해결했습니다.
 
 ### 🧩문제
 
-- Editor에서 액터 Transform 직접 갱신
-- 동시에 GameThread도 같은 액터 Transform 접근 → 레이스 컨디션 발생
+- Editor에서 Component 값 갱신 시 비정상 참조 문제가 발생
 
 ### 🔍원인 분석  
 
-- Transform을 여러 스레드가 직접 쓰는 구조
-- 쓰기 주체·순서 미보장 → 값 꼬임 / 간헐적 비정상 동작
+- Component를 여러 스레드가 직접 쓰는 구조로 레이스 컨디션 문제
 
 ### 🛠해결  
 
-- Transform 실제 갱신 주체를 GameThread로 단일화
-- Editor: 변경 내용을 커맨드(TransformUpdateCommand) 로 큐에 Enqueue
-- GameThread: 매 프레임 시작에 큐를 비우며 명령 순서대로 실행
+- Editor 변경 내용을 Queue에 등록
+- GameThread가 매 프레임 시작에 Queue를 비우며 변경 내용을 반영
 
 ### ✅결과  
 <img width="446" height="284" alt="image" src="https://github.com/user-attachments/assets/6e4cf646-bf4e-48f0-a4a5-95b4a2215af8" />
 
-- Transform 쓰기 경로 단일화 → 레이스 컨디션 제거
+- 쓰기 경로 단일화로 인해 레이스 컨디션 제거
 - 에디터 수정값은 최대 1프레임 지연으로 안정적 반영
 
 ### 📚배운 점  
@@ -194,20 +191,17 @@ CommandQueue를 도입해 최소화 Lock으로 해결했습니다.
 
 <img width="634" height="53" alt="image" src="https://github.com/user-attachments/assets/4a82bd85-39c7-4a24-8d97-611f045c48d0" />
 
-
-- 자원 관리 매니저를 도입
 - 한 번 로드한 파일은 다시 읽지 않고 캐시에서 재사용하도록 변경
 - 로드된 자산은 공유참조로만 쓰게해 불필요한 중복 소유를 제거
 
 ### ✅결과  
 
-- CPU측 시간은 0.02초 → 0.00006초
 <img width="531" height="134" alt="image" src="https://github.com/user-attachments/assets/ee06bffb-a560-4634-ae03-78f46dbfbaa7" />
 
+<img width="531" height="134" alt="image" src="https://github.com/user-attachments/assets/ad32d436-2fc2-4a0f-8c0d-9400bafe5ddb" />
 
-- GPU측 시간은 54초 → 8초
-<img width="547" height="146" alt="image" src="https://github.com/user-attachments/assets/ad32d436-2fc2-4a0f-8c0d-9400bafe5ddb" />
-
+- GPU : 54초 → 8초(85.18%) 단축
+- CPU : 0.02초 → 0.00006(99.7%) 단축 
 
 ### 📚배운 점  
 
@@ -222,23 +216,25 @@ CommandQueue를 도입해 최소화 Lock으로 해결했습니다.
 ### 🧩문제
 
 <img width="362" height="121" alt="image" src="https://github.com/user-attachments/assets/588c3f09-b8c8-4022-b4ba-7514054077bf" />
+
 - 동일 스켈탈 애니메이션 모델 100개 렌더링 시 FPS가 약 40.9까지 하락함
 
 ### 🔍원인 분석  
 
 <img width="362" height="121" alt="image" src="https://github.com/user-attachments/assets/f5905d9b-ad01-400a-b7eb-f821da3a4b1b" />
-- 캐릭터 1개당 애니메이션·본 팔레트 계산에 약 0.15ms, 100개 기준 약 15.2ms가 소모되어 CPU 애니/팔레트 계산이 병목이었다는 점
+
+- 캐릭터 1개당 애니메이션·본 팔레트 계산에 약 0.15ms, 100개 기준 약 15.2ms가 소모되어 CPU 병목이었다는 점
 - 동일 모델 100개를 각각 별도 DrawIndexed로 그려 GPU 드로우콜 수가 과도하게 많았다는 점
 
 ### 🛠해결  
 
-
 - 애니메이션 계산을 FixedUpdate에서 Tick/URO 방식으로 전환해, 모든 프레임을 정밀 계산하지 않고 보간·보정으로 CPU 본 팔레트 계산량을 줄임
-- 동일 모델을 인스턴싱으로 묶어 그리도록 변경해, 개별 DrawIndexed 호출을 통합하고 GPU 드로우콜 병목을 완화함
+- 동일 모델을 인스턴싱으로 묶어 그리도록 변경해, 개별 DrawIndexed 호출을 통합하고 GPU 드로우콜 병목을 완화
 
 ### ✅결과  
 
 <img width="362" height="121" alt="image" src="https://github.com/user-attachments/assets/33dad103-e126-43b6-9dae-20134c2f2887" />
+
 - 40.9 FPS → 112.1 FPS로, 약 174% 수준의 프레임 향상을 달성
 
 ### 📚배운 점  
@@ -259,14 +255,15 @@ CommandQueue를 도입해 최소화 Lock으로 해결했습니다.
 
 ### 🔍원인 분석  
 
-- 제출 인스턴스 수와 드로우콜 구조는 동일한 상태에서 CPU(Game) 부하만 줄였는데 GPU 시간도 함께 감소했다는 점
-- 이는 실제 GPU 부하 감소라기보다, GPU 타이밍 측정 구간에 문제가 있을 가능성이 높다는 점
-
-### 🛠해결  
+- 제출 인스턴스 수와 드로우콜 구조는 동일한 상태에서 CPU 부하를 줄였는데 GPU 시간도 함께 감소했다는 점
+- 이는 실제 GPU 부하 감소라기보다, GPU 타이밍 측정 구간에 문제가 있을 가능성을 의심
 
 <img width="461" height="110" alt="image" src="https://github.com/user-attachments/assets/55675cba-4be9-4d23-a658-b08ff153b109" />
 
 - 렌더링 타임라인을 다시 점검해 보니 GPU 타임스탬프를 Present() 이후에 찍고 있어, 프레임 페이싱 대기 시간이 GPU 시간에 섞여 있었다는 점
+
+### 🛠해결  
+
 - GPU 실제 렌더링 시간만 측정하도록, Present() 호출 직전에 GPU 타임스탬프를 찍도록 측정 위치를 조정
 
 ### ✅결과  
@@ -278,7 +275,8 @@ CommandQueue를 도입해 최소화 Lock으로 해결했습니다.
 
 ### 📚배운 점  
 
-- 겉으로 보이는 수치를 맞추는 데서 멈추지 말고, 항상 원인 단위까지 추적해 가는 태도가 중요하다는 점
+- 렌더링처럼 눈에 보이는 것이 아닌 수치·시간 같은 지표는, 항상 측정 방식이 합리적인지 먼저 의심해야 한다는 점
+- 해결책부터 찾기보다 원인 중심으로 분석하는 습관이 동작 원리를 훨씬 깊게 이해하게 만든다는 점
 
 ---
 
@@ -292,15 +290,13 @@ CommandQueue를 도입해 최소화 Lock으로 해결했습니다.
 
 <img width="570" height="315" alt="image" src="https://github.com/user-attachments/assets/2c913312-c086-4f49-b874-af657b883661" />
 
-- int 기반 정수 샘플링으로 키프레임만 점프하며 갱신
-- TPS가 다른 클립 블렌딩 시 시간 축 불연속성이 그대로 반영됨
+- int 기반 정수 샘플링으로 키프레임만 점프하며 갱신해 TPS가 다른 클립 블렌딩 시 시간 축 불연속성이 그대로 반영됨
 
 ### 🛠해결  
 
 <img width="570" height="177" alt="image" src="https://github.com/user-attachments/assets/424df55e-9547-4764-962b-124a2df4e573" />
 
-- 시간 기반 보간(lerp) 샘플링으로 변경
-- 키프레임 사이 값을 보간 → 보간된 포즈끼리 블렌딩
+- 두 애니메이션의 시간 축을 맞춰, 키 프레임 사이 값을 보간해 자연스럽게 연결
 
 ### ✅결과  
 
@@ -310,16 +306,8 @@ CommandQueue를 도입해 최소화 Lock으로 해결했습니다.
 
 ### 📚배운 점  
 
-미세한 떨림처럼 숫자로는 잡기 어려운 문제도  
-Unity에서 봤던 애니메이션 키프레임/보간 구조 경험을 떠올리며  
-원인에 빨리 도달할 수 있었습니다.  
-
-단순 데이터 값만 보는 것이 아니라,  
-이미 알고 있는 구조·툴 이해를 함께 활용하는 게  
-트러블슈팅에 큰 힘이 된다는 걸 느꼈습니다.  
-
-앞으로도 이런 식으로 구조를 먼저 이해하고,  
-그 위에 경험을 쌓아 가며 문제를 해결하는 태도를 유지하고자 합니다.
+- 애니메이션 블렌딩의 본질이 두 애니메이션의 시간축을 맞추고 그 사이를 보간하는 것이라는 점
+- 시각화를 통해서만 발견할 수 있는 문제가 있으며, 검증과 테스트는 중요하다는 점
 
 # 📘프로젝트에서 얻은 것
 
@@ -421,12 +409,12 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
 엔진 레벨 설계가 클라이언트 개발 효율로 이어진다는 걸 체감했고,  
 이 철학을 DX11 자체 엔진 구조로 직접 옮겨 체득하고자 했습니다.
 
-# 📘구현 상세 내용
+# 📘구현 상세 내용 
 <h3 id="core">1. 코어 아키텍처 & 실행 구조</h3>
 
-- GT/RT 분리 아키텍처 (MailBox 기반 스냅샷 소비 모델)
-- `std::function` 기반 델리게이트/이벤트 시스템
-- CommandQueue 구조로 에디터–게임 간 동기 호출로 인한 스톨 제거(체크)
+- GameThread/RednerThread 분리 아키텍처 (MailBox 기반 스냅샷 소비 모델)
+- `std::function` 기반 델리게이트
+- Editor → GameThread 작업 전달용 Command Queue로 RaceCondition 제거 & Lock 스톨 최소화
 
 ---
 
@@ -437,7 +425,7 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
 - AActor / StaticMeshComponent / SkeletalMeshComponent 구성
 - Pawn / Controller / GameMode 계층
 - ClassID 기반 Actor 런타임 스폰 팩토리 (리플렉션 없이 타입 등록/생성)
-- 전역 입력 시스템 (마우스·키보드 입력을 Controller로 라우팅) (체크)
+- 마우스·키보드 전역 입력 시스템
 
 ---
 
@@ -445,7 +433,7 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
 
 - 그래픽 파이프라인 상태 집합 객체(PSO) 설계  
   (Shader·Blend·Rasterizer·Depth 상태 일체 관리)
-- RenderManager(패스 구성) / RenderQueue(배치·정렬) / Renderer(드로우 호출) 역할 분리
+- RenderManager(패스 구성) / DrawBatch(오브젝트 유형별 배치·정렬) / Renderer(드로우 호출) 구조
 - HDR RenderTarget 파이프라인, MSAA, ToneMapping
 - Fog / Bloom / Shadow / PBR 라이팅
 
@@ -476,8 +464,8 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
 
 <h3 id="profiling">7. 프로파일링</h3>
 
-- 프레임/섹션 단위 측정 프로파일링 시스템
-- CPU / GPU 타임스탬프 기반 프로파일링 시스템
+- 구역 단위 실행 시간 측정 & 파일 저장 프로파일러
+- CPU/GPU 프레임 타임 측정 런타임 시스템
 
 # 📘핵심 주요 코드
 - [전체 코드 (EntryPoint / Framework / Game – Actor 파생 클래스 구현)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio)
