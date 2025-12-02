@@ -1,18 +1,17 @@
 # 📌프로젝트 개요
-<br>
-<img align="right" width="420"
-     src="https://github.com/user-attachments/assets/dffc2176-d743-4aae-90b8-446c3935ae4a"
-     alt="DirectX 11 Engine Editor Screenshot" />
+<p align="center">
+  <img
+    width="800"
+    src="https://github.com/user-attachments/assets/dffc2176-d743-4aae-90b8-446c3935ae4a"
+    alt="DirectX 11 Engine Editor Screenshot" />
+</p>
 
-> WinMain 부터 DirectX11 기반의 자체 게임 엔진을 바닥부터 직접 설계 및 구현했습니다.  
-> 엔진 아키텍처 구축 과정에서 언리얼 엔진의 내부 구조를 분석하여 핵심 개념을 익혀  
-> 저만의 엔진으로 재해석하였습니다.
->
-> 또한 렌더링 기법 활용을 위한 셰이더까지 직접 설계하고 구현하였고  
-> 메모리 관리를 위한 CPU/GPU 병목 분석 프로파일링 기능과  
-> GameThread/RenderingTread 분리, 인스턴싱 등 최적화도 성공적으로 진행하였습니다.
+> WinMain부터 DirectX11 기반의 자체 게임 엔진을 바닥부터 설계 및 구현했습니다.
+> 엔진 아키텍처 구축 과정에서 언리얼 엔진의 내부 구조를 분석해 핵심 개념을 이해하고 이를 기반으로 저만의 방식으로 엔진을 재구성했습니다.
+> 
+> 또한 다양한 렌더링 기법 적용을 위해 셰이더를 직접 설계하고 구현했으며
+> CPU/GPU 병목 구간을 분석하기 위한 프로파일러 개발과 더불어GameThread/RenderingThread 분리 인스턴싱 등 엔진 최적화도 성공적으로 수행했습니다.
 
-<br clear="both"/>
 
 - 소개 영상: [📎포트폴리오 영상](https://www.youtube.com/watch?v=CVj2y5PXsnw)
 - 개발 기간: 2025.05 ~ 2025.10 (156일)
