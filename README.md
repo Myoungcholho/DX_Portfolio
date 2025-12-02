@@ -37,7 +37,7 @@
 | [🧱 Core Architecture](#core) | 1. GameThread / RenderThread </br> 2. 델리게이트 이벤트 시스템 |
 | [🌍 World / Object](#world) | 1. 언리얼 구조 분석하여 유사한 아키텍처 구조로 설계|
 | [🎨 Rendering](#rendering) | 1. 렌더링 파이프라인 구현 </br> 2. PBR, MSAA, Lod, Fog, PCF 그림자, ToneMapping 등 다양한 그래픽스 기법 적용 |
-| [🕺 Animation](#animation) | 1. 거리기반 애니메이션 최적화 애니메이션 보간 및 셰이더 작성 AnimInstance 설계 </br> 2. 거리 기반 애니메이션 업데이트 최적화 |
+| [🕺 Animation](#animation) | 1. 거리 기반 애니메이션 최적화 </br> 2. 애니메이션 보간 및 셰이더 작성 AnimInstance 설계 |
 | [📦 Asset](#asset) | 1. fbx 파일 임포트 시스템 </br> 2. 파일 관리 시스템 |
 | [🛠 Editor](#editor) | 1. Outliner, Inspector, SceneView 등 에디터 위젯 설계 </br> 2. 명령 큐 시스템을 구축하여 에디터 조작 안정화 |
 | [📊 Profiling](#profiling) | 1. 구간별 CPU 사용량 및 레이턴시 프로파일링 시스템 구축 </br> 2. CPU/GPU 타임스탬프 시스템 |
@@ -79,7 +79,8 @@ CommandQueue 기반 구조로 전환하여 Lock 최소화 방식으로 해결했
 </div>
 </td>
 
-<td width="350" style="border:2px solid #c3c3ff; border-radius:12px; background:#e9e9ff;">
+<td width="350" 
+  style="border:2px solid #c3c3ff; border-radius:12px; background:#e9e9ff;">
 <h3>🧾 CPU/GPU 병목 해결 </h3>
 <div align="left">
 <ul>
