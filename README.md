@@ -47,20 +47,14 @@ CPU/GPU 병목 구간을 분석하기 위한 프로파일러 개발과 더불어
 </br>
 
 # 📘핵심 주요 코드
-- [전체 코드 (EntryPoint / Framework / Game – Actor 파생 클래스 구현)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio)
-- [코어 (Core – 엔진 기반 시스템, 실행 구조)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio/Framework/Core)
-- [에디터 (Editor – ImGui 에디터, WorldOutliner, Inspector)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio/Framework/Editor)
-- [Gameplay (Controller / Pawn 등 플레이 로직)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio/Framework/Gameplay)
-- [컴포넌트 (Scene / Primitive / Render Components)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio/Framework/Components)
-- [액터들 (Game/Actors – 플레이어, 몬스터 등)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio/Game/Actors)
-- [자원 관리 매니저 (CPU/GPU/애니메이션 리소스 매니저)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio/Framework/Manager)
 
 | 코드 파일 | 코드 설명 |
 |----------|-----------|
 | RenderManager [.h](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Core/URenderManager.h) / [.cpp](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Core/URenderManager.cpp) | GameThread에서 제출된 스냅샷을 수신해 RenderThread에서 렌더 순서를 분류하고 제어하는 렌더링 허브입니다.|
 | USceneComponent [.h](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Components/USceneComponent.cpp) / [.cpp](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Components/USceneComponent.cpp) | Actor의 부모-자식 계층과 Local/World Transform을 관리하는 베이스 컴포넌트 </br> Attach / Detach 로직을 수행하고 있습니다. |
-| UAnimInstance [.h]() / [.cpp]() | 애니메이션 클립의 재생 시간과 상태를 관리하고, 블렌딩을 처리해 본 팔레트에 쓸 로컬 포즈를 만들어주는 실행기입니다. |
-| UWorld [.h](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Components/UWorld.h) / [.cpp](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Components/UWorld.h) | 액터를 생성·소멸·갱신하며, 액터들의 전체 생명주기(Lifecycle)를 관리하는 클래스입니다. |
+| UAnimInstance [.h](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Components/UAnimInstance.h) / [.cpp](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Components/UAnimInstance.cpp) | 애니메이션 클립의 재생 시간과 상태를 관리하고, 블렌딩을 처리해 본 팔레트에 쓸 로컬 포즈를 만들어주는 실행기입니다. |
+| UWorld [.h](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Components/UWorld.h) / [.cpp](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Components/UWorld.cpp) | 액터를 생성·소멸·갱신하며, 액터들의 전체 생명주기(Lifecycle)를 관리하는 클래스입니다. |
+| 
 
 # 📘문제 해결 경험(트러블 슈팅)
 
@@ -122,8 +116,6 @@ CPU/GPU 병목 구간을 분석하기 위한 프로파일러 개발과 더불어
     </td>
   </tr>
 </table>
-
-
 
 ---
 
@@ -328,6 +320,8 @@ CPU/GPU 병목 구간을 분석하기 위한 프로파일러 개발과 더불어
   </tr>
 </table>
 
+</br>
+
 # 📘프로젝트에서 얻은 것
 
 **요약**
@@ -407,6 +401,7 @@ Transform 시스템을 구현하고 에디터에서 즉시 반영되는 구조�
 Quat ↔ Euler 변환을 수학적으로 다뤄 보며  
 회전 표현에 대한 직관과 문제 해결 능력을 키울 수 있었습니다.
 
+</br>
 
 # 📘개발 계기
 ### 1. 상용 엔진에서 제공하는 기능들의 내부 구현에 대한 호기심
@@ -428,8 +423,10 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
 엔진 레벨 설계가 클라이언트 개발 효율로 이어진다는 걸 체감했고,  
 이 철학을 DX11 자체 엔진 구조로 직접 옮겨 체득하고자 했습니다.
 
+</br>
+
 # 📘구현 상세 내용 
-<h3 id="core">1. 코어 아키텍처 & 실행 구조</h3>
+<h3 id="core">1. Core Architecture </h3>
 
 - GameThread/RednerThread 분리 아키텍처 (MailBox 기반 스냅샷 소비 모델)
 - `std::function` 기반 델리게이트
@@ -437,7 +434,7 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
 
 ---
 
-<h3 id="world">2. 월드·객체 구조 & 트랜스폼</h3>
+<h3 id="world">2. World / Object </h3>
 
 - Transform 시스템 (월드/로컬 변환 및 위치 정보 관리)
 - GameInstance / UWorld / SceneComponent / PrimitiveComponent / RenderProxy 구조
@@ -448,7 +445,7 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
 
 ---
 
-<h3 id="rendering">3. 렌더링 파이프라인 & 그래픽스</h3>
+<h3 id="rendering">3. Rendering </h3>
 
 - 그래픽 파이프라인 상태 집합 객체(PSO) 설계  
   (Shader·Blend·Rasterizer·Depth 상태 일체 관리)
@@ -458,7 +455,7 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
 
 ---
 
-<h3 id="animation">4. 애니메이션 시스템</h3>
+<h3 id="animation">4. Animation </h3>
 
 - 애니메이션 재생 시스템 (AnimationClip 기반 재생·루프·이동 관리)
 - AnimInstance (UAnimInstance와 유사한 상태·블렌딩 로직 전담 계층)
@@ -467,21 +464,21 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
 
 ---
 
-<h3 id="asset">5. 에셋 & 자원 관리</h3>
+<h3 id="asset">5. Asset </h3>
 
 - .fbx 파일 로드 파이프라인 (메시·본·애니메이션 데이터 파싱)
 - CPU / GPU / 애니메이션 자원 공유 관리 클래스
 
 ---
 
-<h3 id="editor">6. 에디터 & 툴링</h3>
+<h3 id="editor">6. Editor </h3>
 
 - ImGui Docking 기반 에디터 UI
 - WorldOutliner / ActorOutliner / InspectorWindow를 통한 런타임 액터/컴포넌트 편집
 
 ---
 
-<h3 id="profiling">7. 프로파일링</h3>
+<h3 id="profiling">7. Profiling </h3>
 
 - 구역 단위 실행 시간 측정 & 파일 저장 프로파일러
 - CPU/GPU 프레임 타임 측정 런타임 시스템
