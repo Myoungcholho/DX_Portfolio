@@ -46,268 +46,269 @@
 
 # 📘문제 해결 경험(트러블 슈팅)
 
-<div align="center">
+<table style="border-collapse:collapse;">
+  <tr>
+    <th width="350" style="border:2px solid #ffb3b3; background:#ffe1e1;">
+      📂 Editor-Game 간 RaceCondition 문제 해결
+    </th>
+    <th width="350" style="border:2px solid #ffd27f; background:#fff1d6;">
+      📚 공유 자원으로 인한 불필요한 복사 해결
+    </th>
+    <th width="350" style="border:2px solid #c3c3ff; background:#e9e9ff;">
+      🧾 CPU/GPU 병목 해결
+    </th>
+  </tr>
 
-<table>
-<tr>
-
-<td width="350" style="border:2px solid #ffb3b3; border-radius:12px; background:#ffe1e1;">
-<h3>📂 Editor-Game 간 RaceCondition 문제 해결</h3>
-<div align="left">
-<ul>
-
-Editor–GameThread 간 RaceCondition이 발생해
-CommandQueue 기반 구조로 전환하여 Lock 최소화 방식으로 해결했습니다.
-
-[상세설명](#t0)
-
-</ul>
-</div>
-</td>
-
-<td width="350" style="border:2px solid #ffd27f; border-radius:12px; background:#fff1d6;">
-<h3>📚 공유 자원으로 인한 불필요한 복사 해결 </h3>
-<div align="left">
-<ul>
-
-인스턴스마다 자원을 중복 로드해 발생하던 지연을
-자원 관리 매니저 도입으로 해결했습니다.
-
-[상세설명](#t1)
-
-</ul>
-</div>
-</td>
-
-<td width="350" 
-  style="border:2px solid #c3c3ff; border-radius:12px; background:#e9e9ff;">
-<h3>🧾 CPU/GPU 병목 해결 </h3>
-<div align="left">
-<ul>
-
-대규모 씬 렌더링 환경에서 발생한 프레임 저하를
-인스턴싱 및 거리 기반 Tick 최적화로 해결했습니다.
-
-[상세설명](#t2)
-
-</ul>
-</div>
-</td>
-
-</tr>
+  <tr>
+    <td width="350" style="border:2px solid #ffb3b3; background:#ffe1e1; vertical-align:top;">
+      Editor–GameThread 간 RaceCondition이 발생해 CommandQueue 기반 구조로 전환하여 Lock 최소화 방식으로 해결했습니다.
+      <br><br>
+      <a href="#t0">[상세설명]</a>
+    </td>
+    <td width="350" style="border:2px solid #ffd27f; background:#fff1d6; vertical-align:top;">
+      인스턴스마다 자원을 중복 로드해 발생하던 지연을 자원 관리 매니저 도입으로 해결했습니다.
+      <br><br>
+      <a href="#t1">[상세설명]</a>
+    </td>
+    <td width="350" style="border:2px solid #c3c3ff; background:#e9e9ff; vertical-align:top;">
+      대규모 씬 렌더링 환경에서 발생한 프레임 저하를 인스턴싱 및 거리 기반 Tick 최적화로 해결했습니다.
+      <br><br>
+      <a href="#t2">[상세설명]</a>
+    </td>
+  </tr>
 </table>
 
 <br>
 
-<table>
-<tr>
+<table style="border-collapse:collapse;">
+  <tr>
+    <th width="350" style="border:2px solid #a8ddff; background:#e6f6ff;">
+      📘 프로파일러 이상 징후 해결
+    </th>
+    <th width="350" style="border:2px solid #c8ffa8; background:#ebffdf;">
+      📂 애니메이션 샘플링 문제 해결
+    </th>
+  </tr>
 
-<td width="350" style="border:2px solid #a8ddff; border-radius:12px; background:#e6f6ff;">
-<h3>📘 프로파일러 이상 징후 해결</h3>
-<div align="left">
-<ul>
-
-GPU/CPU 타임이 비정상적으로 동일하게 측정되는 문제를
-원인을 찾아 문제를 해결했습니다.
-
-[상세설명](#t3)
-
-</ul>
-</div>
-</td>
-
-<td width="350" style="border:2px solid #c8ffa8; border-radius:12px; background:#ebffdf;">
-<h3>📂 애니메이션 샘플링 문제 해결</h3>
-<div align="left">
-<ul>
-
-TPS가 다른 애니메이션을 블렌딩할 때 발생한 미세 떨림 현상을
-시간 기반 보간 방식 적용으로 해결했습니다.
-
-[상세설명](#t4)
-
-</ul>
-</div>
-</td>
-
-<td width="350" style="border:2px solid #ffb0e4; border-radius:12px; background:#ffe7f7;">
-<h3>🔗 - </h3>
-<div align="left">
-<ul>
-
-
-
-</ul>
-</div>
-</td>
-
-</tr>
+  <tr>
+    <td width="350" style="border:2px solid #a8ddff; background:#e6f6ff; vertical-align:top;">
+      GPU/CPU 타임이 비정상적으로 동일하게 측정되는 문제를 원인을 찾아 문제를 해결했습니다.
+      <br><br>
+      <a href="#t3">[상세설명]</a>
+    </td>
+    <td width="350" style="border:2px solid #c8ffa8; background:#ebffdf; vertical-align:top;">
+      TPS가 다른 애니메이션을 블렌딩할 때 발생한 미세 떨림 현상을
+      시간 기반 보간 방식 적용으로 해결했습니다.
+      <br><br>
+      <a href="#t4">[상세설명]</a>
+    </td>
+  </tr>
 </table>
 
-</div>
+
 
 ---
 
 ## 1. Editor–GameThread 간 데이터 충돌 해결 구조 설계 <a id="t0"></a>
 
-### 🧩문제
-
-- Editor에서 Component 값 갱신 시 비정상 참조 문제가 발생
-
-### 🔍원인 분석  
-
-- Component를 여러 스레드가 직접 쓰는 구조로 레이스 컨디션 문제
-
-### 🛠해결  
-
-- Editor 변경 내용을 Queue에 등록
-- GameThread가 매 프레임 시작에 Queue를 비우며 변경 내용을 반영
-
-### ✅결과  
-<img width="446" height="284" alt="image" src="https://github.com/user-attachments/assets/6e4cf646-bf4e-48f0-a4a5-95b4a2215af8" />
-
-- 쓰기 경로 단일화로 인해 레이스 컨디션 제거
-- 에디터 수정값은 최대 1프레임 지연으로 안정적 반영
-
-### 📚배운 점  
-
-- 레이스 컨디션을 피하려면 데이터를 실제로 바꾸는 ‘권위 스레드’를 한 명으로 정해야 한다는 점
-- 프레임 스톨을 줄이기 위해 락을 최소화하는 구조를 항상 고민해야 한다는 점
+<table>
+  <tr>
+    <td style="border:2px solid #4fa3ff; border-radius:8px; padding:12px 16px; background:#050812;">
+      <strong>🧩 문제</strong>
+      <ul>
+        <li>Editor에서 Component 값 갱신 시 비정상 참조 문제가 발생</li>
+      </ul>
+      <strong>🔍 원인 분석</strong>
+      <ul>
+        <li>Component를 여러 스레드가 직접 쓰는 구조로 레이스 컨디션 문제</li>
+      </ul>
+      <strong>🛠 해결</strong><br>
+      <img width="446" height="284" alt="image"
+           src="https://github.com/user-attachments/assets/6e4cf646-bf4e-48f0-a4a5-95b4a2215af8" />
+      <ul>
+        <li>Editor 변경 내용을 Queue에 등록</li>
+        <li>GameThread가 매 프레임 시작에 Queue를 비우며 변경 내용을 반영</li>
+      </ul>
+      <strong>✅ 결과</strong><br>
+      <ul>
+        <li>쓰기 경로 단일화로 인해 레이스 컨디션 제거</li>
+        <li>에디터 수정값은 최대 1프레임 지연으로 안정적 반영</li>
+      </ul>
+      <strong>📚 배운 점</strong>
+      <ul>
+        <li>레이스 컨디션을 피하려면 데이터를 실제로 바꾸는 ‘권위 스레드’를 한 명으로 정해야 한다는 점</li>
+        <li>프레임 스톨을 줄이기 위해 락을 최소화하는 구조를 항상 고민해야 한다는 점</li>
+      </ul>
+    </td>
+  </tr>
+</table>
 
 ---
 
 ### 2. Asset 공유 구조 적용 – 중복 로딩 제거로 로딩 병목 해결 <a id="t1"></a>
 
-### 🧩문제
-
-- 동일 모델을 여러 개 배치할수록 로드 시간이 과도하게 늘어나는 문제가 발생
-
-### 🔍원인 분석  
-
-- 각 컴포넌트가 동일한 모델 데이터를 각각 별도로 소유하는 것이 문제
-- 인스턴스별로 CPU/GPU자원을 공유 가능한 자원임에도 중복 생성하는 것이 문제
-
-### 🛠해결  
-
-<img width="634" height="53" alt="image" src="https://github.com/user-attachments/assets/4a82bd85-39c7-4a24-8d97-611f045c48d0" />
-
-- 한 번 로드한 파일은 다시 읽지 않고 캐시에서 재사용하도록 변경
-- 로드된 자산은 공유참조로만 쓰게해 불필요한 중복 소유를 제거
-
-### ✅결과  
-
-<img width="531" height="134" alt="image" src="https://github.com/user-attachments/assets/ee06bffb-a560-4634-ae03-78f46dbfbaa7" />
-
-<img width="531" height="134" alt="image" src="https://github.com/user-attachments/assets/ad32d436-2fc2-4a0f-8c0d-9400bafe5ddb" />
-
-- GPU : 54초 → 8초(85.18%) 단축
-- CPU : 0.02초 → 0.00006(99.7%) 단축 
-
-### 📚배운 점  
-
-- 자원이 공유 가능한 대상인지 먼저 고민하고, 불필요한 작업을 줄여 속도를 올리는 것이 중요하다는 점
-- 캐시해서 들고 있는 것도 중요하지만, 메모리 사용량을 고려해 쓰지 않는 자원은 제거하는 구조도 필요하다는 점
-- 디자인 패턴 서적처럼, 꾸준한 학습이 있어야 실제 상황에서 개념을 떠올리고 적용까지 시도해 볼 수 있다는 점
+<table>
+  <tr>
+    <td style="border:2px solid #ffd27f; border-radius:8px; padding:12px 16px; background:#120d05;">
+      <strong>🧩 문제</strong>
+      <ul>
+        <li>동일 모델을 여러 개 배치할수록 로드 시간이 과도하게 늘어나는 문제가 발생</li>
+      </ul>
+      <strong>🔍 원인 분석</strong>
+      <ul>
+        <li>각 컴포넌트가 동일한 모델 데이터를 각각 별도로 소유하는 것이 문제</li>
+        <li>인스턴스별로 CPU/GPU 자원을 공유 가능한 자원임에도 중복 생성하는 것이 문제</li>
+      </ul>
+      <strong>🛠 해결</strong><br>
+      <img width="634" height="53"
+           alt="image"
+           src="https://github.com/user-attachments/assets/4a82bd85-39c7-4a24-8d97-611f045c48d0" />
+      <ul>
+        <li>한 번 로드한 파일은 다시 읽지 않고 캐시에서 재사용하도록 변경</li>
+        <li>로드된 자산은 공유참조로만 쓰게 해 불필요한 중복 소유를 제거</li>
+      </ul>
+      <strong>✅ 결과</strong><br>
+      <img width="531" height="134"
+           alt="image"
+           src="https://github.com/user-attachments/assets/ee06bffb-a560-4634-ae03-78f46dbfbaa7" /><br>
+      <img width="531" height="134"
+           alt="image"
+           src="https://github.com/user-attachments/assets/ad32d436-2fc2-4a0f-8c0d-9400bafe5ddb" />
+      <ul>
+        <li>GPU : 54초 → 8초 (약 85.18% 단축)</li>
+        <li>CPU : 0.02초 → 0.00006초 (약 99.7% 단축)</li>
+      </ul>
+      <strong>📚 배운 점</strong>
+      <ul>
+        <li>자원이 공유 가능한 대상인지 먼저 고민하고, 불필요한 작업을 줄여 속도를 올리는 것이 중요하다는 점</li>
+        <li>캐시해서 들고 있는 것도 중요하지만, 메모리 사용량을 고려해 쓰지 않는 자원은 제거하는 구조도 필요하다는 점</li>
+        <li>디자인 패턴 서적처럼, 꾸준한 학습이 있어야 실제 상황에서 개념을 떠올리고 적용까지 시도해 볼 수 있다는 점</li>
+      </ul>
+    </td>
+  </tr>
+</table>
 
 ---
 
 ### 3. 인스턴싱 도입 전 Static / Skeletal 프레임 저하 원인 파악 <a id="t2"></a>
 
-### 🧩문제
-
-<img width="362" height="121" alt="image" src="https://github.com/user-attachments/assets/588c3f09-b8c8-4022-b4ba-7514054077bf" />
-
-- 동일 스켈탈 애니메이션 모델 100개 렌더링 시 FPS가 약 40.9까지 하락함
-
-### 🔍원인 분석  
-
-<img width="362" height="121" alt="image" src="https://github.com/user-attachments/assets/f5905d9b-ad01-400a-b7eb-f821da3a4b1b" />
-
-- 캐릭터 1개당 애니메이션·본 팔레트 계산에 약 0.15ms, 100개 기준 약 15.2ms가 소모되어 CPU 병목이었다는 점
-- 동일 모델 100개를 각각 별도 DrawIndexed로 그려 GPU 드로우콜 수가 과도하게 많았다는 점
-
-### 🛠해결  
-
-- 애니메이션 계산을 FixedUpdate에서 Tick/URO 방식으로 전환해, 모든 프레임을 정밀 계산하지 않고 보간·보정으로 CPU 본 팔레트 계산량을 줄임
-- 동일 모델을 인스턴싱으로 묶어 그리도록 변경해, 개별 DrawIndexed 호출을 통합하고 GPU 드로우콜 병목을 완화
-
-### ✅결과  
-
-<img width="362" height="121" alt="image" src="https://github.com/user-attachments/assets/33dad103-e126-43b6-9dae-20134c2f2887" />
-
-- 40.9 FPS → 112.1 FPS로, 약 174% 수준의 프레임 향상을 달성
-
-### 📚배운 점  
-
-- 프레임 저하는 CPU·GPU 중 한쪽만의 문제가 아니라 두 축을 나눠 각각 병목을 찾아야 한다는 점
-- 감이 아니라 프로파일링 수치로 병목을 검증하는 과정이 프로그래머에게 필수적이라는 점
-- 모든 캐릭터를 매 프레임 완전 계산하기보다, 품질을 유지하는 선에서 연산량을 줄이는 최적화 설계가 중요하다는 점
+<table>
+  <tr>
+    <td style="border:2px solid #a8ddff; border-radius:8px; padding:12px 16px; background:#050a12;">
+      <strong>🧩 문제</strong><br>
+      <img width="362" height="121" alt="image"
+           src="https://github.com/user-attachments/assets/588c3f09-b8c8-4022-b4ba-7514054077bf" />
+      <ul>
+        <li>동일 스켈탈 애니메이션 모델 100개 렌더링 시 FPS가 약 40.9까지 하락함</li>
+      </ul>
+      <strong>🔍 원인 분석</strong><br>
+      <img width="362" height="121" alt="image"
+           src="https://github.com/user-attachments/assets/f5905d9b-ad01-400a-b7eb-f821da3a4b1b" />
+      <ul>
+        <li>캐릭터 1개당 애니메이션·본 팔레트 계산에 약 0.15ms, 100개 기준 약 15.2ms가 소모되어 CPU 병목이었다는 점</li>
+        <li>동일 모델 100개를 각각 별도 DrawIndexed로 그려 GPU 드로우콜 수가 과도하게 많았다는 점</li>
+      </ul>
+      <strong>🛠 해결</strong>
+      <ul>
+        <li>애니메이션 계산을 FixedUpdate에서 Tick/URO 방식으로 전환해, 모든 프레임을 정밀 계산하지 않고 보간·보정으로 CPU 본 팔레트 계산량을 줄임</li>
+        <li>동일 모델을 인스턴싱으로 묶어 그리도록 변경해, 개별 DrawIndexed 호출을 통합하고 GPU 드로우콜 병목을 완화</li>
+      </ul>
+      <strong>✅ 결과</strong><br>
+      <img width="362" height="121" alt="image"
+           src="https://github.com/user-attachments/assets/33dad103-e126-43b6-9dae-20134c2f2887" />
+      <ul>
+        <li>40.9 FPS → 112.1 FPS로, 약 174% 수준의 프레임 향상을 달성</li>
+      </ul>
+      <strong>📚 배운 점</strong>
+      <ul>
+        <li>프레임 저하는 CPU·GPU 중 한쪽만의 문제가 아니라 두 축을 나눠 각각 병목을 찾아야 한다는 점</li>
+        <li>감이 아니라 프로파일링 수치로 병목을 검증하는 과정이 프로그래머에게 필수적이라는 점</li>
+        <li>모든 캐릭터를 매 프레임 완전 계산하기보다, 품질을 유지하는 선에서 연산량을 줄이는 최적화 설계가 중요하다는 점</li>
+      </ul>
+    </td>
+  </tr>
+</table>
 
 ---
 
 ### 4. CPU·GPU 타임 비례 이상 징후 포착 <a id="t3"></a>
 
-### 🧩문제
-
-<img width="461" height="110" alt="image" src="https://github.com/user-attachments/assets/bef2c646-d665-4921-985f-aee132da5e4c" />
-
-- CPU(Game) / GPU 프레임 타임을 시각화했을 때, 두 값이 거의 비례해 같이 움직이는 이상 징후가 있었다는 점
-
-### 🔍원인 분석  
-
-- 제출 인스턴스 수와 드로우콜 구조는 동일한 상태에서 CPU 부하를 줄였는데 GPU 시간도 함께 감소했다는 점
-- 이는 실제 GPU 부하 감소라기보다, GPU 타이밍 측정 구간에 문제가 있을 가능성을 의심
-
-<img width="461" height="110" alt="image" src="https://github.com/user-attachments/assets/55675cba-4be9-4d23-a658-b08ff153b109" />
-
-- 렌더링 타임라인을 다시 점검해 보니 GPU 타임스탬프를 Present() 이후에 찍고 있어, 프레임 페이싱 대기 시간이 GPU 시간에 섞여 있었다는 점
-
-### 🛠해결  
-
-- GPU 실제 렌더링 시간만 측정하도록, Present() 호출 직전에 GPU 타임스탬프를 찍도록 측정 위치를 조정
-
-### ✅결과  
-
-<img width="461" height="110" alt="image" src="https://github.com/user-attachments/assets/13e03291-599e-4167-9052-b5f25e53a587" />
-
-- 수정 후 CPU(Game) ≒ 50ms, CPU(Render) ≒ 14ms, GPU ≒ 26ms로 분리되어 측정되면서, CPU·GPU 시간이 비례하던 왜곡이 사라짐
-- 실제 병목이 GPU가 아니라 게임 로직·애니메이션 계산이 있는 CPU 쪽이라는 것을 명확히 확인할 수 있었음
-
-### 📚배운 점  
-
-- 렌더링처럼 눈에 보이는 것이 아닌 수치·시간 같은 지표는, 항상 측정 방식이 합리적인지 먼저 의심해야 한다는 점
-- 해결책부터 찾기보다 원인 중심으로 분석하는 습관이 동작 원리를 훨씬 깊게 이해하게 만든다는 점
+<table>
+  <tr>
+    <td style="border:2px solid #4fa3ff; border-radius:8px; padding:12px 16px; background:#050812;">
+      <strong>🧩 문제</strong><br>
+      <img width="461" height="110" alt="image"
+           src="https://github.com/user-attachments/assets/bef2c646-d665-4921-985f-aee132da5e4c" />
+      <ul>
+        <li>CPU(Game) / GPU 프레임 타임을 시각화했을 때, 두 값이 거의 비례해 같이 움직이는 이상 징후가 있었다는 점</li>
+      </ul>
+      <strong>🔍 원인 분석</strong>
+      <ul>
+        <li>제출 인스턴스 수와 드로우콜 구조는 동일한 상태에서 CPU 부하를 줄였는데 GPU 시간도 함께 감소했다는 점</li>
+        <li>이는 실제 GPU 부하 감소라기보다, GPU 타이밍 측정 구간에 문제가 있을 가능성을 의심</li>
+      </ul>
+      <img width="461" height="110" alt="image"
+           src="https://github.com/user-attachments/assets/55675cba-4be9-4d23-a658-b08ff153b109" />
+      <ul>
+        <li>렌더링 타임라인을 다시 점검해 보니 GPU 타임스탬프를 Present() 이후에 찍고 있어, 프레임 페이싱 대기 시간이 GPU 시간에 섞여 있었다는 점</li>
+      </ul>
+      <strong>🛠 해결</strong>
+      <ul>
+        <li>GPU 실제 렌더링 시간만 측정하도록, Present() 호출 직전에 GPU 타임스탬프를 찍도록 측정 위치를 조정</li>
+      </ul>
+      <strong>✅ 결과</strong><br>
+      <img width="461" height="110" alt="image"
+           src="https://github.com/user-attachments/assets/13e03291-599e-4167-9052-b5f25e53a587" />
+      <ul>
+        <li>수정 후 CPU(Game) ≒ 50ms, CPU(Render) ≒ 14ms, GPU ≒ 26ms로 분리되어 측정되면서, CPU·GPU 시간이 비례하던 왜곡이 사라짐</li>
+        <li>실제 병목이 GPU가 아니라 게임 로직·애니메이션 계산이 있는 CPU 쪽이라는 것을 명확히 확인할 수 있었음</li>
+      </ul>
+      <strong>📚 배운 점</strong>
+      <ul>
+        <li>렌더링처럼 눈에 보이는 것이 아닌 수치·시간 같은 지표는, 항상 측정 방식이 합리적인지 먼저 의심해야 한다는 점</li>
+        <li>해결책부터 찾기보다 원인 중심으로 분석하는 습관이 동작 원리를 훨씬 깊게 이해하게 만든다는 점</li>
+      </ul>
+    </td>
+  </tr>
+</table>
 
 ---
 
 ### 5. 정수 기반 샘플링의 한계 – 블렌딩 시 덜덜거림 발생 <a id="t4"></a>
 
-### 🧩문제
-
-- 애니메이션 30 TPS → 60 TPS 블렌딩 시 포즈가 계단식으로 변하며 화면에 미세한 덜덜거림 발생
-
-### 🔍원인 분석  
-
-<img width="570" height="315" alt="image" src="https://github.com/user-attachments/assets/2c913312-c086-4f49-b874-af657b883661" />
-
-- int 기반 정수 샘플링으로 키프레임만 점프하며 갱신해 TPS가 다른 클립 블렌딩 시 시간 축 불연속성이 그대로 반영됨
-
-### 🛠해결  
-
-<img width="570" height="177" alt="image" src="https://github.com/user-attachments/assets/424df55e-9547-4764-962b-124a2df4e573" />
-
-- 두 애니메이션의 시간 축을 맞춰, 키 프레임 사이 값을 보간해 자연스럽게 연결
-
-### ✅결과  
-
-![Animation](https://github.com/user-attachments/assets/558f1dd6-fe3e-4737-9404-e6bc26424e2c)
-
-- 덜덜거림 제거, TPS가 다른 애니도 자연스러운 전환 유지
-
-### 📚배운 점  
-
-- 애니메이션 블렌딩의 본질이 두 애니메이션의 시간축을 맞추고 그 사이를 보간하는 것이라는 점
-- 시각화를 통해서만 발견할 수 있는 문제가 있으며, 검증과 테스트는 중요하다는 점
+<table>
+  <tr>
+    <td style="border:2px solid #c8ffa8; border-radius:8px; padding:12px 16px; background:#060f06;">
+      <strong>🧩 문제</strong>
+      <ul>
+        <li>애니메이션 30 TPS → 60 TPS 블렌딩 시 포즈가 계단식으로 변하며 화면에 미세한 덜덜거림 발생</li>
+      </ul>
+      <strong>🔍 원인 분석</strong><br>
+      <img width="570" height="315" alt="image"
+           src="https://github.com/user-attachments/assets/2c913312-c086-4f49-b874-af657b883661" />
+      <ul>
+        <li>int 기반 정수 샘플링으로 키프레임만 점프하며 갱신해 TPS가 다른 클립 블렌딩 시 시간 축 불연속성이 그대로 반영됨</li>
+      </ul>
+      <strong>🛠 해결</strong><br>
+      <img width="570" height="177" alt="image"
+           src="https://github.com/user-attachments/assets/424df55e-9547-4764-962b-124a2df4e573" />
+      <ul>
+        <li>두 애니메이션의 시간 축을 맞춰, 키 프레임 사이 값을 보간해 자연스럽게 연결</li>
+      </ul>
+      <strong>✅ 결과</strong><br>
+      <img alt="Animation"
+           src="https://github.com/user-attachments/assets/558f1dd6-fe3e-4737-9404-e6bc26424e2c" />
+      <ul>
+        <li>덜덜거림 제거, TPS가 다른 애니도 자연스러운 전환 유지</li>
+      </ul>
+      <strong>📚 배운 점</strong>
+      <ul>
+        <li>애니메이션 블렌딩의 본질이 두 애니메이션의 시간축을 맞추고 그 사이를 보간하는 것이라는 점</li>
+        <li>시각화를 통해서만 발견할 수 있는 문제가 있으며, 검증과 테스트는 중요하다는 점</li>
+      </ul>
+    </td>
+  </tr>
+</table>
 
 # 📘프로젝트에서 얻은 것
 
