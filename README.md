@@ -46,6 +46,22 @@ CPU/GPU 병목 구간을 분석하기 위한 프로파일러 개발과 더불어
 
 </br>
 
+# 📘핵심 주요 코드
+- [전체 코드 (EntryPoint / Framework / Game – Actor 파생 클래스 구현)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio)
+- [코어 (Core – 엔진 기반 시스템, 실행 구조)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio/Framework/Core)
+- [에디터 (Editor – ImGui 에디터, WorldOutliner, Inspector)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio/Framework/Editor)
+- [Gameplay (Controller / Pawn 등 플레이 로직)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio/Framework/Gameplay)
+- [컴포넌트 (Scene / Primitive / Render Components)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio/Framework/Components)
+- [액터들 (Game/Actors – 플레이어, 몬스터 등)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio/Game/Actors)
+- [자원 관리 매니저 (CPU/GPU/애니메이션 리소스 매니저)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio/Framework/Manager)
+
+| 코드 파일 | 코드 설명 |
+|----------|-----------|
+| RenderManager [.h](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Core/URenderManager.h) / [.cpp](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Core/URenderManager.cpp) | GameThread에서 제출된 스냅샷을 수신해 RenderThread에서 렌더 순서를 분류하고 제어하는 렌더링 허브입니다.|
+| USceneComponent [.h](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Components/USceneComponent.cpp) / [.cpp](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Components/USceneComponent.cpp) | Actor의 부모-자식 계층과 Local/World Transform을 관리하는 베이스 컴포넌트 </br> Attach / Detach 로직을 수행하고 있습니다. |
+| UAnimInstance [.h]() / [.cpp]() | 애니메이션 클립의 재생 시간과 상태를 관리하고, 블렌딩을 처리해 본 팔레트에 쓸 로컬 포즈를 만들어주는 실행기입니다. |
+| UWorld [.h](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Components/UWorld.h) / [.cpp](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Components/UWorld.h) | 액터를 생성·소멸·갱신하며, 액터들의 전체 생명주기(Lifecycle)를 관리하는 클래스입니다. |
+
 # 📘문제 해결 경험(트러블 슈팅)
 
 <table style="border-collapse:collapse;">
@@ -147,7 +163,7 @@ CPU/GPU 병목 구간을 분석하기 위한 프로파일러 개발과 더불어
 
 ---
 
-### 2. Asset 공유 구조 적용 – 중복 로딩 제거로 로딩 병목 해결 <a id="t1"></a>
+## 2. Asset 공유 구조 적용 – 중복 로딩 제거로 로딩 병목 해결 <a id="t1"></a>
 
 <table>
   <tr>
@@ -192,7 +208,7 @@ CPU/GPU 병목 구간을 분석하기 위한 프로파일러 개발과 더불어
 
 ---
 
-### 3. 인스턴싱 도입 전 Static / Skeletal 프레임 저하 원인 파악 <a id="t2"></a>
+## 3. 인스턴싱 도입 전 Static / Skeletal 프레임 저하 원인 파악 <a id="t2"></a>
 
 <table>
   <tr>
@@ -233,7 +249,7 @@ CPU/GPU 병목 구간을 분석하기 위한 프로파일러 개발과 더불어
 
 ---
 
-### 4. CPU·GPU 타임 비례 이상 징후 포착 <a id="t3"></a>
+## 4. CPU·GPU 타임 비례 이상 징후 포착 <a id="t3"></a>
 
 <table>
   <tr>
@@ -276,7 +292,7 @@ CPU/GPU 병목 구간을 분석하기 위한 프로파일러 개발과 더불어
 
 ---
 
-### 5. 정수 기반 샘플링의 한계 – 블렌딩 시 덜덜거림 발생 <a id="t4"></a>
+## 5. 정수 기반 샘플링의 한계 – 블렌딩 시 덜덜거림 발생 <a id="t4"></a>
 
 <table>
   <tr>
@@ -469,12 +485,3 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
 
 - 구역 단위 실행 시간 측정 & 파일 저장 프로파일러
 - CPU/GPU 프레임 타임 측정 런타임 시스템
-
-# 📘핵심 주요 코드
-- [전체 코드 (EntryPoint / Framework / Game – Actor 파생 클래스 구현)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio)
-- [코어 (Core – 엔진 기반 시스템, 실행 구조)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio/Framework/Core)
-- [에디터 (Editor – ImGui 에디터, WorldOutliner, Inspector)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio/Framework/Editor)
-- [Gameplay (Controller / Pawn 등 플레이 로직)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio/Framework/Gameplay)
-- [컴포넌트 (Scene / Primitive / Render Components)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio/Framework/Components)
-- [액터들 (Game/Actors – 플레이어, 몬스터 등)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio/Game/Actors)
-- [자원 관리 매니저 (CPU/GPU/애니메이션 리소스 매니저)](https://github.com/Myoungcholho/DX_Portfolio/tree/main/DX11Portfolio/Framework/Manager)
