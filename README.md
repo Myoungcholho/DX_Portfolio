@@ -56,6 +56,8 @@ CPU/GPU 병목 구간을 분석하기 위한 프로파일러 개발과 더불어
 | UWorld [.h](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Components/UWorld.h) / [.cpp](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Components/UWorld.cpp) | 액터를 생성·소멸·갱신하며, 액터들의 전체 생명주기(Lifecycle)를 관리하는 클래스입니다. |
 | APawnTest [.h](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Game/Actors/APawnTest.h) / [.cpp](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Game/Actors/APawnTest.cpp) | 게임 모듈에서 사용되는 APawn 기반 플레이어 테스트용 액터 클래스입니다. |
 
+</br>
+
 # 📘문제 해결 경험(트러블 슈팅) [(목차 이동)](#목차)
 
 <table style="border-collapse:collapse;">
@@ -324,14 +326,15 @@ CPU/GPU 병목 구간을 분석하기 위한 프로파일러 개발과 더불어
 
 # 📘프로젝트에서 얻은 것 [(목차 이동)](#목차)
 
-**요약**
-- [1. 드로우콜 렌더링 파이프라인 감각](#gain-drawcall)
-- [2. 언리얼 아키텍처 이해와 재구현 경험](#gain-ue-arch)
-- [3. C++ 자원 관리와 소유권 감각](#gain-cpp-resource)
-- [4. 게임 스레드 / 렌더 스레드 분리·멀티스레드 이해](#gain-gt-rt)
-- [5. 행렬·계층 구조 기반 씬/애니메이션 처리 경험](#gain-matrix)
-- [6. 쉐이딩 모델·라이팅 이해](#gain-shading)
-- [7. Transform·회전·짐벌락을 다루며 쌓은 수학적 감각](#gain-rotation)
+| 번호 | 얻은 경험 |
+|------|-----------|
+| 1 | [드로우콜·렌더링 파이프라인 감각](#gain-drawcall) |
+| 2 | [언리얼 아키텍처 이해와 재구현 경험](#gain-ue-arch) |
+| 3 | [C++ 자원 관리와 소유권 감각](#gain-cpp-resource) |
+| 4 | [게임 스레드 / 렌더 스레드 분리·멀티스레드 이해](#gain-gt-rt) |
+| 5 | [행렬·계층 구조 기반 씬/애니메이션 처리 경험](#gain-matrix) |
+| 6 | [쉐이딩 모델·라이팅 이해](#gain-shading) |
+| 7 | [Transform·회전·짐벌락을 다루며 쌓은 수학적 감각](#gain-rotation) |
 
 ---
 
