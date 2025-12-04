@@ -10,10 +10,17 @@ APawnTest::APawnTest()
 
 	// 1) 루트 + 메쉬
 	mesh = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalComponent");
+
+	if (mesh == nullptr)
+		return;
+
 	SetRootComponent(mesh);
 
 	shared_ptr<const CPUMeshAsset> asset = CPUAssetManager::GetProcedural("Rumy:character");
 	shared_ptr<AnimationData> aniData = CPUAssetManager::GetAnimation("Rumy:Animation");
+
+	if (asset == nullptr || aniData == nullptr)
+		return;
 
 	mesh->SetAssets(asset,aniData);
 	mesh->SetMaterialFactors(albedo, roughnessFactor, metaliicFactor);
@@ -22,6 +29,10 @@ APawnTest::APawnTest()
 
 	// 2) 라이트를 메쉬에 어태치
 	attachTestlight = CreateDefaultSubobject<ULightComponent>("LightComponent");
+
+	if (attachTestlight == nullptr)
+		return;
+
 	attachTestlight->AttachTo(mesh, EAttachMode::KeepRelative);
 }
 
@@ -29,9 +40,14 @@ void APawnTest::Initialize()
 {
 	APawn::Initialize();
 
+	if (mesh == nullptr)
+		return;
+
 	mesh->Init();
 
-	// light 초기값 설정
+	if (attachTestlight == nullptr)
+		return;
+
 	attachTestlight->SetRadiance(Vector3(5.0f));
 	attachTestlight->SetFalloff(0.0f, 6.0f);
 	attachTestlight->SetLightType((uint32_t)LIGHT_POINT | LIGHT_SHADOW);

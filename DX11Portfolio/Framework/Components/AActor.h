@@ -44,6 +44,8 @@ public:
 	T* CreateDefaultSubobject(const string& name, Args&&... args)
 	{
 		auto comp = make_shared<T>(forward<Args>(args)...);
+		assert(comp != nullptr);
+
 		comp->SetName(name);
 		comp->SetOwner(this);
 
