@@ -3,6 +3,9 @@
 
 static int s_actorID = 0;
 
+/// <summary>
+/// 내 루트 밑 내 소유가 아닌 컴포넌트가 섞여 있으면 전부 Detach하고 싶을 때 사용
+/// </summary>
 static void DetachForeignDescendants(USceneComponent* node, AActor* self)
 {
 	if (!node) return;
@@ -27,44 +30,6 @@ AActor::AActor()
 	name = "Actor_" + to_string(s_actorID++);
 }
 
-shared_ptr<UActorComponent> AActor::AddComponent(shared_ptr<UActorComponent> comp)
-{
-	if (comp == nullptr)
-		return nullptr;
-
-	// Owner 설정
-	comp->OnAttach(this);
-
-	if(!ContainsComponent(comp))
-		Components.push_back(comp);
-
-	// 루트 컴포넌트가 있다면 루트 컴포넌트에 어태치
-	AttachIfSceneComponent(comp);
-
-	return comp;
-}
-
-void AActor::SetRootComponent(shared_ptr<USceneComponent> comp)
-{
-	auto oldRoot = root;
-	root = move(comp);					// 일반 대입 사용하면 refcount가 1증가함
-
-	if (root)
-	{
-		root->OnAttach(this);
-
-		// 이전 Transform을 Root로 이전
-		root->SetRelativeTransform(actorTransform);
-		root->UpdateWorldTransformRecursive();
-
-		// 기존 actorTransform은 더 이상 직접 사용하지 않음
-		actorTransform = Transform();
-
-		if (!ContainsComponent(root))
-			Components.push_back(root);
-	}
-}
-
 void AActor::SetWorld(UWorld* world)
 {
 	this->world = world;
@@ -77,21 +42,19 @@ UWorld* AActor::GetWorld() const
 
 void AActor::Tick()
 {
-	// auto comp 쓰고 있었는데 이는 포인터 주소를 복사해 약간의 오버헤드가 있음.
-	// const auto& 로 변경
-	for (auto& comp : Components)
+	for (auto& comp : components)
 		comp->Tick();
 }
 
 void AActor::FixedTick(double dt)
 {
-	for (auto& comp : Components)
+	for (auto& comp : components)
 		comp->FixedTick(dt);
 }
 
 void AActor::OnGUI()
 {
-	for (auto& comp : Components)
+	for (auto& comp : components)
 		comp->OnGUI();
 }
 
@@ -99,21 +62,24 @@ void AActor::ClearComponent()
 {
 	if (root)
 	{
-		DetachForeignDescendants(root.get(), this);
+		DetachForeignDescendants(root, this);
 		if (root->GetParent())
 			root->Detach(EAttachMode::KeepWorld);
 	}
 
 	// 소유한 컴포넌트들 정리
-	auto comps = move(Components);
-	Components.clear();
+	auto comps = move(components);
+	components.clear();
 
 	for (auto& comp : comps)
 		comp->Destroy();		// 외부 시스템 등록 해제, 델리게이트 해제 등
 
-	root.reset();
+	root = nullptr;
 }
 
+/// <summary>
+/// Actor 단위의 attach 요청 시 Root 컴포넌트끼리 attach 시도 래퍼
+/// </summary>
 bool AActor::AttachToActor(AActor* parent, EAttachMode mode)
 {
 	// 자신에게 Attach
@@ -124,7 +90,7 @@ bool AActor::AttachToActor(AActor* parent, EAttachMode mode)
 	if (!myRoot)
 		return false;
 
-	USceneComponent* parentRoot = parent ? parent->GetRootComponent().get() : nullptr;
+	USceneComponent* parentRoot = parent ? parent->GetRootComponent() : nullptr;
 	
 	// parent는 존재하지만 parent의 Root노드가 없다면 return
 	if (parent && !parentRoot)
@@ -137,6 +103,9 @@ bool AActor::AttachToActor(AActor* parent, EAttachMode mode)
 	return myRoot->AttachTo(parentRoot, mode);
 }
 
+/// <summary>
+/// Actor 단위의 Detach 요청 시 실행 래퍼
+/// </summary>
 bool AActor::DetachFromActor(EAttachMode mode)
 {
 	auto myRoot = GetRootComponent();
@@ -155,7 +124,7 @@ AActor* AActor::GetParent() const
 }
 
 /// <summary>
-/// Actor 삭제 메서드
+/// Actor 삭제 메서드로, bool 변수 마킹 후 삭제 리스트에 추가
 /// </summary>
 void AActor::Destroy()
 {
@@ -194,29 +163,4 @@ void AActor::SetRotation(const Quaternion& q)
 		root->SetRelativeRotation(q);
 	else
 		actorTransform.SetRotation(q);
-}
-
-/// <summary>
-/// vector<..> Components에 가지고 있는지 확인
-/// </summary>
-bool AActor::ContainsComponent(const shared_ptr<UActorComponent>& comp) const
-{
-	return find(Components.begin(), Components.end(), comp) != Components.end();
-}
-
-/// <summary>
-/// 루트에 씬 컴포넌트 어태치
-/// </summary>
-void AActor::AttachIfSceneComponent(const shared_ptr<UActorComponent>& comp)
-{	
-	shared_ptr<USceneComponent> sc = dynamic_pointer_cast<USceneComponent>(comp);
-
-	if (sc == nullptr)
-		return;
-	if (root == nullptr)
-		return;
-	if (sc == root)
-		return;
-
-	sc->AttachTo(root.get(), EAttachMode::KeepWorld);
 }

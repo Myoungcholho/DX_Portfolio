@@ -6,27 +6,50 @@ REGISTER_CLASS(APawnTest);
 
 APawnTest::APawnTest()
 {
-	name = "PawnTestActor";
-	skeletalMeshComponent = make_shared<USkeletalMeshComponent>();
-	root = skeletalMeshComponent;
-	AddComponent(skeletalMeshComponent);
+	SetName("PawnTestActor");
+
+	// 1) 루트 + 메쉬
+	mesh = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalComponent");
+	SetRootComponent(mesh);
 
 	shared_ptr<const CPUMeshAsset> asset = CPUAssetManager::GetProcedural("Rumy:character");
 	shared_ptr<AnimationData> aniData = CPUAssetManager::GetAnimation("Rumy:Animation");
 
-	skeletalMeshComponent->SetAssets(asset,aniData);
-	skeletalMeshComponent->SetMaterialFactors(Vector3(1.0f), 0.8f, 0.0f);
-	skeletalMeshComponent->SetRelativePosition(Vector3(0, -0.5f, -9.f));
-	skeletalMeshComponent->SetTrack(0, true, 1.0f);
+	mesh->SetAssets(asset,aniData);
+	mesh->SetMaterialFactors(albedo, roughnessFactor, metaliicFactor);
+	mesh->SetRelativePosition(InitPos);
+	mesh->SetTrack(0, true, 1.0f);
 
+	// 2) 라이트를 메쉬에 어태치
+	attachTestlight = CreateDefaultSubobject<ULightComponent>("LightComponent");
+	attachTestlight->AttachTo(mesh, EAttachMode::KeepRelative);
 }
 
 void APawnTest::Initialize()
 {
-	skeletalMeshComponent->Init();
+	APawn::Initialize();
+
+	mesh->Init();
+
+	// light 초기값 설정
+	attachTestlight->SetRadiance(Vector3(5.0f));
+	attachTestlight->SetFalloff(0.0f, 6.0f);
+	attachTestlight->SetLightType((uint32_t)LIGHT_POINT | LIGHT_SHADOW);
+	attachTestlight->SetRelativePosition(Vector3(0, 0, 0));
+	attachTestlight->SetRelativeRotation(Vector3(0, 0, 0));
 }
 
-shared_ptr<USkeletalMeshComponent> APawnTest::GetSkeletalMeshComponent()
+void APawnTest::Tick()
 {
-	return skeletalMeshComponent;
+	APawn::Tick();
+
+	CKeyboard* key = CKeyboard::Get();
+
+	if (key == nullptr)
+		return;
+
+	if (key->Press(VK_LSHIFT))
+		MoveSpeed = 2.0f;
+	else
+		MoveSpeed = 1.0f;
 }

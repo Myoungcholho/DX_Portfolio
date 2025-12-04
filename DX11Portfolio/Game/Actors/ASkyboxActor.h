@@ -9,8 +9,8 @@ public:
 	void Initialize() override;
 
 public:
-	shared_ptr<USkyboxComponent> GetSkyboxComponent();
+	USkyboxComponent* GetSkyboxComponent() { return skyboxComponent; }
 
 private:
-	shared_ptr<USkyboxComponent> skyboxComponent;
+	USkyboxComponent* skyboxComponent;
 };

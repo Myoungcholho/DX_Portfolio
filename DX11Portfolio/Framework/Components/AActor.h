@@ -19,7 +19,7 @@ public:
 	const string& GetName() const { return name; }
 	void SetWorld(UWorld* world);
 	UWorld* GetWorld() const;
-	vector<shared_ptr<UActorComponent>>& GetComponents() { return Components; }
+	vector<shared_ptr<UActorComponent>>& GetComponents() { return components; }
 	bool IsPendingDestroy() const { return bPendingDestroy; }
 
 public:
@@ -40,15 +40,27 @@ public:
 	void ClearComponent();
 
 public:
-	shared_ptr<UActorComponent> AddComponent(shared_ptr<UActorComponent> comp);
+	template<typename T, typename... Args>
+	T* CreateDefaultSubobject(const string& name, Args&&... args)
+	{
+		auto comp = make_shared<T>(forward<Args>(args)...);
+		comp->SetName(name);
+		comp->SetOwner(this);
 
-	void SetRootComponent(shared_ptr<USceneComponent> comp);
-	shared_ptr<USceneComponent> GetRootComponent() const { return root; }
+		components.push_back(comp);
+		return comp.get();
+	}
 
+public:
+	//UActorComponent* AddComponent(const shared_ptr<UActorComponent> comp);
+	USceneComponent* GetRootComponent() const { return root; }
+	void SetRootComponent(USceneComponent* InRoot) { root = InRoot; }
 
 protected:
-	vector<shared_ptr<UActorComponent>> Components;
-	shared_ptr<USceneComponent> root = nullptr;
+	vector<shared_ptr<UActorComponent>> components;
+
+	USceneComponent* root = nullptr;							// 향후 사용 버전
+
 	string name;
 	UWorld* world = nullptr;
 
@@ -61,8 +73,8 @@ public:
 	void SetRotation(const Quaternion& q);
 
 private:
-	bool ContainsComponent(const shared_ptr<UActorComponent>& comp) const;
-	void AttachIfSceneComponent(const shared_ptr<UActorComponent>& comp);
+	//bool ContainsComponent(const UActorComponent* comp) const;
+	//void AttachIfSceneComponent(UActorComponent* comp);
 
 private:
 	atomic<bool> bPendingDestroy{ false };

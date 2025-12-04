@@ -3,15 +3,20 @@
 
 APlayer::APlayer()
 {
-	name = "Player";
-	staticMeshComponent = make_shared<UStaticMeshComponent>();
-	root = staticMeshComponent;
-	AddComponent(staticMeshComponent);
+	name = "APlayer";
+
+	/*mesh = make_shared<UStaticMeshComponent>();
+	rootShared = staticMeshComponent;
+	AddComponent(staticMeshComponent);*/
+
+	mesh = CreateDefaultSubobject<UStaticMeshComponent>("mesh");
+	SetRootComponent(mesh);
+
 }
 
 void APlayer::Initialize()
 {
-	staticMeshComponent->Init();
+	mesh->Init();
 
 	//int a = 50;
 	//cout << a;
@@ -36,9 +41,4 @@ void APlayer::Tick()
 	//		}
 	//	}
 	//}
-}
-
-shared_ptr<UStaticMeshComponent> APlayer::GetStaticMeshComponent()
-{
-	return staticMeshComponent;
 }

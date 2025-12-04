@@ -23,7 +23,7 @@ void TransformEditor::OnGUI()
 {
     if (!mTarget) { return; }
 
-    // 편집 중이 아닐 때만 외부 변경을 버퍼에 반영
+    // 편집 중이 아닐 때, 외부 변경을 버퍼에 반영하기
     if (!mEditingPos && !mEditingRot && !mEditingScale)
         RefreshBuffersFromTarget();
 
@@ -36,21 +36,25 @@ void TransformEditor::OnGUI()
     // --- Position ---
     {
         Vector3 v = mPosBuf;
-        if (ImGui::DragFloat3("Position", &v.x, 0.01f)) {
+        if (ImGui::DragFloat3("Position", &v.x, 0.01f)) 
+        {
             mPosBuf = v;
-            if (mPreviewDuringEdit) {
-                mTarget->SetRelativePosition(mPosBuf);
-                //mTarget->UpdateWorldTransformRecursive();
+            if (mPreviewDuringEdit) 
+            {
+                ApplyBuffersToTarget();
             }
         }
 
         // 현재 위젯이 활성화된 순간 true, [마우스를 누른 직후, 키보드 포커스 잡힌 직후] 한 프레임만
-        if (ImGui::IsItemActivated())             mEditingPos = true;
+        if (ImGui::IsItemActivated())             
+            mEditingPos = true;
+
         // 편집이 끝나고 비활성화된 순간 한 프레임만 true
-        if (ImGui::IsItemDeactivatedAfterEdit()) {
-            if (!mPreviewDuringEdit) {
-                mTarget->SetRelativePosition(mPosBuf);
-                //mTarget->UpdateWorldTransformRecursive();
+        if (ImGui::IsItemDeactivatedAfterEdit()) 
+        {
+            if (!mPreviewDuringEdit) 
+            {
+                ApplyBuffersToTarget();
             }
             mEditingPos = false;
         }
@@ -61,16 +65,22 @@ void TransformEditor::OnGUI()
         Vector3 v = mRotBuf;
         if (ImGui::DragFloat3("Rotation", &v.x, 0.5f)) {
             mRotBuf = v;
-            if (mPreviewDuringEdit) {
-                mTarget->SetRelativeRotation(mRotBuf); // degrees
+            if (mPreviewDuringEdit) 
+            {
+                //mTarget->SetRelativeRotation(mRotBuf); // degrees
                 //mTarget->UpdateWorldTransformRecursive();
+                ApplyBuffersToTarget();
             }
         }
-        if (ImGui::IsItemActivated())             mEditingRot = true;
+        if (ImGui::IsItemActivated())             
+            mEditingRot = true;
+
         if (ImGui::IsItemDeactivatedAfterEdit()) {
-            if (!mPreviewDuringEdit) {
-                mTarget->SetRelativeRotation(mRotBuf); // degrees
+            if (!mPreviewDuringEdit) 
+            {
+                //mTarget->SetRelativeRotation(mRotBuf); // degrees
                 //mTarget->UpdateWorldTransformRecursive();
+                ApplyBuffersToTarget();
             }
             mEditingRot = false;
         }
@@ -81,16 +91,24 @@ void TransformEditor::OnGUI()
         Vector3 v = mScaleBuf;
         if (ImGui::DragFloat3("Scale", &v.x, 0.01f)) {
             mScaleBuf = v;
-            if (mPreviewDuringEdit) {
-                mTarget->SetRelativeScale(mScaleBuf);
+            if (mPreviewDuringEdit) 
+            {
+                //mTarget->SetRelativeScale(mScaleBuf);
                 //mTarget->UpdateWorldTransformRecursive();
+                ApplyBuffersToTarget();
             }
         }
-        if (ImGui::IsItemActivated())             mEditingScale = true;
-        if (ImGui::IsItemDeactivatedAfterEdit()) {
-            if (!mPreviewDuringEdit) {
-                mTarget->SetRelativeScale(mScaleBuf);
+
+        if (ImGui::IsItemActivated())             
+            mEditingScale = true;
+
+        if (ImGui::IsItemDeactivatedAfterEdit()) 
+        {
+            if (!mPreviewDuringEdit) 
+            {
+                //mTarget->SetRelativeScale(mScaleBuf);
                 //mTarget->UpdateWorldTransformRecursive();
+                ApplyBuffersToTarget();
             }
             mEditingScale = false;
         }
@@ -118,11 +136,6 @@ void TransformEditor::RefreshBuffersFromTarget()
 void TransformEditor::ApplyBuffersToTarget()
 {
 	if (!mTarget) return;
-
-	//mTarget->SetRelativePosition(mPosBuf);
-	//mTarget->SetRelativeRotation(mRotBuf); // degrees 버전 사용
-	//mTarget->SetRelativeScale(mScaleBuf);
-	//mTarget->UpdateWorldTransformRecursive();
 
     FTransformUpdateCommand cmd;
     cmd.target = mTarget;

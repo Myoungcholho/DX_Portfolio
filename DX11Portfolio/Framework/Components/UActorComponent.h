@@ -17,6 +17,7 @@ public:
 
 	void SetName(string name) { mName = name; }
 
+	void SetOwner(AActor* InOwner) { Owner = InOwner; }
 	AActor* GetOwner() { return Owner; }             // ºñ-const °´Ã¼¿ë
 	const AActor* GetOwner() const { return Owner; } // const °´Ã¼¿ë
 };

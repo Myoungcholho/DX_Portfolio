@@ -82,7 +82,7 @@ void ComponentHierarchyWindow::OnGUI()
 	auto rootSP = actor->GetRootComponent();
 	if (rootSP) 
 	{
-		DrawSceneCompNode(rootSP.get(), selectedComp);
+		DrawSceneCompNode(rootSP, selectedComp);
 	}
 
 	// 2) 루트에 속하지 않는(또는 Non-Scene) 컴포넌트들을 상단 리스트로 추가
@@ -92,7 +92,7 @@ void ComponentHierarchyWindow::OnGUI()
 
 		if (auto sc = dynamic_cast<USceneComponent*>(comp)) 
 		{
-			if (sc == rootSP.get())				// 자기 자신이라면 건너뛰기
+			if (sc == rootSP)				// 자기 자신이라면 건너뛰기
 				continue;
 			if(sc->GetParent() != nullptr)		// 부모가 있다면 그려졌으므로 건너뛰기
 				continue;

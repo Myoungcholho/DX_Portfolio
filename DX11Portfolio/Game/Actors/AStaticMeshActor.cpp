@@ -3,13 +3,17 @@
 
 AStaticMeshActor::AStaticMeshActor()
 {
-	name = "Plane";
-	staticMeshComponent = make_shared<UStaticMeshComponent>();
+	SetName("Plane");
+
+	staticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("staticMeshComponent");
+	SetRootComponent(staticMeshComponent);
+
+	/*staticMeshComponent = make_shared<UStaticMeshComponent>();
 	SetRootComponent(staticMeshComponent);
 	AddComponent(staticMeshComponent);
 
 	lightComponent = make_shared<ULightComponent>();
-	AddComponent(lightComponent);
+	AddComponent(lightComponent);*/
 
 	//lightComponent2 = make_shared<ULightComponent>();
 	//AddComponent(lightComponent2);
@@ -23,14 +27,22 @@ AStaticMeshActor::AStaticMeshActor()
 
 AStaticMeshActor::AStaticMeshActor(shared_ptr<const CPUMeshAsset> InAsset)
 {
-	name = "Plane";
-	staticMeshComponent = make_shared<UStaticMeshComponent>();
+	SetName("Plane");
+
+	staticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("staticMeshComponent");
+	SetRootComponent(staticMeshComponent);
+	staticMeshComponent->SetPBRMeshData(InAsset);
+
+	lightComponent = CreateDefaultSubobject<ULightComponent>("lightComponent");
+	lightComponent->AttachTo(staticMeshComponent, EAttachMode::KeepRelative);
+
+	/*staticMeshComponent = make_shared<UStaticMeshComponent>();
 	SetRootComponent(staticMeshComponent);
 	AddComponent(staticMeshComponent);
 	staticMeshComponent->SetPBRMeshData(InAsset);
 
 	lightComponent = make_shared<ULightComponent>();
-	AddComponent(lightComponent);
+	AddComponent(lightComponent);*/
 
 	//lightComponent2 = make_shared<ULightComponent>();
 	//AddComponent(lightComponent2);

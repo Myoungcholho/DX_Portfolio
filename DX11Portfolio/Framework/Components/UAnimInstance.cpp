@@ -56,11 +56,13 @@ void UAnimInstance::Update(double dt)
 		frameAccum -= step;
 		if (bLoop)
 		{
-			if (clipNumKeys > 0) {
+			if (clipNumKeys > 0) 
+			{
 				frame = (frame + step) % clipNumKeys;
 				if (frame < 0) frame += clipNumKeys;
 			}
-			else {
+			else 
+			{
 				frame += step;
 				if (frame < 0) frame = 0;
 			}

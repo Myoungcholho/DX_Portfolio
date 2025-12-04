@@ -14,9 +14,10 @@ struct FDelegateHandle
 struct FBoundFunction
 {
     void* ObjectPtr = nullptr;          // 함수가지는 객체
-    function<void()> Invoker;      // 실행할 함수 주소
+    function<void()> Invoker;           // 실행할 함수 주소
+
     FDelegateHandle Handle;             // 디버깅용 핸들
-    string FunctionName;           // 함수 이름 Delete용
+    string FunctionName;                // 함수 이름 Delete용
 
     bool Matches(void* InObj, const std::string& InFuncName) const
     {

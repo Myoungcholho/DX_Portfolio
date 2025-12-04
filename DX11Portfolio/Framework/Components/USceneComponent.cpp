@@ -104,14 +104,20 @@ Transform USceneComponent::GetWorldTransform() const
     return worldTransform;
 }
 
-bool USceneComponent::AttachTo(USceneComponent* newParent, EAttachMode mode)
+/// <summary>
+/// 부모 트랜스폼 기준으로 실제 위치/회전/스케일 재계산
+/// </summary>
+bool USceneComponent::AttachTo(USceneComponent* InParent, EAttachMode mode)
 {
-    if (parent == newParent) return true;
-    if (newParent == this) return false;
+    if (parent == InParent) 
+        return true;
+
+    if (InParent == this)
+        return false;
 
     // 새 부모의 조상들을 위로 타고 올라가면서 검사하며
     // 내가 이미 위쪽에 있다면 Cycle이 생기므로 금지(false)
-    for (auto* p = newParent; p != nullptr; p = p->GetParent())
+    for (auto* p = InParent; p != nullptr; p = p->GetParent())
         if (p == this) return false;
 
     UpdateWorldTransform();
@@ -125,7 +131,7 @@ bool USceneComponent::AttachTo(USceneComponent* newParent, EAttachMode mode)
     }
 
     // 새 부모로 설정
-    parent = newParent;
+    parent = InParent;
     if (parent)
     {
         parent->children.push_back(this);

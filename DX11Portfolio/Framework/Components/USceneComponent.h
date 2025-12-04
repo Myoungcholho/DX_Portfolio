@@ -16,15 +16,6 @@ public:
     USceneComponent();
     ~USceneComponent() override = default;
 
-    // 언리얼의 값 관리 형식 방식을 적용
-    // Transform은 Value타입에 가깝기 때문에 소유권 공유 필요가 없음
-protected:
-	Transform localTransform;		                    // 부모 기준 위치(상대 위치, Local)
-	Transform worldTransform;		                    // 렌더링에 사용(절대 위치, World)
-
-	USceneComponent* parent;                            // 부모 포인터
-	vector<USceneComponent*> children;                  // 자식 포인터
-
 public:
     void SetRelativePosition(const Vector3& position);
     void SetRelativeRotation(const Quaternion& rotation);
@@ -48,11 +39,19 @@ public:
     const Matrix& GetWorldMatrix();
 
     // 계층 구조 구성
-    bool AttachTo(USceneComponent* parent, EAttachMode mode);
+    bool AttachTo(USceneComponent* InParent, EAttachMode mode);
     bool Detach(EAttachMode mode);
 
 public:
     USceneComponent* GetParent() const;
     const vector<USceneComponent*>& GetChildren() const;
     USceneComponent* GetRoot() const;
+    
+protected:
+    // Transform은 Value타입에 가깝기 때문에 소유권 공유 필요가 없음
+	Transform localTransform;		                    // 부모 기준 위치(상대 위치, Local)
+	Transform worldTransform;		                    // 렌더링에 사용(절대 위치, World)
+
+	USceneComponent* parent;                            // 부모 포인터
+	vector<USceneComponent*> children;                  // 자식 포인터
 };

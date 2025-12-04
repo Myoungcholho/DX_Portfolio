@@ -22,6 +22,9 @@ void APlayerController::HandleInput(double dt)
 	CKeyboard* key = CKeyboard::Get();
 	CMouse* mouse = CMouse::Get();
 
+	if (key == nullptr || mouse == nullptr)
+		return;
+
 	if (pawn == nullptr)
 		return;
 

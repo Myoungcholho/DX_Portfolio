@@ -9,8 +9,8 @@ public:
 	void Initialize() override;
 
 public:
-	shared_ptr<USkeletalMeshComponent> GetSkeletalMeshComponent();
+	USkeletalMeshComponent* GetSkeletalMeshComponent() { return skMesh; }
 
 private:
-	shared_ptr<USkeletalMeshComponent> skeletalMeshComponent;
+	USkeletalMeshComponent* skMesh;
 };	

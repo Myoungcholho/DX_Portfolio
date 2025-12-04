@@ -9,8 +9,8 @@ public:
 	void Initialize() override;
 
 public:
-	shared_ptr<ULightComponent> GetLightComponent();
+	ULightComponent* GetLightComponent() { return lightComponent; }
 
 private:
-	shared_ptr<ULightComponent> lightComponent;
+	ULightComponent* lightComponent;
 };

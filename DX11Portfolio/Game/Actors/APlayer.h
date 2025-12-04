@@ -10,10 +10,10 @@ public:
 	void Tick() override;
 
 public:
-	shared_ptr<UStaticMeshComponent> GetStaticMeshComponent();
+	UStaticMeshComponent* GetStaticMeshComponent() { return mesh; }
 
 private:
-	shared_ptr<UStaticMeshComponent> staticMeshComponent;
+	UStaticMeshComponent* mesh;
 
 
 private:

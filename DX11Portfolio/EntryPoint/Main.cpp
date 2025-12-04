@@ -105,44 +105,44 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 
 	// 모델 로드 테스트
 	{
-		string path = "Mixamo/PaladinJNordstrom/";
+		//string path = "Mixamo/PaladinJNordstrom/";
 
-		vector<string> clipNames =
-		{
-			//"MeleeAttack.fbx",
-			//"ComboAttack.fbx",
-			"Idle.fbx",
-			//"EquipUnderarm.fbx",
-			//"MeleeKick.fbx",
-			//"RunForward.fbx",
-		};
+		//vector<string> clipNames =
+		//{
+		//	//"MeleeAttack.fbx",
+		//	//"ComboAttack.fbx",
+		//	"Idle.fbx",
+		//	//"EquipUnderarm.fbx",
+		//	//"MeleeKick.fbx",
+		//	//"RunForward.fbx",
+		//};
 
-		shared_ptr<AnimationData> aniData = make_shared<AnimationData>();
+		//shared_ptr<AnimationData> aniData = make_shared<AnimationData>();
 
-		auto [meshes, _] = GeometryGenerator::ReadAnimationFromFile(path, "PaladinJNordstrom.fbx");
+		//auto [meshes, _] = GeometryGenerator::ReadAnimationFromFile(path, "PaladinJNordstrom.fbx");
 
-		shared_ptr<const CPUMeshAsset> asset = CPUAssetManager::CreateProcedural("PaladinJNordstrom:character", meshes);
+		//shared_ptr<const CPUMeshAsset> asset = CPUAssetManager::CreateProcedural("PaladinJNordstrom:character", meshes);
 
-		for (auto& name : clipNames)
-		{
-			auto [_, ani] = GeometryGenerator::ReadAnimationFromFile(path, name);
+		//for (auto& name : clipNames)
+		//{
+		//	auto [_, ani] = GeometryGenerator::ReadAnimationFromFile(path, name);
 
-			if (aniData->clips.empty()) {
-				*aniData = move(ani);
-			}
-			else {
-				aniData->clips.push_back(ani.clips.front());
-			}
-		}
-		CPUAssetManager::SaveAnimation("PaladinJNordstrom:Animation", aniData);
+		//	if (aniData->clips.empty()) {
+		//		*aniData = move(ani);
+		//	}
+		//	else {
+		//		aniData->clips.push_back(ani.clips.front());
+		//	}
+		//}
+		//CPUAssetManager::SaveAnimation("PaladinJNordstrom:Animation", aniData);
 
-		ASkinnedTestActor* skinned = world->SpawnActor<ASkinnedTestActor>();
-		skinned->GetSkeletalMeshComponent()->SetAssets(asset, aniData);
-		skinned->GetSkeletalMeshComponent()->SetMaterialFactors(Vector3(1.0f), 0.8f, 0.0f);
+		//ASkinnedTestActor* skinned = world->SpawnActor<ASkinnedTestActor>();
+		//skinned->GetSkeletalMeshComponent()->SetAssets(asset, aniData);
+		//skinned->GetSkeletalMeshComponent()->SetMaterialFactors(Vector3(1.0f), 0.8f, 0.0f);
 
-		skinned->GetSkeletalMeshComponent()->SetRelativePosition(Vector3(1.0f, -0.5f, -9.f));
-		skinned->GetSkeletalMeshComponent()->SetTrack(0, true, 1.0f);
-		skinned->SetName("Paladin");
+		//skinned->GetSkeletalMeshComponent()->SetRelativePosition(Vector3(1.0f, -0.5f, -9.f));
+		//skinned->GetSkeletalMeshComponent()->SetTrack(0, true, 1.0f);
+		//skinned->SetName("Paladin");
 	}
 
 	// SkinnedMesh(1),(2)
@@ -152,9 +152,9 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 		vector<string> clipNames =
 		{
 			"Idle.fbx", 
-			//"Walking60.fbx",
-			//"backward60.fbx",
-			//"left60.fbx", "right60.fbx", "Run60.fbx",
+			"Walking60.fbx",
+			"backward60.fbx",
+			"left60.fbx", "right60.fbx", "Run60.fbx",
 			//"RootWalking.fbx",
 			//"CoverToStand.fbx"
 			//"Walking60_InPlace.fbx",
@@ -234,30 +234,29 @@ int WINAPI WinMain(HINSTANCE InInstance, HINSTANCE InPrevInstance, LPSTR InParam
 
 		// GameMode 테스트
 		{
-			//APawnTest* p = new APawnTest();		// [테스트]강제 참조, 심볼 추가로 .obj링크용
+			APawnTest* p = new APawnTest();		// [테스트]강제 참조, 심볼 추가로 .obj링크용
 
-			//AGameMode* gameMode = static_cast<AGameMode*>(ClassID::Create("AGameMode", world));
+			AGameMode* gameMode = static_cast<AGameMode*>(ClassID::Create("AGameMode", world));
 
-			//// --- 기본 Pawn / Controller 클래스 이름 지정 ---
-			//gameMode->SetDefaultPawnClass("APawnTest");
-			//gameMode->SetDefaultControllerClass("AMyController");
+			// 기본 Pawn / Controller 클래스 이름 지정
+			gameMode->SetDefaultPawnClass("APawnTest");
+			gameMode->SetDefaultControllerClass("AMyController");
 
-			//// --- 게임 시작 ---
-			//gameMode->StartPlay();
+			gameMode->StartPlay();
 
 
-			//// Controller Pawn 변경 테스트
-			//APawnTest* pawnActor = static_cast<APawnTest*>(ClassID::Create("APawnTest", world));
-			//pawnActor->GetSkeletalMeshComponent()->SetRelativePosition(Vector3(0, -0.5f, -8.f));
-			//pawnActor->SetName("Pawn01");
-			//
-			//APawnTest* pawnActor1 = static_cast<APawnTest*>(ClassID::Create("APawnTest", world));
-			//pawnActor1->GetSkeletalMeshComponent()->SetRelativePosition(Vector3(0, -0.5f, -7.f));
-			//pawnActor1->SetName("Pawn02");
+			// Controller Pawn 변경 테스트
+			APawnTest* pawnActor = static_cast<APawnTest*>(ClassID::Create("APawnTest", world));
+			pawnActor->GetSkeletalMeshComponent()->SetRelativePosition(Vector3(0, -0.5f, -8.f));
+			pawnActor->SetName("Pawn01");
+			
+			/*APawnTest* pawnActor1 = static_cast<APawnTest*>(ClassID::Create("APawnTest", world));
+			pawnActor1->GetSkeletalMeshComponent()->SetRelativePosition(Vector3(0, -0.5f, -7.f));
+			pawnActor1->SetName("Pawn02");
 
-			//APawnTest* pawnActor2 = static_cast<APawnTest*>(ClassID::Create("APawnTest", world));
-			//pawnActor2->GetSkeletalMeshComponent()->SetRelativePosition(Vector3(0, -0.5f, -6.f));
-			//pawnActor2->SetName("Pawn03");
+			APawnTest* pawnActor2 = static_cast<APawnTest*>(ClassID::Create("APawnTest", world));
+			pawnActor2->GetSkeletalMeshComponent()->SetRelativePosition(Vector3(0, -0.5f, -6.f));
+			pawnActor2->SetName("Pawn03");*/
 		}
 	}
 

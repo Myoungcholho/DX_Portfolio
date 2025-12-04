@@ -117,7 +117,7 @@ void InspectorWindow::OnUpdateTarget()
     if (selComp) 
     {
         // 선택이 루트 씬컴포넌트라면 이름을 "Root"로 보여주고 싶을 때
-        USceneComponent* root = actor->GetRootComponent().get();
+        USceneComponent* root = actor->GetRootComponent();
         const bool isRoot = (root && selComp == root);
         addEditors(selComp, isRoot ? "Root" : nullptr);
         return;
@@ -127,14 +127,14 @@ void InspectorWindow::OnUpdateTarget()
     auto rootSP = actor->GetRootComponent();
     if (rootSP) 
     {
-        addEditors(rootSP.get(), "Root");
+        addEditors(rootSP, "Root");
     }
     for (auto& compSP : actor->GetComponents()) 
     {
         UActorComponent* c = compSP.get();
 
         // 루트는 위에서 처리했으니 중복 방지
-        if (rootSP && c == rootSP.get()) 
+        if (rootSP && c == rootSP) 
             continue;
 
         addEditors(c);
