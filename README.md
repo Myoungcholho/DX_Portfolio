@@ -415,8 +415,8 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
 # 📘구현 상세 내용 [(목차 이동)](#목차)
 <h3 id="core">1. Core Architecture </h3>
 
-- GameThread/RednerThread 분리 아키텍처 (MailBox 기반 스냅샷 소비 모델)
-- `std::function` 기반 델리게이트
+- GameThread/RednerThread 분리 아키텍처 (MailBox 기반 DoubleBuffer 스냅샷 소비 모델)
+- 델리게이트 시스템
 - Editor → GameThread 작업 전달용 Command Queue로 RaceCondition 제거 & Lock 스톨 최소화
 
 ---
