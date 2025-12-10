@@ -16,12 +16,12 @@ void UWorld::Tick()
 	vector<AActor*> snapshot;
 	snapshot.reserve(Actors.size());
 
-	for (auto& uptr : Actors)
+	for (const unique_ptr<AActor>& uptr : Actors)
 		snapshot.push_back(uptr.get());
 
 	for (AActor* a : snapshot)
 	{
-		if (a && !a->IsPendingDestroy())
+		if (a != nullptr && a->IsPendingDestroy() == false)
 			a->Tick();
 	}
 }
@@ -30,12 +30,13 @@ void UWorld::FixedTick(double fixedDt)
 {
 	vector<AActor*> snapshot;
 	snapshot.reserve(Actors.size());
-	for (auto& uptr : Actors)
+
+	for (const unique_ptr<AActor>& uptr : Actors)
 		snapshot.push_back(uptr.get());
 
 	for (AActor* a : snapshot)
 	{
-		if (a && !a->IsPendingDestroy())
+		if (a != nullptr && a->IsPendingDestroy() == false)
 			a->FixedTick(fixedDt);
 	}
 }
@@ -45,20 +46,20 @@ void UWorld::ProxySnapshot()
 	vector<shared_ptr<URenderProxy>> proxies;
 	vector<LightData> lights;
 
-	for (auto const& actor : Actors)
+	for (const unique_ptr<AActor>& actor : Actors)
 	{
-		for (auto comp : actor->GetComponents())
+		for (const shared_ptr<UActorComponent>& comp : actor->GetComponents())
 		{
 			// 렌더 프록시 수집
-			if (auto prim = dynamic_cast<UPrimitiveComponent*>(comp.get()))
+			if (UPrimitiveComponent* prim = dynamic_cast<UPrimitiveComponent*>(comp.get()))
 			{
-				auto proxy = prim->GetRenderProxy();
+				shared_ptr<URenderProxy> proxy = prim->GetRenderProxy();
 
 				proxies.push_back(move(proxy));
 			}
 
 			// 라이트 수집
-			if(auto light = dynamic_cast<ULightComponent*>(comp.get()))
+			if(ULightComponent* light = dynamic_cast<ULightComponent*>(comp.get()))
 			{
 				lights.push_back(light->GetLightData()); // 위치, 색, 방향 등
 			}
@@ -78,17 +79,11 @@ void UWorld::Destroy()
 	//	actor->Destroy();
 
 	// 1. 남은 액터들 마킹
-	for (auto const& actor : Actors)
+	for (const unique_ptr<AActor>& actor : Actors)
 		actor->Destroy();
 
 	// 2. 마지막 배치
 	FlushDestroyed();
-}
-
-void UWorld::OnGUI()
-{
-	for (auto const& actor : Actors)
-		actor->OnGUI();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -96,10 +91,10 @@ void UWorld::OnGUI()
 // 월드에 올라갈 액터들 데이터 준비가 완료 후 호출
 void UWorld::StartAllActors()
 {
-	for (auto const& actor : Actors)
+	for (const unique_ptr<AActor>& actor : Actors)
 		actor->Initialize();
 
-	for (auto const& actor : Actors)
+	for (const unique_ptr<AActor>& actor : Actors)
 		actor->BeginPlay();
 }
 
@@ -107,7 +102,8 @@ vector<AActor*> UWorld::GetActorsOf() const
 {
 	vector<AActor*> out;
 	out.reserve(Actors.size());
-	for (auto const& actor : Actors)
+
+	for (const unique_ptr<AActor>& actor : Actors)
 		out.push_back(actor.get());
 
 	return out;
@@ -116,7 +112,7 @@ vector<AActor*> UWorld::GetActorsOf() const
 // Actor가 본인을 인자로 전달해 UWorld의 파괴 관리 컨테이너에 등록
 void UWorld::MarkActorForDestroy(AActor* actor)
 {
-	if (!actor) 
+	if (actor == nullptr) 
 		return;
 
 	// 삭제 리스트에 없으면 추가, 있다면 중복 추가 방지
@@ -135,7 +131,7 @@ void UWorld::FlushDestroyed()
 	vector<AActor*> pending = move(PendingDestroy);
 	PendingDestroy.clear();
 
-	for (auto* a : pending) 
+	for (AActor* a : pending) 
 		RemoveActor(a);
 }
 
@@ -146,7 +142,7 @@ void UWorld::RemoveActor(AActor* actor)
 		return;
 
 	// 액터 관리 컨테이너에 있는지 확인해서 가져옴
-	auto it = find_if(Actors.begin(), Actors.end(),
+	vector<unique_ptr<AActor>>::iterator it = find_if(Actors.begin(), Actors.end(),
 		[actor](const unique_ptr<AActor>& p) { return p.get() == actor; });
 
 	if (it == Actors.end()) 
