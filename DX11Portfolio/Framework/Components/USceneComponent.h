@@ -45,7 +45,8 @@ public:
 public:
     USceneComponent* GetParent() const;
     const vector<USceneComponent*>& GetChildren() const;
-    USceneComponent* GetRoot() const;
+    USceneComponent* GetRoot();
+    const USceneComponent* GetRoot() const;
     
 protected:
     // Transform은 Value타입에 가깝기 때문에 소유권 공유 필요가 없음

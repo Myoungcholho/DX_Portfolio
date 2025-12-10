@@ -2,12 +2,11 @@
 #include "USceneComponent.h"
 
 USceneComponent::USceneComponent()
+    : localTransform()
+    , worldTransform()
+    , parent(nullptr)
 {
-    mName = "USceneComponent";
-
-    localTransform = Transform();
-    worldTransform = Transform();
-    parent = nullptr;
+    SetName("USceneComponent");   
 }
 
 /// <summary>
@@ -50,21 +49,21 @@ void USceneComponent::UpdateWorldTransform()
 {
     if (parent)
     {
+        worldTransform = localTransform * parent->worldTransform;    // World행렬을 부모행렬과 상대행렬의 곱으로 구성
+
 #ifdef TransformTest
         cout << "--------------------------------------------------\n";
         cout << "Parent Before :" << parent->mName << "\n";
         cout << "Pos :" << parent->worldTransform.GetPosition().x << "," << parent->worldTransform.GetPosition().y << "," << parent->worldTransform.GetPosition().z << "\n";
         cout << "Rot :" << parent->worldTransform.GetRotation().x << "," << parent->worldTransform.GetRotation().y << "," << parent->worldTransform.GetRotation().z << "\n";
         cout << "Scale :" << parent->worldTransform.GetScale().x << "," << parent->worldTransform.GetScale().y << "," << parent->worldTransform.GetScale().z << "\n";
-#endif
-        worldTransform = localTransform * parent->worldTransform;    // World행렬을 부모행렬과 상대행렬의 곱으로 구성
 
-#ifdef TransformTest
         cout << "Name after :" << mName << "\n";
         cout << "Pos :" << worldTransform.GetPosition().x << "," << worldTransform.GetPosition().y << "," << worldTransform.GetPosition().z << "\n";
         cout << "Rot :" << worldTransform.GetRotation().x << "," << worldTransform.GetRotation().y << "," << worldTransform.GetRotation().z << "\n";
         cout << "Scale :" << worldTransform.GetScale().x << "," << worldTransform.GetScale().y << "," << worldTransform.GetScale().z << "\n";
 #endif
+
     }
     else
     {
@@ -117,7 +116,7 @@ bool USceneComponent::AttachTo(USceneComponent* InParent, EAttachMode mode)
 
     // 새 부모의 조상들을 위로 타고 올라가면서 검사하며
     // 내가 이미 위쪽에 있다면 Cycle이 생기므로 금지(false)
-    for (auto* p = InParent; p != nullptr; p = p->GetParent())
+    for (USceneComponent* p = InParent; p != nullptr; p = p->GetParent())
         if (p == this) return false;
 
     UpdateWorldTransform();
@@ -126,7 +125,7 @@ bool USceneComponent::AttachTo(USceneComponent* InParent, EAttachMode mode)
     // 기존 부모로부터 분리
     if (parent)
     {
-        auto& s = parent->children;
+        vector<USceneComponent*>& s = parent->children;
         s.erase(remove(s.begin(), s.end(), this), s.end());
     }
 
@@ -227,7 +226,6 @@ const vector<USceneComponent*>& USceneComponent::GetChildren() const
     return children;
 }
 
-
 USceneComponent* USceneComponent::GetParent() const
 {
     return parent;
@@ -238,10 +236,17 @@ Vector3 USceneComponent::GetForwardVector() const
     return localTransform.GetForward();
 }
 
-USceneComponent* USceneComponent::GetRoot() const
+USceneComponent* USceneComponent::GetRoot()
 {
     if (parent == nullptr)
-        return const_cast<USceneComponent*>(this);
+        return this;
+    return parent->GetRoot();
+}
+
+const USceneComponent* USceneComponent::GetRoot() const
+{
+    if (parent == nullptr)
+        return this;
     return parent->GetRoot();
 }
 
