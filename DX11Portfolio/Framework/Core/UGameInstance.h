@@ -21,8 +21,6 @@ public:
     void Render();
     void Shotdown();
 
-    void OnGUI();
-
 private:
     double fixedDt = 1.0 / 60.0;
     double fixedAcc = 0.0;

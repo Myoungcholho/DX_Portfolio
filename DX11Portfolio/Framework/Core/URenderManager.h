@@ -23,13 +23,11 @@ public:
 
 	void EnqueueProxies(vector<shared_ptr<URenderProxy>>&& proxies, vector<LightData>&& lights);
 
-public:
-	void OnGUI();
-
 private:
 	void RenderLoop();
 
 private:
+	static constexpr int BUFFER_COUNT = 2;
 	thread renderThread;
 	atomic<bool> shouldExit = false;
 

@@ -65,12 +65,3 @@ void UGameInstance::Shotdown()
 	if (world)
 		world->Destroy();
 }
-
-void UGameInstance::OnGUI()
-{
-	if (world)
-		world->OnGUI();					// 컴포넌트 개인 값 수정은 여기서
-	
-	if(renderManager)
-		renderManager->OnGUI();			// 전역 렌더러 수정은 여기서
-}

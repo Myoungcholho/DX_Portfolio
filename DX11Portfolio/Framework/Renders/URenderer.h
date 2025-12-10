@@ -20,7 +20,7 @@ public:
 		const Matrix& refl = Matrix());
 	void UpdateGlobalLights(const vector<LightData>& lights);
 
-	void OnGUI() {}
+	
 	void RenderPostProcess();
 	void Present();
 
