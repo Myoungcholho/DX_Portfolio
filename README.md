@@ -24,16 +24,16 @@ CPU/GPU 병목 구간을 분석하기 위한 프로파일러 개발과 더불어
 </br>
 
 # 📘목차
-- [구현 요약 내용](#구현-요약-내용)
-- [문제 해결 경험(트러블 슈팅)](#문제-해결-경험트러블-슈팅)
-- [프로젝트에서 얻은 것](#프로젝트에서-얻은-것)
-- [개발 계기](#개발-계기)
-- [구현 상세 내용](#구현-상세-내용)
-- [핵심 주요 코드](#핵심-주요-코드)
+- [구현 요약 내용](#구현-요약-내용-목차-이동)
+- [핵심 주요 코드](#핵심-주요-코드-목차-이동)
+- [문제 해결 경험(트러블 슈팅)](#문제-해결-경험트러블-슈팅-목차-이동)
+- [프로젝트에서 얻은 것](#프로젝트에서-얻은-것-목차-이동)
+- [개발 계기](#개발-계기-목차-이동)
+- [구현 상세 내용](#구현-상세-내용-목차-이동)
 
 </br>
 
-# 📘구현 요약 내용
+# 📘구현 요약 내용 [(목차 이동)](#목차)
 | 상세 설명 링크 | 구현 요약 |
 |----------------------|------------------|
 | [🧱 Core Architecture](#core) | 1. GameThread / RenderThread </br> 2. 델리게이트 이벤트 시스템 |
@@ -46,17 +46,19 @@ CPU/GPU 병목 구간을 분석하기 위한 프로파일러 개발과 더불어
 
 </br>
 
-# 📘핵심 주요 코드
+# 📘핵심 주요 코드 [(목차 이동)](#목차)
 
 | 코드 파일 | 코드 설명 |
 |----------|-----------|
 | RenderManager [.h](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Core/URenderManager.h) / [.cpp](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Core/URenderManager.cpp) | GameThread에서 제출된 스냅샷을 수신해 RenderThread에서 렌더 순서를 분류하고 제어하는 렌더링 허브입니다.|
-| USceneComponent [.h](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Components/USceneComponent.cpp) / [.cpp](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Components/USceneComponent.cpp) | Actor의 부모-자식 계층과 Local/World Transform을 관리하는 베이스 컴포넌트 </br> Attach / Detach 로직을 수행하고 있습니다. |
+| USceneComponent [.h](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Components/USceneComponent.h) / [.cpp](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Components/USceneComponent.cpp) | Actor의 부모-자식 계층과 Local/World Transform을 관리하는 베이스 컴포넌트 </br> Attach / Detach 로직을 수행하고 있습니다. |
 | UAnimInstance [.h](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Components/UAnimInstance.h) / [.cpp](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Components/UAnimInstance.cpp) | 애니메이션 클립의 재생 시간과 상태를 관리하고, 블렌딩을 처리해 본 팔레트에 쓸 로컬 포즈를 만들어주는 실행기입니다. |
 | UWorld [.h](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Components/UWorld.h) / [.cpp](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Framework/Components/UWorld.cpp) | 액터를 생성·소멸·갱신하며, 액터들의 전체 생명주기(Lifecycle)를 관리하는 클래스입니다. |
-| 
+| APawnTest [.h](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Game/Actors/APawnTest.h) / [.cpp](https://github.com/Myoungcholho/DX_Portfolio/blob/main/DX11Portfolio/Game/Actors/APawnTest.cpp) | 게임 모듈에서 사용되는 APawn 기반 플레이어 테스트용 액터 클래스입니다. |
 
-# 📘문제 해결 경험(트러블 슈팅)
+</br>
+
+# 📘문제 해결 경험(트러블 슈팅) [(목차 이동)](#목차)
 
 <table style="border-collapse:collapse;">
   <tr>
@@ -119,7 +121,7 @@ CPU/GPU 병목 구간을 분석하기 위한 프로파일러 개발과 더불어
 
 ---
 
-## 1. Editor–GameThread 간 데이터 충돌 해결 구조 설계 <a id="t0"></a>
+## 1. Editor–GameThread 간 데이터 충돌 해결 구조 설계 <a id="t0"></a> [(표로 이동)](#문제-해결-경험트러블-슈팅-목차-이동)
 
 <table>
   <tr>
@@ -155,7 +157,7 @@ CPU/GPU 병목 구간을 분석하기 위한 프로파일러 개발과 더불어
 
 ---
 
-## 2. Asset 공유 구조 적용 – 중복 로딩 제거로 로딩 병목 해결 <a id="t1"></a>
+## 2. Asset 공유 구조 적용 – 중복 로딩 제거로 로딩 병목 해결 <a id="t1"></a> [(표로 이동)](#문제-해결-경험트러블-슈팅-목차-이동)
 
 <table>
   <tr>
@@ -200,7 +202,7 @@ CPU/GPU 병목 구간을 분석하기 위한 프로파일러 개발과 더불어
 
 ---
 
-## 3. 인스턴싱 도입 전 Static / Skeletal 프레임 저하 원인 파악 <a id="t2"></a>
+## 3. 인스턴싱 도입 전 Static / Skeletal 프레임 저하 원인 파악 <a id="t2"></a> [(표로 이동)](#문제-해결-경험트러블-슈팅-목차-이동)
 
 <table>
   <tr>
@@ -241,7 +243,7 @@ CPU/GPU 병목 구간을 분석하기 위한 프로파일러 개발과 더불어
 
 ---
 
-## 4. CPU·GPU 타임 비례 이상 징후 포착 <a id="t3"></a>
+## 4. CPU·GPU 타임 비례 이상 징후 포착 <a id="t3"></a> [(표로 이동)](#문제-해결-경험트러블-슈팅-목차-이동)
 
 <table>
   <tr>
@@ -284,7 +286,7 @@ CPU/GPU 병목 구간을 분석하기 위한 프로파일러 개발과 더불어
 
 ---
 
-## 5. 정수 기반 샘플링의 한계 – 블렌딩 시 덜덜거림 발생 <a id="t4"></a>
+## 5. 정수 기반 샘플링의 한계 – 블렌딩 시 덜덜거림 발생 <a id="t4"></a> [(표로 이동)](#문제-해결-경험트러블-슈팅-목차-이동)
 
 <table>
   <tr>
@@ -322,88 +324,73 @@ CPU/GPU 병목 구간을 분석하기 위한 프로파일러 개발과 더불어
 
 </br>
 
-# 📘프로젝트에서 얻은 것
+# 📘프로젝트에서 얻은 것 [(목차 이동)](#목차)
 
-**요약**
-- [1. 드로우콜 렌더링 파이프라인 감각](#gain-drawcall)
-- [2. 언리얼 아키텍처 이해와 재구현 경험](#gain-ue-arch)
-- [3. C++ 자원 관리와 소유권 감각](#gain-cpp-resource)
-- [4. 게임 스레드 / 렌더 스레드 분리·멀티스레드 이해](#gain-gt-rt)
-- [5. 행렬·계층 구조 기반 씬/애니메이션 처리 경험](#gain-matrix)
-- [6. 쉐이딩 모델·라이팅 이해](#gain-shading)
-- [7. Transform·회전·짐벌락을 다루며 쌓은 수학적 감각](#gain-rotation)
+| 번호 | 얻은 경험 |
+|------|-----------|
+| 1 | [드로우콜·렌더링 파이프라인 감각](#gain-drawcall) |
+| 2 | [언리얼 아키텍처 이해와 재구현 경험](#gain-ue-arch) |
+| 3 | [C++ 자원 관리와 소유권 감각](#gain-cpp-resource) |
+| 4 | [게임 스레드 / 렌더 스레드 분리·멀티스레드 이해](#gain-gt-rt) |
+| 5 | [행렬·계층 구조 기반 씬/애니메이션 처리 경험](#gain-matrix) |
+| 6 | [쉐이딩 모델·라이팅 이해](#gain-shading) |
+| 7 | [Transform·회전·짐벌락을 다루며 쌓은 수학적 감각](#gain-rotation) |
 
 ---
 
-### 1. 드로우콜 렌더링 파이프라인 감각 <a id="gain-drawcall"></a>
+### 1. 드로우콜 렌더링 파이프라인 감각 <a id="gain-drawcall"></a> [(⬆표로 이동)](#프로젝트에서-얻은-것-목차-이동)
 
-도형을 직접 그려 보고, 하나하나 드로우콜을 날려 보면서  
-물체를 화면에 그리기 위해 어떤 단계들이 필요하고,  
+도형을 직접 그려 보고, 하나하나 드로우콜을 날려 보면서 물체를 화면에 그리기 위해 어떤 단계들이 필요하고,  
 그 과정에서 어느 정도 자원이 소모되는지 체감할 수 있었습니다.
 
 ---
 
-### 2. 언리얼 아키텍처에 대한 이해와 재구현 경험 <a id="gain-ue-arch"></a>
+### 2. 언리얼 아키텍처에 대한 이해와 재구현 경험 <a id="gain-ue-arch"></a> [(⬆표로 이동)](#프로젝트에서-얻은-것-목차-이동)
 
-언리얼 아키텍처를 내 엔진으로 옮겨 구현해 보면서  
-Actor / Component / SceneComponent / Controller 등의 계층 구조와 책임 분리,  
-그리고 언리얼이 어떤 방식으로 업데이트와 최적화를 조직하는지  
-더 깊게 이해하게 되었습니다.
+언리얼 아키텍처를 내 엔진으로 옮겨 구현해 보면서 Actor / Component / SceneComponent / Controller 등의 계층 구조와 책임 분리,  
+그리고 언리얼이 어떤 방식으로 업데이트와 최적화를 조직하는지 더 깊게 이해하게 되었습니다.
 
 ---
 
-### 3. C++ 자원 관리와 소유권에 대한 감각 <a id="gain-cpp-resource"></a>
+### 3. C++ 자원 관리와 소유권에 대한 감각 <a id="gain-cpp-resource"></a> [(⬆표로 이동)](#프로젝트에서-얻은-것-목차-이동)
 
-엔진 레벨에서 객체 생명주기와 소유권을 직접 관리하다 보니  
-`std::move`, `std::forward`를 사용해야 하는 이유와  
-RAII / 스마트 포인터를 활용한 효율적인 자원 관리 방법을 몸으로 익힐 수 있었습니다.  
+엔진 레벨에서 객체 생명주기와 소유권을 직접 관리하다 보니 `std::move`, `std::forward`를 사용해야 하는 이유와 RAII / 스마트 포인터를 활용한 효율적인 자원 관리 방법을 몸으로 익힐 수 있었습니다.  
 
-SpawnActor와 유사한 흐름을 구현하면서  
-팩토리 패턴, 가변 인자, perfect forwarding 같은 언어 레벨 기법을  
-실제 설계에 적용해 볼 수 있었던 점도 컸습니다.
+SpawnActor와 유사한 흐름을 구현하면서 팩토리 패턴, 가변 인자, perfect forwarding 같은 언어 레벨 기법을 실제 설계에 적용해 볼 수 있었던 점도 컸습니다.
 
 ---
 
-### 4. 게임 스레드 / 렌더 스레드 분리와 멀티스레드 이해 <a id="gain-gt-rt"></a>
+### 4. 게임 스레드 / 렌더 스레드 분리와 멀티스레드 이해 <a id="gain-gt-rt"></a> [(⬆표로 이동)](#프로젝트에서-얻은-것-목차-이동)
 
-렌더 스레드와 게임 스레드를 분리해 동작시키는 과정에서  
-직접 레이스 컨디션과 동기화 문제를 마주하고 해결해 보며,  
-멀티스레드 환경에서 데이터를 안전하게 다루는 방법과 패턴에 대한  
-이해를 넓힐 수 있었습니다.
+렌더 스레드와 게임 스레드를 분리해 동작시키는 과정에서 직접 레이스 컨디션과 동기화 문제를 마주하고 해결해 보며,  
+멀티스레드 환경에서 데이터를 안전하게 다루는 방법과 패턴에 대한 이해를 넓힐 수 있었습니다.
 
 ---
 
-### 5. 행렬·계층 구조를 활용한 씬/애니메이션 처리 경험 <a id="gain-matrix"></a>
+### 5. 행렬·계층 구조를 활용한 씬/애니메이션 처리 경험 <a id="gain-matrix"></a> [(⬆표로 이동)](#프로젝트에서-얻은-것-목차-이동)
 
-컨텐츠 레벨에서는 잘 드러나지 않던 행렬 연산들이  
-SceneComponent의 부모–자식 계층, 스켈레탈 본 트리 계산, WVP 변환 같은 부분에서  
-어떻게 쓰이는지 직접 구현해 보았습니다.  
+컨텐츠 레벨에서는 잘 드러나지 않던 행렬 연산들이 SceneComponent의 부모–자식 계층, 스켈레탈 본 트리 계산, WVP 변환 같은 부분에서 어떻게 쓰이는지 직접 구현해 보았습니다.  
 
-이 과정에서 선형(행렬)·비선형(회전) 변환,  
-그리고 SIMD가 주는 이점을 실제 코드와 함께 이해하게 되었습니다.
+이 과정에서 선형(행렬)·비선형(회전) 변환, 그리고 SIMD가 주는 이점을 실제 코드와 함께 이해하게 되었습니다.
 
 ---
 
-### 6. 쉐이딩 모델과 라이팅에 대한 이해 <a id="gain-shading"></a>
+### 6. 쉐이딩 모델과 라이팅에 대한 이해 <a id="gain-shading"></a> [(⬆표로 이동)](#프로젝트에서-얻은-것-목차-이동)
 
-Phong 쉐이딩부터 Blinn-Phong, PBR 모델까지 직접 구현해 보면서  
-게임 화면의 표면이 어떤 라이팅 연산을 수행하는지,  
-하이라이트·반사·러프니스 같은 개념이 수식과 결과 이미지에서  
-어떻게 연결되는지 이해할 수 있었습니다.
+Phong 쉐이딩부터 Blinn-Phong, PBR 모델까지 직접 구현해 보면서 게임 화면의 표면이 어떤 라이팅 연산을 수행하는지,  
+하이라이트·반사·러프니스 같은 개념이 수식과 결과 이미지에서 어떻게 연결되는지 이해할 수 있었습니다.
 
 ---
 
-### 7. Transform, 회전, 짐벌락을 다루며 쌓은 수학적 감각 <a id="gain-rotation"></a>
+### 7. Transform, 회전, 짐벌락을 다루며 쌓은 수학적 감각 <a id="gain-rotation"></a> [(⬆표로 이동)](#프로젝트에서-얻은-것-목차-이동)
 
-Transform 시스템을 구현하고 에디터에서 즉시 반영되는 구조를 만들면서  
-잘못된 회전 적용, 축 고정, 짐벌락 같은 문제들을 직접 마주했습니다.  
+Transform 시스템을 구현하고 에디터에서 즉시 반영되는 구조를 만들면서 잘못된 회전 적용, 축 고정, 짐벌락 같은 문제들을 직접 마주했습니다.  
 
-Quat ↔ Euler 변환을 수학적으로 다뤄 보며  
-회전 표현에 대한 직관과 문제 해결 능력을 키울 수 있었습니다.
+Quat ↔ Euler 변환을 수학적으로 다뤄 보며 회전 표현에 대한 직관과 문제 해결 능력을 키울 수 있었습니다.
 
 </br>
 
-# 📘개발 계기
+# 📘개발 계기 [(목차 이동)](#목차)
 ### 1. 상용 엔진에서 제공하는 기능들의 내부 구현에 대한 호기심
 
 상용 엔진에서 버튼·체크박스 한 번으로 끝나는 기능들이  
@@ -425,11 +412,11 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
 
 </br>
 
-# 📘구현 상세 내용 
+# 📘구현 상세 내용 [(목차 이동)](#목차)
 <h3 id="core">1. Core Architecture </h3>
 
-- GameThread/RednerThread 분리 아키텍처 (MailBox 기반 스냅샷 소비 모델)
-- `std::function` 기반 델리게이트
+- GameThread/RednerThread 분리 아키텍처 (MailBox 기반 DoubleBuffer 스냅샷 소비 모델)
+- 델리게이트 시스템
 - Editor → GameThread 작업 전달용 Command Queue로 RaceCondition 제거 & Lock 스톨 최소화
 
 ---
