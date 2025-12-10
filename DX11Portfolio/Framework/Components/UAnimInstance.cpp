@@ -9,6 +9,12 @@
 /// <param name="rate"></param>
 void UAnimInstance::PlayClip(int index, bool loop, float rate)
 {
+	if (AnimData == nullptr)
+		return;
+
+	if (index < 0 || index >= AnimData->clips.size())
+		return;
+
     clipIndex = index;
     bLoop = loop;
     playRate = rate;
@@ -25,7 +31,7 @@ void UAnimInstance::PlayClip(int index, bool loop, float rate)
 /// <param name="rate"></param>
 void UAnimInstance::PlayAtFrame(int startFrame)
 {
-	if (!AnimData || AnimData->clips.empty())
+	if (AnimData == nullptr || AnimData->clips.empty())
 		return;
 
 	frame = clamp(startFrame, 0, AnimData->clips[clipIndex].numKeys - 1);
@@ -37,8 +43,12 @@ void UAnimInstance::PlayAtFrame(int startFrame)
 
 void UAnimInstance::Update(double dt)
 {
-    if (!AnimData || AnimData->clips.empty())
+    if (AnimData == nullptr || AnimData->clips.empty())
         return;
+
+	if (clipIndex < 0 || clipIndex >= AnimData->clips.size())
+		return;
+
 
     const AnimationClip& clip = AnimData->clips[clipIndex];
     const double ticksPerSec = (clip.ticksPerSec > 0) ? clip.ticksPerSec : 60.0;	// 클립이 1초에 도는 프레임 수
@@ -158,18 +168,34 @@ void UAnimInstance::Update(double dt)
 	}
 }
 
-string UAnimInstance::GetCurrentClipName()
+string UAnimInstance::GetCurrentClipName() const
 {
+	if (AnimData == nullptr)
+		return "AnimData is nullptr";
+
+	if (clipIndex < 0 || clipIndex >= AnimData->clips.size())
+		return "clipIndex out of range";
+
 	return AnimData->clips[clipIndex].name;
 }
 
-float UAnimInstance::GetCurrentFrame()
+float UAnimInstance::GetCurrentFrame() const
 {
 	return frame;
 }
 
-float UAnimInstance::GetTotalFrames()
+/// <summary>
+/// 진행중인 애니메이션의 전체 길이 반환
+/// </summary>
+/// <returns></returns>
+float UAnimInstance::GetTotalFrames() const
 {
+	if (AnimData == nullptr)
+		return -1;
+
+	if (clipIndex < 0 || clipIndex >= AnimData->clips.size())
+		return -1;
+
 	return AnimData->clips[clipIndex].numKeys;
 }
 
@@ -182,6 +208,9 @@ float UAnimInstance::GetTotalFrames()
 /// <param name="rate"> 전환될 클립의 애니메이션 속도 </param>
 void UAnimInstance::CrossFadeTo(int nextIndex, float durationSec, bool loop, float rate)
 {
+	if (AnimData == nullptr)
+		return;
+
 	fromPose = localPose;
 
 	nextClipIndex = nextIndex;
@@ -192,8 +221,8 @@ void UAnimInstance::CrossFadeTo(int nextIndex, float durationSec, bool loop, flo
 
 	// 대상 포즈 1회 로컬 포즈 생성
 	toPose.clear();
-	if (AnimData)
-		AnimData->EvaluateLocalPose(nextClipIndex, 0, nextAccum, toPose);
+	
+	AnimData->EvaluateLocalPose(nextClipIndex, 0, nextAccum, toPose);
 
 	blendDur = max(0.0001f, durationSec);
 	blendT = 0.0f;
@@ -214,7 +243,7 @@ void UAnimInstance::BlendPose(const vector<AnimationClip::Key>& A, const vector<
 	const size_t n = A.size();
 	if (Out.size() != n) Out.resize(n);
 
-	w = std::clamp(w, 0.0f, 1.0f);
+	w = clamp(w, 0.0f, 1.0f);
 	for (int i = 0; i < n; ++i)
 	{
 		Out[i].pos = Vector3::Lerp(A[i].pos, B[i].pos, w);

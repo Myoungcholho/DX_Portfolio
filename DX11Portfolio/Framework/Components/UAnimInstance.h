@@ -29,9 +29,9 @@ public:
 	bool IsBlending() const { return bBlending; }
 	int GetNextClipIndex() const { return nextClipIndex; }
 	float GetBlendDuration() const { return blendDur; }
-	string GetCurrentClipName();
-	float GetCurrentFrame();
-	float GetTotalFrames();
+	string GetCurrentClipName() const;
+	float GetCurrentFrame() const;
+	float GetTotalFrames() const;
 
 	const vector<AnimationClip::Key>& GetLocalPose() const { return localPose; }
 
