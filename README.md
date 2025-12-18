@@ -416,17 +416,17 @@ Quat ↔ Euler 변환을 수학적으로 다뤄 보며 회전 표현에 대한 �
       <td>
         <b>🎯 설계 의도</b><br/>
         <p style="margin-top:6px; margin-bottom:14px;">
-          수직 동기화(Present 대기)로 렌더링과 게임 로직이 같은 사이클에 묶여 게임 로직 실행이 지연되는 문제를 해결하기 위함
+          수직 동기화(Present 대기)로 렌더링과 게임 로직이 같은 사이클에 묶여 게임 로직 실행이 지연되는 문제를 해결하기 위함입니다.
         </p>
         <b>🗺️ 구조/핵심 구성</b><br/>
         <p style="margin-top:6px; margin-bottom:14px;">
           <img width="520" alt="flow" src="https://github.com/user-attachments/assets/e685b1d4-5d78-4f23-bb8f-4670ab0ab85e" /></br>
-           게임 스레드가 렌더링용 스냅샷을 생성해 MailBox에 발행하고, 렌더 스레드는 가장 최신 스냅샷을 가져와 소비하는 구조
+           게임 스레드가 렌더링용 스냅샷을 생성해 MailBox에 발행하고, 렌더 스레드는 가장 최신 스냅샷을 가져와 소비하는 구조입니다.
         </p>
         <b>🔍 적용/효과/검증</b><br/>
         <p style="margin-top:6px; margin-bottom:0px;">
           <img width="520" alt="evidence" src="https://github.com/user-attachments/assets/b4259807-6562-4f9b-b5a3-a67ad2aedfa5" /></br>
-          이전 구조에서는 렌더링 스톨 영향으로 게임 로직 호출 빈도까지 함께 낮아졌지만, 분리 이후에는 렌더링과 무관하게 게임 로직 업데이트가 안정적으로 더 자주 수행
+          이전 구조에서는 렌더링 스톨 영향으로 게임 로직 호출 빈도까지 함께 낮아졌지만, 분리 이후에는 렌더링과 무관하게 게임 로직 업데이트가 안정적으로 더 자주 수행하고 있습니다.
         </p>  
       </td>
     </tr>
@@ -442,17 +442,22 @@ Quat ↔ Euler 변환을 수학적으로 다뤄 보며 회전 표현에 대한 �
       <td>
         <b>🎯 설계 의도</b><br/>
         <p style="margin-top:6px; margin-bottom:14px;">
-          내용 설명
+          게임 모듈에서 함수 포인터 방식이 불편해, 간편한 델리게이트(이벤트) 시스템을 직접 구현했습니다.
         </p>
         <b>🗺️ 구조/핵심 구성</b><br/>
         <p style="margin-top:6px; margin-bottom:14px;">
           [이미지]
            내용 설명
         </p>
+        <b>🧠 설계 고민 </b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          델리게이트 바인딩 방식으로 <code>std::function(람다 캡처)</code>와 <code>Stub + void*</code>(type erasure) 두 접근을 비교했습니다.<br/>
+          현재는 프로젝트 규모/단계에서 구현 속도와 디버깅 편의성이 더 중요하다고 판단해 람다 기반 방식을 우선 적용했습니다.
+        </p>
         <b>🔍 적용/효과/검증</b><br/>
         <p style="margin-top:6px; margin-bottom:0px;">
-          [이미지]
-          내용 설명
+          <img width="575" height="57" alt="image" src="https://github.com/user-attachments/assets/8bb6369d-a2e4-40e3-9b69-1efb60b05495" />
+          엔진에서는 위 방식으로 델리게이트를 바인딩하고, Broadcast로 이벤트를 전파해 사용하고 있습니다.
         </p>  
       </td>
     </tr>
@@ -468,18 +473,22 @@ Quat ↔ Euler 변환을 수학적으로 다뤄 보며 회전 표현에 대한 �
       <td>
         <b>🎯 설계 의도</b><br/>
         <p style="margin-top:6px; margin-bottom:14px;">
-          내용 설명
+          <img width="572" height="267" alt="image" src="https://github.com/user-attachments/assets/221325ea-2590-4400-8434-552333d7c713" />
+          에디터에서 액터 값을 변경할 때 게임 스레드가 동시에 접근해 레이스 컨디션이 발생했고, 이를 해결하기 위해 해당 시스템을 구현했습니다.
         </p>
         <b>🗺️ 구조/핵심 구성</b><br/>
         <p style="margin-top:6px; margin-bottom:14px;">
-          [이미지]
-           내용 설명
+          <img width="949" height="234" alt="image" src="https://github.com/user-attachments/assets/ac4dd3be-f6df-4c09-9d1f-3c0949a9e595" />
+<ul>
+  <li>에디터는 N프레임에 변경값을 명령 패킷으로 만들어 큐에 등록합니다.</li>
+  <li>GameThread는 N+1프레임에 이를 소비해 Actor에 반영합니다.</li>
+</ul>
         </p>
-        <b>🔍 적용/효과/검증</b><br/>
+        <b>🧠 설계 고민 </b><br/>
         <p style="margin-top:6px; margin-bottom:0px;">
-          [이미지]
-          내용 설명
-        </p>  
+          초기엔 에디터 값 변경시마다 Lock으로 막을까 했습니다.
+          하지만 변경이 잦아 게임 스레드 스톨이 커질 수 있어, 즉시 반영 대신 변경값을 모아두고 게임 로직 시작 시점에 일괄 적용하는 방식을 사용하게 되었습니다.
+        </p>
       </td>
     </tr>
   </table>
@@ -498,17 +507,22 @@ Quat ↔ Euler 변환을 수학적으로 다뤄 보며 회전 표현에 대한 �
       <td>
         <b>🎯 설계 의도</b><br/>
         <p style="margin-top:6px; margin-bottom:14px;">
-          내용 설명
+          오브젝트의 위치/회전/크기를 한 곳에서 책임지고 관리하기 위해 만들었습니다.
         </p>
         <b>🗺️ 구조/핵심 구성</b><br/>
         <p style="margin-top:6px; margin-bottom:14px;">
-          [이미지]
-           내용 설명
+          <img width="533" height="125" alt="image" src="https://github.com/user-attachments/assets/0027499a-d783-4129-a16d-651c682d99ec" /><br/>
+           제 Transform은 Euler와 Quaternion을 모두 보관합니다.
+          Euler는 에디터에서 직관적으로 수정·노출하기 위한 용도이고, Quaternion은 애니메이션/런타임에서 회전 보간을 안정적으로 처리하기 위한 용도로 설계했습니다.
         </p>
-        <b>🔍 적용/효과/검증</b><br/>
+        <b>🔍 구현 포인트</b><br/>
         <p style="margin-top:6px; margin-bottom:0px;">
-          [이미지]
-          내용 설명
+          <img width="781" height="159" alt="image" src="https://github.com/user-attachments/assets/2ab08265-ad51-4901-a207-4f3dc42ff6a8" /><br/>
+          에디터에서 편집할 때는 Euler → Quat 방향으로만 갱신합니다.
+          이렇게 해서 불필요한 Quat → Euler 재계산을 피합니다.
+          <img width="540" height="119" alt="image" src="https://github.com/user-attachments/assets/ea4fe2ca-1387-49fb-8388-ba18cac79431" /><br/>
+          결국 애니메이션 계산 등으로 Quat → Euler 변환이 필요한 순간이 있습니다.
+          이때 각 축에 -360/0/+360을 적용한 27개 후보를 만든 뒤, 이전 Euler 값과의 거리가 가장 작은 값을 선택해 튐을 방지하고 있습니다.
         </p>  
       </td>
     </tr>
@@ -517,7 +531,69 @@ Quat ↔ Euler 변환을 수학적으로 다뤄 보며 회전 표현에 대한 �
 </details>
 
 <details>
-  <summary>GameInstance / UWorld / SceneComponent / PrimitiveComponent / RenderProxy 구조</summary>
+  <summary> UWorld 클래스 </summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 설계 의도</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          월드 단위 객체들의 수명 관리 목적으로 설계했습니다.
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          <img width="226" height="266" alt="image" src="https://github.com/user-attachments/assets/4344c7f3-a93c-469d-b9ec-ab8a26143919" />
+           UWorld는 월드에 존재하는 Actor들의 생성/보관/수명 관리를 담당합니다.
+        </p>
+        <b>🔍 구현 포인트</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          <img width="789" height="307" alt="image" src="https://github.com/user-attachments/assets/0c7e5193-1baf-483e-9379-6f213a0210de" />
+            초기에는 액터를 기본 생성자로만 스폰한 뒤, 필요한 데이터를 Set()으로 별도 주입해야 했습니다.
+            이 과정에서 Set() 호출을 빠뜨리는 실수가 있었습니다.
+            그래서 스폰 함수가 가변 인자(variadic)를 받아 메시 정보 등을 생성과 동시에 전달/설정할 수 있도록 구조를 개선했습니다.
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary> ActorComponent / SceneComponent / PrimitiveComponent / RenderProxy 구조</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 설계 의도</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          초기에는 모델마다 공통 기능을 반복 구현해야 했습니다.
+          이를 해결하기 위해 자주 사용되는 기능을 분리해 ActorComponent → SceneComponent → PrimitiveComponent로 
+          이어지는 역할 기반 계층 구조를 설계했습니다.
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+           <img width="245" height="441" alt="image" src="https://github.com/user-attachments/assets/52dbd18d-b001-4f00-ba7f-c7419a05d77a" />
+            ActorComponent는 어태치 기능을 담당하는 기본 컴포넌트입니다.
+            SceneComponent는 부모–자식 계층과 위치·회전·스케일 정보를 관리합니다.
+            PrimitiveComponent는 정점·인덱스·머티리얼 등 렌더링 데이터를 중심으로 관리합니다.
+        </p>
+        <b>🔍 구현 포인트</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          Transform은 포인터가 아닌 value 타입으로 관리했습니다.
+            <img width="488" height="183" alt="image" src="https://github.com/user-attachments/assets/2d8e7baf-afa6-4e68-8cf5-3d45282e247d" />
+초기에는 포인터 관리 방식을 고려했지만, Unreal Engine의 구현과
+성능/소유권 특성을 검토한 뒤 value 타입이 더 적합하다고 판단했습니다.
+          가장 큰 이유는 CPU는 캐시라인 단위로 메모리를 로드하므로
+객체가 Transform을 값으로 소유하면 액터 접근 시 함께 캐시에 적재되기 때문입니다.
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary> Actor 클래스</summary>
   <br/>
   <table>
     <tr>
