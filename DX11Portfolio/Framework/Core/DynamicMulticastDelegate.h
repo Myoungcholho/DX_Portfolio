@@ -34,7 +34,7 @@ public:
         FBoundFunction Bound;
         Bound.ObjectPtr = static_cast<void*>(Object);
         Bound.Invoker = [Object, Method]() { (Object->*Method)(); };
-        Bound.Handle = FDelegateHandle(NextId++);
+        Bound.Handle = FDelegateHandle(NextHandleId++);
         Bound.FunctionName = MethodName;
         Delegates.push_back(std::move(Bound));
         return Bound.Handle;
@@ -56,6 +56,6 @@ public:
     bool IsBound() const;
 
 private:
-    std::vector<FBoundFunction> Delegates;
-    uint64_t NextId = 1;
+    vector<FBoundFunction> Delegates;
+    uint64_t NextHandleId = 1;
 };
