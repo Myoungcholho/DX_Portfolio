@@ -393,79 +393,645 @@ Quat ↔ Euler 변환을 수학적으로 다뤄 보며 회전 표현에 대한 �
 # 📘개발 계기 [(목차 이동)](#목차)
 ### 1. 상용 엔진에서 제공하는 기능들의 내부 구현에 대한 호기심
 
-상용 엔진에서 버튼·체크박스 한 번으로 끝나는 기능들이  
-어떤 자료구조와 업데이트 순서, 수학으로 돌아가는지 궁금해져  
-“엔진이 해주는 일을 직접 구현해 보자”는 생각으로  
-DX11 기반 자체 엔진 개발을 시작했습니다.
+상용 엔진에서 버튼·체크박스 한 번으로 끝나는 기능들이 어떤 자료구조와 업데이트 순서, 수학으로 돌아가는지 궁금해져 “엔진이 해주는 일을 직접 구현해 보자”는 생각으로 DX11 기반 자체 엔진 개발을 시작했습니다.
 
 ### 2. 렌더링 과정에 대한 이해와 직접 적용
 
-렌더링이 많은 자원을 쓰는 건 느끼면서도 파이프라인을 몰라 병목을 찾기 어려웠고,  
-자원 관리는 프로그래머의 핵심 덕목이라 생각해  
-렌더링 파이프라인을 직접 구현하며 구조를 파고들고자 했습니다.
+렌더링이 많은 자원을 쓰는 건 느끼면서도 파이프라인을 몰라 병목을 찾기 어려웠고, 자원 관리는 프로그래머의 핵심 덕목이라 생각해 렌더링 파이프라인을 직접 구현하며 구조를 파고들고자 했습니다.
 
 ### 3. 언리얼 엔진의 설계 철학 이해 및 적용
 
-언리얼의 복잡하지만 개발자 친화적인 구조를 보며  
-엔진 레벨 설계가 클라이언트 개발 효율로 이어진다는 걸 체감했고,  
-이 철학을 DX11 자체 엔진 구조로 직접 옮겨 체득하고자 했습니다.
+언리얼의 복잡하지만 개발자 친화적인 구조를 보며 엔진 레벨 설계가 클라이언트 개발 효율로 이어진다는 걸 체감했고, 이 철학을 DX11 자체 엔진 구조로 직접 옮겨 체득하고자 했습니다.
 
 </br>
 
 # 📘구현 상세 내용 [(목차 이동)](#목차)
 <h3 id="core">1. Core Architecture </h3>
 
-- GameThread/RednerThread 분리 아키텍처 (MailBox 기반 DoubleBuffer 스냅샷 소비 모델)
-- 델리게이트 시스템
-- Editor → GameThread 작업 전달용 Command Queue로 RaceCondition 제거 & Lock 스톨 최소화
+<details>
+  <summary>GameThread/RenderThread 분리 아키텍처 (MailBox 기반 DoubleBuffer 스냅샷 소비 모델)</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 설계 의도</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          수직 동기화(Present 대기)로 렌더링과 게임 로직이 같은 사이클에 묶여 게임 로직 실행이 지연되는 문제를 해결하기 위함
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          <img width="520" alt="flow" src="https://github.com/user-attachments/assets/e685b1d4-5d78-4f23-bb8f-4670ab0ab85e" /></br>
+           게임 스레드가 렌더링용 스냅샷을 생성해 MailBox에 발행하고, 렌더 스레드는 가장 최신 스냅샷을 가져와 소비하는 구조
+        </p>
+        <b>🔍 적용/효과/검증</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          <img width="520" alt="evidence" src="https://github.com/user-attachments/assets/b4259807-6562-4f9b-b5a3-a67ad2aedfa5" /></br>
+          이전 구조에서는 렌더링 스톨 영향으로 게임 로직 호출 빈도까지 함께 낮아졌지만, 분리 이후에는 렌더링과 무관하게 게임 로직 업데이트가 안정적으로 더 자주 수행
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary>델리게이트 시스템</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 설계 의도</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          내용 설명
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [이미지]
+           내용 설명
+        </p>
+        <b>🔍 적용/효과/검증</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          [이미지]
+          내용 설명
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary>Editor → GameThread 작업 전달용 Command Queue로 RaceCondition 제거 & Lock 스톨 최소화</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 설계 의도</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          내용 설명
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [이미지]
+           내용 설명
+        </p>
+        <b>🔍 적용/효과/검증</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          [이미지]
+          내용 설명
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
 
 ---
 
 <h3 id="world">2. World / Object </h3>
 
-- Transform 시스템 (월드/로컬 변환 및 위치 정보 관리)
-- GameInstance / UWorld / SceneComponent / PrimitiveComponent / RenderProxy 구조
-- AActor / StaticMeshComponent / SkeletalMeshComponent 구성
-- Pawn / Controller / GameMode 계층
-- ClassID 기반 Actor 런타임 스폰 팩토리 (리플렉션 없이 타입 등록/생성)
-- 마우스·키보드 전역 입력 시스템
+<details>
+  <summary>Transform 시스템 (월드/로컬 변환 및 위치 정보 관리)</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 설계 의도</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          내용 설명
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [이미지]
+           내용 설명
+        </p>
+        <b>🔍 적용/효과/검증</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          [이미지]
+          내용 설명
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary>GameInstance / UWorld / SceneComponent / PrimitiveComponent / RenderProxy 구조</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 설계 의도</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          내용 설명
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [이미지]
+           내용 설명
+        </p>
+        <b>🔍 적용/효과/검증</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          [이미지]
+          내용 설명
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary>AActor / StaticMeshComponent / SkeletalMeshComponent 구성</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 설계 의도</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          내용 설명
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [이미지]
+           내용 설명
+        </p>
+        <b>🔍 적용/효과/검증</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          [이미지]
+          내용 설명
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+  
+<details>
+  <summary>Pawn / Controller / GameMode 계층</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 설계 의도</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          내용 설명
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [이미지]
+           내용 설명
+        </p>
+        <b>🔍 적용/효과/검증</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          [이미지]
+          내용 설명
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary>ClassID 기반 Actor 런타임 스폰 팩토리 (리플렉션 없이 타입 등록/생성)</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 설계 의도</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          내용 설명
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [이미지]
+           내용 설명
+        </p>
+        <b>🔍 적용/효과/검증</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          [이미지]
+          내용 설명
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary>마우스·키보드 전역 입력 시스템</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 설계 의도</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          내용 설명
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [이미지]
+           내용 설명
+        </p>
+        <b>🔍 적용/효과/검증</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          [이미지]
+          내용 설명
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
 
 ---
 
 <h3 id="rendering">3. Rendering </h3>
 
-- 그래픽 파이프라인 상태 집합 객체(PSO) 설계  
-  (Shader·Blend·Rasterizer·Depth 상태 일체 관리)
-- RenderManager(패스 구성) / DrawBatch(오브젝트 유형별 배치·정렬) / Renderer(드로우 호출) 구조
-- HDR RenderTarget 파이프라인, MSAA, ToneMapping
-- Fog / Bloom / Shadow / PBR 라이팅
+<details>
+  <summary>그래픽 파이프라인 상태 집합 객체(PSO) 설계 (Shader·Blend·Rasterizer·Depth 상태 일체 관리)</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 설계 의도</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          내용 설명
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [이미지]
+           내용 설명
+        </p>
+        <b>🔍 적용/효과/검증</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          [이미지]
+          내용 설명
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary>RenderManager(패스 구성) / DrawBatch(오브젝트 유형별 배치·정렬) / Renderer(드로우 호출) 구조</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 설계 의도</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          내용 설명
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [이미지]
+           내용 설명
+        </p>
+        <b>🔍 적용/효과/검증</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          [이미지]
+          내용 설명
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary>HDR RenderTarget 파이프라인, MSAA, ToneMapping</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 설계 의도</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          내용 설명
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [이미지]
+           내용 설명
+        </p>
+        <b>🔍 적용/효과/검증</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          [이미지]
+          내용 설명
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+  
+<details>
+  <summary>Fog / Bloom / Shadow / PBR 라이팅</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 설계 의도</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          내용 설명
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [이미지]
+           내용 설명
+        </p>
+        <b>🔍 적용/효과/검증</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          [이미지]
+          내용 설명
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
 
 ---
 
 <h3 id="animation">4. Animation </h3>
 
-- 애니메이션 재생 시스템 (AnimationClip 기반 재생·루프·이동 관리)
-- AnimInstance (UAnimInstance와 유사한 상태·블렌딩 로직 전담 계층)
-- 애니메이션 블렌딩 (키프레임 보간 기반 블렌딩)
-- 카메라 거리 기반 Tick 최적화 (Update Rate Optimization)
+<details>
+  <summary>애니메이션 재생 시스템 (AnimationClip 기반 재생·루프·이동 관리)</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 설계 의도</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          내용 설명
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [이미지]
+           내용 설명
+        </p>
+        <b>🔍 적용/효과/검증</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          [이미지]
+          내용 설명
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary>AnimInstance (UAnimInstance와 유사한 상태·블렌딩 로직 전담 계층)</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 설계 의도</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          내용 설명
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [이미지]
+           내용 설명
+        </p>
+        <b>🔍 적용/효과/검증</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          [이미지]
+          내용 설명
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary>애니메이션 블렌딩 (키프레임 보간 기반 블렌딩)</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 설계 의도</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          내용 설명
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [이미지]
+           내용 설명
+        </p>
+        <b>🔍 적용/효과/검증</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          [이미지]
+          내용 설명
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary>카메라 거리 기반 Tick 최적화 (Update Rate Optimization)</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 설계 의도</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          내용 설명
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [이미지]
+           내용 설명
+        </p>
+        <b>🔍 적용/효과/검증</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          [이미지]
+          내용 설명
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
 
 ---
 
 <h3 id="asset">5. Asset </h3>
 
-- .fbx 파일 로드 파이프라인 (메시·본·애니메이션 데이터 파싱)
-- CPU / GPU / 애니메이션 자원 공유 관리 클래스
+<details>
+  <summary>.fbx 파일 로드 파이프라인 (메시·본·애니메이션 데이터 파싱)</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 설계 의도</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          내용 설명
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [이미지]
+           내용 설명
+        </p>
+        <b>🔍 적용/효과/검증</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          [이미지]
+          내용 설명
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary>CPU / GPU / 애니메이션 자원 공유 관리 클래스</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 설계 의도</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          내용 설명
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [이미지]
+           내용 설명
+        </p>
+        <b>🔍 적용/효과/검증</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          [이미지]
+          내용 설명
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
 
 ---
 
 <h3 id="editor">6. Editor </h3>
 
-- ImGui Docking 기반 에디터 UI
-- WorldOutliner / ActorOutliner / InspectorWindow를 통한 런타임 액터/컴포넌트 편집
+<details>
+  <summary>ImGui Docking 기반 에디터 UI</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 설계 의도</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          내용 설명
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [이미지]
+           내용 설명
+        </p>
+        <b>🔍 적용/효과/검증</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          [이미지]
+          내용 설명
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary>WorldOutliner / ActorOutliner / InspectorWindow를 통한 런타임 액터/컴포넌트 편집</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 설계 의도</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          내용 설명
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [이미지]
+           내용 설명
+        </p>
+        <b>🔍 적용/효과/검증</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          [이미지]
+          내용 설명
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
 
 ---
 
 <h3 id="profiling">7. Profiling </h3>
 
-- 구역 단위 실행 시간 측정 & 파일 저장 프로파일러
-- CPU/GPU 프레임 타임 측정 런타임 시스템
+<details>
+  <summary>구역 단위 실행 시간 측정 & 파일 저장 프로파일러</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 설계 의도</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          내용 설명
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [이미지]
+           내용 설명
+        </p>
+        <b>🔍 적용/효과/검증</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          [이미지]
+          내용 설명
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary> CPU/GPU 프레임 타임 측정 런타임 시스템 </summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 설계 의도</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          내용 설명
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [이미지]
+           내용 설명
+        </p>
+        <b>🔍 적용/효과/검증</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          [이미지]
+          내용 설명
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
