@@ -423,17 +423,29 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
       <td>
         <b>🎯 설계 의도</b><br/>
         <p style="margin-top:6px; margin-bottom:14px;">
-          수직 동기화(Present 대기)로 렌더링과 게임 로직이 같은 사이클에 묶여 게임 로직 실행이 지연되는 문제를 해결하기 위함입니다.
+                <ul>
+        <li>수직 동기화(Present 대기)로 인해 렌더링과 게임 로직이 같은 사이클에 묶이는 문제를 해결하고자 했습니다.</li>
+        <li>렌더링 스톨이 게임 로직 실행을 지연시키지 않도록 스레드 분리를 설계했습니다.</li>
+      </ul>
         </p>
         <b>🗺️ 구조/핵심 구성</b><br/>
         <p style="margin-top:6px; margin-bottom:14px;">
           <img width="520" alt="flow" src="https://github.com/user-attachments/assets/e685b1d4-5d78-4f23-bb8f-4670ab0ab85e" /></br>
-           게임 스레드가 렌더링용 스냅샷을 생성해 MailBox에 발행하고, 렌더 스레드는 가장 최신 스냅샷을 가져와 소비하는 구조입니다.
+                 <ul>
+        <li>GameThread는 렌더링에 필요한 데이터를 스냅샷 형태로 생성합니다.</li>
+        <li>생성된 스냅샷은 MailBox에 발행됩니다.</li>
+        <li>RenderThread는 MailBox에서 가장 최신 스냅샷 하나만 가져와 소비합니다.</li>
+        <li>Double Buffer 구조로 스냅샷 생성과 소비를 분리했습니다.</li>
+      </ul>
         </p>
-        <b>🔍 적용/효과/검증</b><br/>
+        <b>🔍 검증 </b><br/>
         <p style="margin-top:6px; margin-bottom:0px;">
           <img width="520" alt="evidence" src="https://github.com/user-attachments/assets/b4259807-6562-4f9b-b5a3-a67ad2aedfa5" /></br>
-          이전 구조에서는 렌더링 스톨 영향으로 게임 로직 호출 빈도까지 함께 낮아졌지만, 분리 이후에는 렌더링과 무관하게 게임 로직 업데이트가 안정적으로 더 자주 수행하고 있습니다.
+      <ul>
+        <li>기존 구조에서는 렌더링 스톨로 인해 게임 로직 호출 빈도도 함께 낮아졌습니다.</li>
+        <li>스레드 분리 이후에는 렌더링과 무관하게 게임 로직 업데이트가 안정적으로 수행됩니다.</li>
+        <li>게임 로직의 실행 빈도와 시간 안정성이 눈에 띄게 개선되었습니다.</li>
+      </ul>
         </p>  
       </td>
     </tr>
@@ -449,23 +461,28 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
       <td>
         <b>🎯 도입 배경 </b><br/>
         <p style="margin-top:6px; margin-bottom:14px;">
-          함수 포인터 방식이 불편해, 게임 모듈에서 쓰기 쉬운 델리게이트(이벤트) 시스템을 직접 구현했습니다.
+                <ul>
+        <li>함수 포인터 방식은 사용성이 떨어져, 게임 모듈에서 쓰기 쉬운 이벤트 시스템이 필요했습니다.</li>
+        <li>이에 따라 델리게이트(이벤트) 시스템을 직접 구현했습니다.</li>
+      </ul>
         </p>
         <b>🗺️ 구조/핵심 구성</b><br/>
         <p style="margin-top:6px; margin-bottom:14px;">
-          [이미지]
-           내용 설명
+          <img width="237" height="38" alt="image" src="https://github.com/user-attachments/assets/5dab9a3f-fac3-448f-983c-7444157a6d3f" />
+			<img width="575" height="57" alt="image" src="https://github.com/user-attachments/assets/8bb6369d-a2e4-40e3-9b69-1efb60b05495" />
+                <ul>
+        <li>엔진에서는 델리게이트를 바인딩한 뒤, Broadcast로 이벤트를 전파해 사용합니다.</li>
+      </ul>
+      </ul>
         </p>
-        <b>🧠 설계 고민 </b><br/>
+        <b>🧠 구현 포인 </b><br/>
         <p style="margin-top:6px; margin-bottom:0px;">
-          델리게이트 바인딩 방식으로 <code>std::function(람다 캡처)</code>와 <code>Stub + void*</code>(type erasure) 두 접근을 비교했습니다.
-          현재는 프로젝트 규모/단계에서 구현 속도와 디버깅 편의성이 더 중요하다고 판단해 람다 기반 방식을 우선 적용했습니다.
+                <ul>
+        <li><code>std::function</code>(람다 캡처) 방식과 <code>Stub + void*</code>(type erasure) 방식을 비교했습니다.</li>
+        <li>현재 프로젝트 단계에서는 구현 속도와 디버깅 편의성이 더 중요하다고 판단했습니다.</li>
+        <li>이에 따라 람다 기반 방식을 우선 적용했습니다.</li>
+      </ul>
         </p>
-        <b>🔍 사용 방식</b><br/>
-        <p style="margin-top:6px; margin-bottom:0px;">
-          <img width="575" height="57" alt="image" src="https://github.com/user-attachments/assets/8bb6369d-a2e4-40e3-9b69-1efb60b05495" />
-          엔진에서는 위 방식으로 델리게이트를 바인딩하고, Broadcast로 이벤트를 전파해 사용하고 있습니다.
-        </p>  
       </td>
     </tr>
   </table>
@@ -481,20 +498,27 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
         <b>🎯 도입 배경</b><br/>
         <p style="margin-top:6px; margin-bottom:14px;">
           <img width="572" height="267" alt="image" src="https://github.com/user-attachments/assets/221325ea-2590-4400-8434-552333d7c713" />
-          에디터에서 액터 값을 변경할 때 게임 스레드가 동시에 접근해 레이스 컨디션이 발생했고, 이를 해결하기 위해 해당 시스템을 구현했습니다.
+                <ul>
+        <li>에디터에서 액터 값을 수정할 때, GameThread가 동시에 접근해 레이스 컨디션이 발생했습니다.</li>
+        <li>스레드 간 안전하게 변경 사항을 전달할 구조가 필요하다고 판단했습니다.</li>
+      </ul>
         </p>
         <b>🗺️ 구조/핵심 구성</b><br/>
         <p style="margin-top:6px; margin-bottom:14px;">
           <img width="949" height="234" alt="image" src="https://github.com/user-attachments/assets/ac4dd3be-f6df-4c09-9d1f-3c0949a9e595" />
-<ul>
-  <li>에디터는 N프레임에 변경값을 명령 패킷으로 만들어 큐에 등록합니다.</li>
-  <li>GameThread는 N+1프레임에 이를 소비해 Actor에 반영합니다.</li>
-</ul>
+      <ul>
+        <li>에디터는 N 프레임에 변경값을 명령(Command) 형태로 큐에 등록합니다.</li>
+        <li>GameThread는 N+1 프레임에 큐를 소비해 Actor에 반영합니다.</li>
+        <li>Editor ↔ GameThread 간 직접 접근을 차단하고, 단방향 전달 구조로 설계했습니다.</li>
+      </ul>
         </p>
         <b>🧠 설계 고민 </b><br/>
         <p style="margin-top:6px; margin-bottom:0px;">
-          초기에는 에디터 값 변경마다 Lock 동기화를 고려했습니다.
-		  다만 스톨 위험이 있어 변경값을 누적한 뒤, 게임 로직 시작 시점에 일괄 적용했습니다.
+                <ul>
+        <li>초기에는 에디터 값 변경마다 Lock 기반 동기화를 고려했습니다.</li>
+        <li>하지만 변경 빈도가 높아 GameThread 스톨 위험이 크다고 판단했습니다.</li>
+        <li>이에 따라 변경값을 누적한 뒤, 게임 로직 시작 시점에 일괄 적용하는 방식으로 전환했습니다.</li>
+      </ul>
         </p>
       </td>
     </tr>
@@ -514,20 +538,29 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
       <td>
         <b>🎯 도입 배경</b><br/>
         <p style="margin-top:6px; margin-bottom:14px;">
-          오브젝트의 위치/회전/크기를 한 곳에서 책임지고 일관되게 관리하기 위해 구현했습니다.
+                <ul>
+        <li>오브젝트의 위치·회전·스케일을 한 곳에서 책임지고 일관되게 관리하기 위해 설계했습니다.</li>
+      </ul>
         </p>
         <b>🗺️ 구조/핵심 구성</b><br/>
         <p style="margin-top:6px; margin-bottom:14px;">
           <img width="533" height="125" alt="image" src="https://github.com/user-attachments/assets/0027499a-d783-4129-a16d-651c682d99ec" /><br/>
-          Transform은 Euler와 Quaternion을 함께 보관하고있습니다.
-			Euler는 에디터에서 직관적인 수정·노출, Quaternion은 런타임/애니메이션 보간의 안정성을 위해 사용합니다.
+                <ul>
+        <li>Transform은 Euler와 Quaternion을 함께 보관합니다.</li>
+        <li>Euler는 에디터에서의 직관적인 수정·노출을 위해 사용합니다.</li>
+        <li>Quaternion은 런타임 및 애니메이션 보간의 안정성을 위해 사용합니다.</li>
+      </ul>
         </p>
         <b>🔍 구현 포인트</b><br/>
         <p style="margin-top:6px; margin-bottom:0px;">
           <img width="781" height="159" alt="image" src="https://github.com/user-attachments/assets/2ab08265-ad51-4901-a207-4f3dc42ff6a8" /><br/>
-          에디터 편집 시에는 Euler → Quaternion 단방향 갱신만 수행해, 불필요한 재계산을 피했습니다.
+                <ul>
+        <li>에디터 편집 시에는 Euler → Quaternion 단방향 갱신만 수행해 불필요한 재계산을 피했습니다.</li>
+      </ul>
           <img width="540" height="119" alt="image" src="https://github.com/user-attachments/assets/ea4fe2ca-1387-49fb-8388-ba18cac79431" /><br/>
-          Quat → Euler 변환 시에는 27개 후보(−360/0/+360 조합) 중 이전 값과 가장 가까운 Euler를 선택해 회전 튐을 방지합니다.
+          <ul>
+        <li>Quaternion → Euler 변환 시에는 −360 / 0 / +360 조합의 27개 후보 중, 이전 값과 가장 가까운 Euler를 선택해 회전 튐을 방지했습니다.</li>
+      </ul>
         </p>  
       </td>
     </tr>
@@ -543,18 +576,24 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
       <td>
         <b>🎯 도입 배경</b><br/>
         <p style="margin-top:6px; margin-bottom:14px;">
-          월드 단위 객체들의 수명 관리를 책임지기 위해 설계했습니다.
+                <ul>
+        <li>월드 단위 객체들의 수명 관리를 일관되게 책임지기 위해 설계했습니다.</li>
+      </ul>
         </p>
         <b>🗺️ 구조/핵심 구성</b><br/>
         <p style="margin-top:6px; margin-bottom:14px;">
           <img width="226" height="266" alt="image" src="https://github.com/user-attachments/assets/4344c7f3-a93c-469d-b9ec-ab8a26143919" />
-           UWorld는 월드에 존재하는 Actor의 생성·보관·수명 관리를 담당합니다.
+                 <ul>
+        <li>UWorld는 월드에 존재하는 Actor의 생성·보관·수명 관리를 담당합니다.</li>
+      </ul>
         </p>
         <b>🔍 구현 포인트</b><br/>
         <p style="margin-top:6px; margin-bottom:0px;">
           <img width="789" height="307" alt="image" src="https://github.com/user-attachments/assets/0c7e5193-1baf-483e-9379-6f213a0210de" />
-            초기에는 기본 생성 후 Set()으로 데이터를 주입해, 호출 누락 문제가 발생했습니다.
-이를 해결하기 위해 스폰 함수가 가변 인자를 받아 생성 시점에 바로 설정하도록 개선했습니다.
+      <ul>
+        <li>초기에는 기본 생성 후 Set()으로 데이터를 주입해, 호출 누락 문제가 발생했습니다.</li>
+        <li>이를 해결하기 위해 스폰 함수가 가변 인자를 받아 생성 시점에 바로 데이터를 설정하도록 개선했습니다.</li>
+      </ul>
         </p>  
       </td>
     </tr>
@@ -570,8 +609,10 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
       <td>
         <b>🎯 도입 배경</b><br/>
         <p style="margin-top:6px; margin-bottom:14px;">
-          초기에는 모델마다 공통 기능을 반복 구현해야 했습니다.
-이를 해결하기 위해 역할 기반 컴포넌트 계층 구조를 설계했습니다.
+<ul>
+  <li>초기에는 모델마다 공통 기능을 반복 구현해야 했습니다.</li>
+  <li>이를 해결하기 위해 역할 기반 컴포넌트 계층 구조를 설계했습니다.</li>
+</ul>
         </p>
         <b>🗺️ 구조/핵심 구성</b><br/>
         <p style="margin-top:6px; margin-bottom:14px;">
@@ -859,7 +900,6 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
         <b>🗺️ 구조/핵심 구성</b><br/>
         <p style="margin-top:6px; margin-bottom:14px;">
           [이미지]
-           
         </p>
         <b>🔍 구현 포인트 </b><br/>
         <p style="margin-top:6px; margin-bottom:0px;">
