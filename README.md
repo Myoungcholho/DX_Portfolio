@@ -415,57 +415,794 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
 # 📘구현 상세 내용 [(목차 이동)](#목차)
 <h3 id="core">1. Core Architecture </h3>
 
-- GameThread/RednerThread 분리 아키텍처 (MailBox 기반 DoubleBuffer 스냅샷 소비 모델)
-- 델리게이트 시스템
-- Editor → GameThread 작업 전달용 Command Queue로 RaceCondition 제거 & Lock 스톨 최소화
+<details>
+  <summary>GameThread/RenderThread 분리 아키텍처 (MailBox 기반 DoubleBuffer 스냅샷 소비 모델)</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 설계 의도</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          수직 동기화(Present 대기)로 렌더링과 게임 로직이 같은 사이클에 묶여 게임 로직 실행이 지연되는 문제를 해결하기 위함입니다.
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          <img width="520" alt="flow" src="https://github.com/user-attachments/assets/e685b1d4-5d78-4f23-bb8f-4670ab0ab85e" /></br>
+           게임 스레드가 렌더링용 스냅샷을 생성해 MailBox에 발행하고, 렌더 스레드는 가장 최신 스냅샷을 가져와 소비하는 구조입니다.
+        </p>
+        <b>🔍 적용/효과/검증</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          <img width="520" alt="evidence" src="https://github.com/user-attachments/assets/b4259807-6562-4f9b-b5a3-a67ad2aedfa5" /></br>
+          이전 구조에서는 렌더링 스톨 영향으로 게임 로직 호출 빈도까지 함께 낮아졌지만, 분리 이후에는 렌더링과 무관하게 게임 로직 업데이트가 안정적으로 더 자주 수행하고 있습니다.
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary>델리게이트 시스템</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 도입 배경 </b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          함수 포인터 방식이 불편해, 게임 모듈에서 쓰기 쉬운 델리게이트(이벤트) 시스템을 직접 구현했습니다.
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [이미지]
+           내용 설명
+        </p>
+        <b>🧠 설계 고민 </b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          델리게이트 바인딩 방식으로 <code>std::function(람다 캡처)</code>와 <code>Stub + void*</code>(type erasure) 두 접근을 비교했습니다.
+          현재는 프로젝트 규모/단계에서 구현 속도와 디버깅 편의성이 더 중요하다고 판단해 람다 기반 방식을 우선 적용했습니다.
+        </p>
+        <b>🔍 사용 방식</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          <img width="575" height="57" alt="image" src="https://github.com/user-attachments/assets/8bb6369d-a2e4-40e3-9b69-1efb60b05495" />
+          엔진에서는 위 방식으로 델리게이트를 바인딩하고, Broadcast로 이벤트를 전파해 사용하고 있습니다.
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary>Editor → GameThread 작업 전달용 Command Queue로 RaceCondition 제거 & Lock 스톨 최소화</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 도입 배경</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          <img width="572" height="267" alt="image" src="https://github.com/user-attachments/assets/221325ea-2590-4400-8434-552333d7c713" />
+          에디터에서 액터 값을 변경할 때 게임 스레드가 동시에 접근해 레이스 컨디션이 발생했고, 이를 해결하기 위해 해당 시스템을 구현했습니다.
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          <img width="949" height="234" alt="image" src="https://github.com/user-attachments/assets/ac4dd3be-f6df-4c09-9d1f-3c0949a9e595" />
+<ul>
+  <li>에디터는 N프레임에 변경값을 명령 패킷으로 만들어 큐에 등록합니다.</li>
+  <li>GameThread는 N+1프레임에 이를 소비해 Actor에 반영합니다.</li>
+</ul>
+        </p>
+        <b>🧠 설계 고민 </b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          초기에는 에디터 값 변경마다 Lock 동기화를 고려했습니다.
+		  다만 스톨 위험이 있어 변경값을 누적한 뒤, 게임 로직 시작 시점에 일괄 적용했습니다.
+        </p>
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
 
 ---
 
 <h3 id="world">2. World / Object </h3>
 
-- Transform 시스템 (월드/로컬 변환 및 위치 정보 관리)
-- GameInstance / UWorld / SceneComponent / PrimitiveComponent / RenderProxy 구조
-- AActor / StaticMeshComponent / SkeletalMeshComponent 구성
-- Pawn / Controller / GameMode 계층
-- ClassID 기반 Actor 런타임 스폰 팩토리 (리플렉션 없이 타입 등록/생성)
-- 마우스·키보드 전역 입력 시스템
+<details>
+  <summary>Transform 시스템 (월드/로컬 변환 및 위치 정보 관리)</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 도입 배경</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          오브젝트의 위치/회전/크기를 한 곳에서 책임지고 일관되게 관리하기 위해 구현했습니다.
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          <img width="533" height="125" alt="image" src="https://github.com/user-attachments/assets/0027499a-d783-4129-a16d-651c682d99ec" /><br/>
+          Transform은 Euler와 Quaternion을 함께 보관하고있습니다.
+			Euler는 에디터에서 직관적인 수정·노출, Quaternion은 런타임/애니메이션 보간의 안정성을 위해 사용합니다.
+        </p>
+        <b>🔍 구현 포인트</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          <img width="781" height="159" alt="image" src="https://github.com/user-attachments/assets/2ab08265-ad51-4901-a207-4f3dc42ff6a8" /><br/>
+          에디터 편집 시에는 Euler → Quaternion 단방향 갱신만 수행해, 불필요한 재계산을 피했습니다.
+          <img width="540" height="119" alt="image" src="https://github.com/user-attachments/assets/ea4fe2ca-1387-49fb-8388-ba18cac79431" /><br/>
+          Quat → Euler 변환 시에는 27개 후보(−360/0/+360 조합) 중 이전 값과 가장 가까운 Euler를 선택해 회전 튐을 방지합니다.
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary> UWorld 클래스 </summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 도입 배경</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          월드 단위 객체들의 수명 관리를 책임지기 위해 설계했습니다.
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          <img width="226" height="266" alt="image" src="https://github.com/user-attachments/assets/4344c7f3-a93c-469d-b9ec-ab8a26143919" />
+           UWorld는 월드에 존재하는 Actor의 생성·보관·수명 관리를 담당합니다.
+        </p>
+        <b>🔍 구현 포인트</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          <img width="789" height="307" alt="image" src="https://github.com/user-attachments/assets/0c7e5193-1baf-483e-9379-6f213a0210de" />
+            초기에는 기본 생성 후 Set()으로 데이터를 주입해, 호출 누락 문제가 발생했습니다.
+이를 해결하기 위해 스폰 함수가 가변 인자를 받아 생성 시점에 바로 설정하도록 개선했습니다.
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary> ActorComponent / SceneComponent / PrimitiveComponent / RenderProxy 구조</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 도입 배경</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          초기에는 모델마다 공통 기능을 반복 구현해야 했습니다.
+이를 해결하기 위해 역할 기반 컴포넌트 계층 구조를 설계했습니다.
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+           <img width="245" height="441" alt="image" src="https://github.com/user-attachments/assets/52dbd18d-b001-4f00-ba7f-c7419a05d77a" />
+<ul>
+  <li>ActorComponent는 어태치 기능을 담당하는 기본 컴포넌트입니다.</li>
+  <li>SceneComponent는 부모–자식 계층과 위치·회전·스케일 정보를 관리합니다.</li>
+  <li>PrimitiveComponent는 정점·인덱스·머티리얼 등 렌더링 데이터를 관리합니다.</li>
+</ul>
+        </p>
+        <b>🔍 구현 포인트</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          Transform은 포인터가 아닌 value 타입으로 관리했습니다.
+            <img width="488" height="183" alt="image" src="https://github.com/user-attachments/assets/2d8e7baf-afa6-4e68-8cf5-3d45282e247d" />
+<ul>
+  <li>초기에는 포인터 방식을 검토했으나, 성능과 소유권 특성을 고려해 Transform을 value 타입으로 관리하기로 결정했습니다.</li>
+  <li>객체가 Transform을 값으로 소유하면, 액터 접근 시 함께 캐시에 적재되어 메모리 접근 효율이 좋아집니다.</li>
+</ul>
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary> Actor 클래스</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 도입 배경</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+<ul>
+  <li>여러 컴포넌트를 하나의 생명 주기와 공간 단위로 묶어, 월드에서 일관되게 관리하기 위한 추상 계층이 필요했기 때문입니다.</li>
+</ul>
+        </p>
+        <b>🔍 구현 포인트</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          액터가 삭제될 때
+          <img width="792" height="65" alt="image" src="https://github.com/user-attachments/assets/efb40374-7cc2-4d94-aa58-5de83ec4a4b5" />
+<ul>
+  <li>Tick 도중 액터를 즉시 삭제할 경우 댕글링 포인터로 인한 크래시와 미정의 동작이 발생할 수 있어, 삭제 시점을 특히 신중히 설계했습니다.</li>
+</ul>
+        </p>
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary> StaticMeshComponent / SkinnedMeshComponent / SkeletalMeshComponent 클래스 </summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 도입 배경</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+<ul>
+  <li>컴포넌트를 3단계로 분리한 이유는 메시 컴포넌트의 책임을 명확히 나누기 위함입니다.</li>
+  <li>캐릭터가 아닌 경우에는 본 가중치와 같은 데이터가 불필요해, 이를 분리하는 구조가 적합하다고 판단했습니다.</li>
+</ul>
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          <img width="573" height="696" alt="image" src="https://github.com/user-attachments/assets/0bbdd2e0-e7c9-40cc-96b2-c1c5b246c6d8" />
+<ul>
+  <li>
+    <b>StaticMeshComponent</b>  
+    정점(Vertex)과 인덱스(Index) 데이터를 기반으로, 캐릭터가 아닌 정적 물체를 렌더링하는 컴포넌트입니다.
+  </li>
+  <li>
+    <b>SkinnedMeshComponent</b>  
+    스켈레탈 메시 렌더링을 위한 기본 클래스이며, 본 구조와 본 가중치(Skin Weight) 데이터를 포함하는 추상 컴포넌트입니다.
+  </li>
+  <li>
+    <b>SkeletalMeshComponent</b>  
+    SkinnedMeshComponent를 상속한 인스턴스화 가능한 컴포넌트로, UAnimInstance를 통해 애니메이션을 계산하고 스키닝 결과를 렌더링에 반영합니다.
+  </li>
+</ul>
+        </p>
+        <b>🔍 구현 포인트</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+<ul>
+  <li>초기에는 Static / Skeletal 두 컴포넌트만으로 충분하다고 판단했습니다.</li>
+  <li>그러나 스키닝은 필요하지만 애니메이션을 사용하지 않는 케이스가 존재함을 확인했습니다.</li>
+  <li>이에 따라 본·스킨 데이터와 같은 스키닝 공통 책임을 Skinned 추상 계층으로 분리했습니다.</li>
+  <li>Skeletal은 UAnimInstance 기반 애니메이션 구동 책임만 담당하도록 설계했습니다.</li>
+</ul>
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+  
+<details>
+  <summary>Pawn / Controller / GameMode 계층</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 도입 배경</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          <ul>
+  <li>언리얼과 유사하게 조작 로직과 조작 대상을 분리해 재사용성을 높이기 위해 도입했습니다.</li>
+</ul>
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          <img width="694" height="337" alt="image" src="https://github.com/user-attachments/assets/97f86fd5-84e1-4265-8d29-a93f8ae5946a" />
+<ul>
+  <li><b>Pawn</b>: 입력 또는 AI의 대상이 되는 조작 가능한 객체입니다.</li>
+  <li><b>Controller</b>: 입력·AI 로직을 담당하며, 필요 시 여러 Pawn에 재사용할 수 있습니다.</li>
+  <li><b>GameMode</b>: 게임 시작 시 Pawn과 Controller를 생성하고, 카메라 포커싱·소유 등 초기 흐름을 일관되게 설정합니다.</li>
+</ul>
+        </p>
+        <b>🔍 구현 포인트</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+<ul>
+  <li>초기에는 bUseController를 Controller가 관리했습니다.</li>
+  <li>그러나 Pawn마다 회전 반영 기준(Yaw/Pitch 등)이 달라, Controller 소유 방식은 확장성이 떨어졌습니다.</li>
+  <li>이에 따라 회전 반영 정책(bUseController*)을 Pawn이 소유하도록 변경했습니다.</li>
+</ul>
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary>ClassID 기반 Actor 런타임 스폰 팩토리 (리플렉션 없이 타입 등록/생성)</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 도입 배경</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+<ul>
+  <li>GameMode 역시 Actor이므로, 게임 시작 시점에 스폰할 Actor를 런타임에 선택하고 싶었습니다.</li>
+  <li>그러나 템플릿 기반 생성은 타입이 컴파일 타임에 고정되어 런타임 선택에 제약이 있었습니다.</li>
+  <li>이에 따라 리플렉션 없이 런타임 타입 선택이 가능한 스폰 팩토리를 설계했습니다.</li>
+</ul>
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          <img width="704" height="99" alt="image" src="https://github.com/user-attachments/assets/c96fa3f9-dcf2-4fc3-aa52-2cdd4e057f08" />
+<ul>
+  <li>매크로로 클래스 타입을 받아 생성 람다를 만들고, 이를 ClassID에 등록합니다.</li>
+  <li>이후 문자열 키로 람다를 조회·호출해 액터를 생성합니다.</li>
+</ul>
+<img width="699" height="113" alt="image" src="https://github.com/user-attachments/assets/f74f895b-8e62-4fbe-bfb5-57a79ed3ac12" />
+<ul>
+  <li>GameMode는 Pawn과 Controller의 구체 타입을 알 필요 없이, 클래스 이름만으로 데이터 기반 객체 생성을 수행합니다.</li>
+</ul>
+        </p>
+        <b>🔍 구현 포인트 </b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+<ul>
+  <li>Actor를 if/switch로 생성하면 수가 늘수록 분기 비용이 선형으로 증가합니다.</li>
+  <li>이를 ClassID → 생성 함수 매핑 테이블로 대체해, 해시 기반의 상수 시간에 가까운 조회로 개선했습니다.</li>
+</ul>
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
 
 ---
 
 <h3 id="rendering">3. Rendering </h3>
 
-- 그래픽 파이프라인 상태 집합 객체(PSO) 설계  
-  (Shader·Blend·Rasterizer·Depth 상태 일체 관리)
-- RenderManager(패스 구성) / DrawBatch(오브젝트 유형별 배치·정렬) / Renderer(드로우 호출) 구조
-- HDR RenderTarget 파이프라인, MSAA, ToneMapping
-- Fog / Bloom / Shadow / PBR 라이팅
+<details>
+  <summary>그래픽 파이프라인 상태 집합 객체(PSO) 설계 (Shader·Blend·Rasterizer·Depth 상태 일체 관리)</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 도입 배경</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+<ul>
+  <li>오브젝트마다 셰이더와 RasterizerState를 매번 지정하는 과정이 번거로웠습니다.</li>
+  <li>이를 해결하기 위해 렌더 상태를 한 번에 설정할 수 있는 PSO(Render State) 객체를 설계했습니다.</li>
+</ul>
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          <img width="593" height="472" alt="image" src="https://github.com/user-attachments/assets/e288f0d8-5e0e-486d-a557-5317e006d391" />
+<ul>
+  <li>DirectX11 렌더 파이프라인 상태(셰이더, InputLayout, Blend·Depth·Rasterizer)를 하나의 GraphicsPSO 객체로 묶어 적용합니다.</li>
+</ul>
+        </p>
+        <b>🔍 구현 포인트 </b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+<ul>
+  <li>Primitive가 PSO를 직접 참조하면 표현 모드 확장 시 렌더 정책과 과결합되는 문제가 있었습니다.</li>
+  <li>이를 해결하기 위해 Primitive에는 PSO 대신 RenderType(enum)만 두고, 프레임 직전에 타입별로 분류하도록 구성했습니다.</li>
+  <li>Draw 단계에서는 Renderer가 그룹 단위로 PSO를 한 번만 전환해, 상태 전환과 드로우콜을 최소화했습니다.</li>
+</ul>
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary>RenderManager(패스 구성) / DrawBatch(오브젝트 유형별 배치·정렬) / Renderer(드로우 호출) 구조</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 도입 배경</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          <ul>
+  <li>Renderer가 패스 구성·순서 제어와 드로우를 모두 담당해, 패스 확장 시 내부 로직 수정이 반복되며 코드가 비대해졌습니다.</li>
+</ul>
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          <img width="303" height="555" alt="image" src="https://github.com/user-attachments/assets/f356963e-7b12-48ed-84ce-052a41675900" />
+<ul>
+  <li>패스 구성·순서 결정·프레임 데이터 생성을 URenderManager로 분리했습니다.</li>
+  <li>URenderManager가 프록시를 RenderType 기준으로 분류해 URenderer에 전달합니다.</li>
+  <li>URenderer는 드로우만 담당해, 패스 추가·재배치를 Manager 단일 지점에서 처리할 수 있도록 개선했습니다.</li>
+</ul>
+        </p>
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary>HDR RenderTarget 파이프라인과 PBR, MSAA, ToneMapping</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 도입 배경</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+<ul>
+  <li>PBR 적용을 위해 HDR 파이프라인을 사용했습니다.</li>
+  <li>MSAA를 직접 적용·리졸브하며 DX11 렌더링 기술을 이해하고 응용했습니다.</li>
+  <li>HDR 결과를 LDR로 변환하기 위해 톤매핑을 적용했습니다.</li>
+</ul>
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [파이프라인 이미지]
+           <ul>
+  <li>제 엔진 렌더링 파이프라인은 다음과 같은 흐름으로 동작합니다.</li>
+</ul>
+        </p>
+        <b>🔍 구현 포인트</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+<ul>
+  <li>MSAA 적용으로 인해 리졸브 단계가 필요했습니다.</li>
+  <li>MSAA 텍스처는 셰이더에서 직접 샘플링할 수 없어, x1 텍스처로 리졸브해 처리했습니다.</li>
+  <li>HDR 색 범위가 0~1을 초과하므로, 최종 출력 전 톤매핑으로 색을 보정했습니다.</li>
+  <li>언차티드 2 톤매핑을 분석하며 적용 경험을 쌓았습니다.</li>
+</ul>
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+  
+<details>
+  <summary>Fog / Bloom / Shadow </summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 도입 배경</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          <ul>
+  <li>렌더링 장면을 보다 현실적으로 표현하기 위한 기법들을 적용해보기 위해 도입했습니다.</li>
+</ul>
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [이미지]
+           
+        </p>
+        <b>🔍 구현 포인트 </b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          [그 그림자 이미지]
+<ul>
+  <li>픽셀 단위 그림자 계산으로 계단 현상이 심하게 발생했습니다.</li>
+  <li>이를 완화하기 위해 PCF 3×3 가우시안 필터를 적용해 그림자를 부드럽게 처리했습니다.</li>
+</ul>
+		  [안개 복원 이미지]
+<ul>
+  <li>후처리 단계에서는 색 텍스처만 있어 픽셀의 위치 정보를 알 수 없어, view 공간으로 복원해야 했습니다.</li>
+  <li>NDC 상태에서 clip.w를 알 수 없어 clip 공간 변환이 어려웠습니다.</li>
+  <li>임시로 w = 1을 적용해 InvProjection을 사용했습니다.</li>
+  <li>동차좌표는 스케일에 불변이므로, 마지막에 /w를 수행하면 배율이 상쇄되어 올바르게 복원됩니다.</li>
+</ul>
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
 
 ---
 
 <h3 id="animation">4. Animation </h3>
 
-- 애니메이션 재생 시스템 (AnimationClip 기반 재생·루프·이동 관리)
-- AnimInstance (UAnimInstance와 유사한 상태·블렌딩 로직 전담 계층)
-- 애니메이션 블렌딩 (키프레임 보간 기반 블렌딩)
-- 카메라 거리 기반 Tick 최적화 (Update Rate Optimization)
+<details>
+  <summary>애니메이션 재생 시스템 UAnimInstance (재생,루프,특정 프레임 선택)</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 도입 배경</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+<ul>
+  <li>애니메이션 단계에서 메시 행렬까지 생성하면, 메시 구조에 종속되어 재사용성이 떨어졌습니다.</li>
+  <li>블렌딩 시 불필요한 연산이 발생하고, 애니메이션 계산 책임이 과도해지는 문제가 있었습니다.</li>
+</ul>
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          
+<ul>
+  <li>UAnimInstance는 로컬 포즈 계산만 담당합니다.</li>
+  <li>SkeletalMesh는 바인드 포즈(메시 정보)를 사용해 스키닝 행렬을 생성합니다.</li>
+</ul>
+        </p>
+        <b>🔍 구현 포인트</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+          [이미지]
+<ul>
+  <li>로컬 포즈 단위로 블렌딩해, 포즈 계산을 1회로 제한했습니다.</li>
+  <li>UAnimInstance가 메시 정보를 알 필요가 없어 책임이 명확해졌습니다.</li>
+  <li>애니메이션 계산 로직을 메시와 분리해 재사용성을 확보했습니다.</li>
+</ul>
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary>애니메이션 블렌딩 (키프레임 보간 기반 블렌딩)</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 도입 배경</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          <ul>
+  <li>실제 게임처럼 애니메이션 전환이 부드럽게 이루어지도록 블렌딩을 도입했습니다.</li>
+</ul>
+        </p>
+        <b>🗺️ 동작 흐름</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+<ul>
+  <li>블렌딩 요청 시, 현재 애니메이션과 대상 애니메이션의 로컬 포즈를 각각 계산합니다.</li>
+  <li>경과 시간에 따라 블렌딩 가중치를 산출합니다.</li>
+  <li>두 로컬 포즈의 position, rotation, scale을 보간해 출력 포즈를 생성합니다.</li>
+  <li>블렌딩 시간이 종료되면 대상 애니메이션으로 전환을 확정합니다.</li>
+</ul>
+        </p>
+        <b>🔍 구현 포인트</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+<ul>
+  <li>정수 프레임 샘플링은 FPS나 애니메이션 길이에 따라 떨림이 발생할 수 있었습니다.</li>
+  <li>이를 해결하기 위해 키 프레임 보간 기반 샘플링을 적용했습니다.</li>
+</ul>
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary>카메라 거리 기반 Tick 최적화 (Update Rate Optimization)</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 도입 배경</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+                <ul>
+        <li>애니메이션 계산량이 많아 CPU 병목이 발생했습니다.</li>
+        <li>카메라에서 먼 오브젝트까지 동일한 빈도로 계산할 필요는 없다고 판단했습니다.</li>
+      </ul>
+        </p>
+        <b>🗺️ 구현 포인트 </b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+                <ul>
+        <li>카메라 거리 기준으로 애니메이션 Tick 빈도를 단계적으로 조절했습니다.</li>
+        <li>중간 거리는 1/2 Tick, 매우 먼 거리는 1/8 Tick만 수행합니다.</li>
+        <li>일반 Tick과 분리해, 애니메이션 계산만 선택적으로 줄이도록 구성했습니다.</li>
+      </ul>
+        </p>
+        <b>🔍 검증</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+		[이미지]
+                <ul>
+        <li>평균 FPS가 18.1 → 36.4로 개선되었습니다.</li>
+      </ul>
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
 
 ---
 
 <h3 id="asset">5. Asset </h3>
 
-- .fbx 파일 로드 파이프라인 (메시·본·애니메이션 데이터 파싱)
-- CPU / GPU / 애니메이션 자원 공유 관리 클래스
+<details>
+  <summary>.fbx 파일 로드 파이프라인 (메시·본·애니메이션 데이터 파싱)</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 도입 배경</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+                <ul>
+        <li>외부 툴에서 제작된 메시·본·애니메이션 데이터를 메모리에 적재하기 위해 도입했습니다.</li>
+      </ul>
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+      <ul>
+        <li>Assimp를 사용해 .fbx 파일을 파싱합니다.</li>
+        <li>파싱된 데이터를 엔진 내부에서 사용하는 사용자 정의 구조체로 변환해 저장합니다.</li>
+        <li>메시, 본, 애니메이션 데이터를 각각 독립된 로드 흐름으로 처리합니다.</li>
+      </ul>
+        </p>
+        <b>🔍 구현 포인트</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+               <ul>
+        <li>애니메이션 로드와 메시 로드를 명확히 분리했습니다.</li>
+        <li>하나의 메시 데이터를 여러 애니메이션이 공유할 수 있도록 설계했습니다.</li>
+        <li>애니메이션 로드 시 메시 데이터를 반복 로딩하지 않아 불필요한 비용을 줄였습니다.</li>
+      </ul>
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary>CPU / GPU / 애니메이션 자원 공유 관리 클래스</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 도입 배경</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+			      <ul>
+        <li>같은 모델임에도 메시 데이터를 각 인스턴스가 개별로 보유해, 복사 비용이 크게 발생했습니다.</li>
+        <li>중복 데이터를 제거하고 자원 사용을 최적화하기 위해 공유 관리 구조를 도입했습니다.</li>
+      </ul>
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+		[이미지]
+      <ul>
+        <li>로드된 메시·애니메이션 자원을 에셋 관리 클래스에 등록해 중앙에서 관리합니다.</li>
+        <li>자원 조회를 위해 unordered_map 컨테이너를 사용했습니다.</li>
+      </ul>
+        </p>
+        <b>🔍 구현 포인트 </b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+      <ul>
+        <li>파일 경로를 Key로 사용해 자원을 식별합니다.</li>
+        <li>이미 등록된 Key가 존재하면 재로드 없이 기존 자원을 재사용합니다.</li>
+        <li>이를 통해 디스크 I/O와 메모리 복사 비용을 줄였습니다.</li>
+      </ul>
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
 
 ---
 
 <h3 id="editor">6. Editor </h3>
 
-- ImGui Docking 기반 에디터 UI
-- WorldOutliner / ActorOutliner / InspectorWindow를 통한 런타임 액터/컴포넌트 편집
+<details>
+  <summary>ImGui Docking 기반 에디터 UI</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 도입 배경</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+                <ul>
+        <li>상용 엔진과 유사한 레이아웃을 구성해, 엔진 사용성과 작업 효율을 높이기 위해 도입했습니다.</li>
+      </ul>
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+			[이미지]
+			      <ul>
+        <li>ImGui Docking 기능을 사용해 에디터 창을 자유롭게 배치할 수 있도록 구성했습니다.</li>
+        <li>SceneView, Inspector 등 각 에디터 패널을 독립적인 Dock 윈도우로 구성했습니다.</li>
+      </ul>
+        </p>
+        <b>🔍 구현 포인트 </b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+                <ul>
+        <li>에디터 UI는 렌더링 파이프라인의 마지막 단계(PostProcess 이후)에 실행됩니다.</li>
+        <li>SceneView에 출력할 화면 텍스처를 사용하기 위해, 최종 렌더 결과 이후에 그리도록 설계했습니다.</li>
+      </ul>
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary>WorldOutliner / ActorOutliner / InspectorWindow를 통한 런타임 액터/컴포넌트 편집</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 도입 배경</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+                <ul>
+        <li>폴링 방식 대신, 선택 이벤트 기반으로 UI를 갱신해 불필요한 연산을 줄이고자 했습니다.</li>
+      </ul>
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [이미지]
+                 <ul>
+        <li>WorldOutliner, ActorOutliner, InspectorWindow를 독립적인 편집 패널로 구성했습니다.</li>
+        <li>액터 또는 컴포넌트 선택 시, 관련 UI 패널이 이벤트를 통해 동기화됩니다.</li>
+      </ul>
+        </p>
+        <b>🔍 구현 포인트 </b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+      <ul>
+        <li>UI를 매 프레임 갱신하지 않고, 선택 이벤트 발생 시에만 업데이트하도록 설계했습니다.</li>
+        <li>선택 이벤트를 구독한 UI 패널만 갱신해 연산 비용을 최소화했습니다.</li>
+      </ul>
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
 
 ---
 
 <h3 id="profiling">7. Profiling </h3>
 
-- 구역 단위 실행 시간 측정 & 파일 저장 프로파일러
-- CPU/GPU 프레임 타임 측정 런타임 시스템
+<details>
+  <summary>구역 단위 실행 시간 측정 & 파일 저장 프로파일러</summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 도입 배경</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+                <ul>
+        <li>코드 구간별 실행 시간을 측정해 병목 지점을 파악하기 위해 도입했습니다.</li>
+      </ul>
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [이미지]
+                 <ul>
+        <li>문자열 기반 마킹으로 측정 구간을 정의합니다.</li>
+        <li>수집된 시간 데이터를 파싱해 파일로 저장합니다.</li>
+      </ul>
+        </p>
+        <b>🔍 구현 포인트</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+                <ul>
+        <li>begin/end 호출 순서 오류를 방지하기 위해 예외 처리를 추가했습니다.</li>
+        <li>begin–begin, end–end와 같은 잘못된 사용을 감지해 안정성을 확보했습니다.</li>
+      </ul>
+        </p>  
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
+
+<details>
+  <summary> CPU/GPU 프레임 타임 측정 런타임 시스템 </summary>
+  <br/>
+  <table>
+    <tr>
+      <td>
+        <b>🎯 도입 배경</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+                <ul>
+        <li>프로그램 종료 후 로그가 아닌, 런타임 중에도 프레임 타임을 실시간으로 확인하고자 도입했습니다.</li>
+      </ul>
+        </p>
+        <b>🗺️ 구조/핵심 구성</b><br/>
+        <p style="margin-top:6px; margin-bottom:14px;">
+          [코드 사용하는 모습]
+		        <ul>
+        <li>begin/end 구간을 마킹해 CPU·GPU 프레임 시간을 측정합니다.</li>
+        <li>측정된 구간의 시간 차이를 계산해 런타임 UI로 노출합니다.</li>
+      </ul>
+        </p>
+        <b>🔍 구현 포인트</b><br/>
+        <p style="margin-top:6px; margin-bottom:0px;">
+      <ul>
+        <li>GPU 타임 측정을 위해 ID3D11 타임스탬프 쿼리를 사용했습니다.</li>
+        <li>GPU는 비동기적으로 동작하므로, 명령 직후가 아닌 2~3프레임 뒤에 결과를 회수하도록 설계했습니다.</li>
+      </ul>
+        </p>
+      </td>
+    </tr>
+  </table>
+  <br/>
+</details>
