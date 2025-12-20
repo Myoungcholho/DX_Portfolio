@@ -413,6 +413,7 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
 </br>
 
 # 📘구현 상세 내용 [(목차 이동)](#목차)
+> 각 내용은 토글 버튼을 통해 도입 배경과 구조(클래스 다이어그램, 동작 흐름), 구현 포인트를 단계적으로 확인하실 수 있습니다.
 <h3 id="core">1. Core Architecture </h3>
 
 <details>
@@ -1069,6 +1070,9 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
         <img width="424" height="201" alt="image" src="https://github.com/user-attachments/assets/bdaf2ad8-0e4a-4444-9aed-06a5ba3d99c5" /><br/>
         <ul style="margin-top:6px; margin-bottom:14px;">
           <li>문자열 기반 마킹으로 측정 구간을 정의합니다.</li>
+        </ul>
+        <img width="424" height="437" alt="image" src="https://github.com/user-attachments/assets/3ea20655-f13e-450d-8e5c-1bbaa733b282" /><br/>
+        <ul style="margin-top:6px; margin-bottom:14px;">
           <li>수집된 시간 데이터를 파싱해 파일로 저장합니다.</li>
         </ul>
         <b>🔍 구현 포인트</b><br/>
