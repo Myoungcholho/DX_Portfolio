@@ -746,9 +746,9 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
         </ul>
         <b>🔍 구현 포인트 </b><br/>
         <ul style="margin-top:6px; margin-bottom:0px;">
-          <li>Primitive가 PSO를 직접 참조하면 표현 모드 확장 시 렌더 정책과 과결합되는 문제가 있었습니다.</li>
+          <li>Primitive가 PSO를 직접 소유할 경우 일반 렌더링·그림자 렌더링 등 표현 모드가 늘어날 때마다 각 렌더 패스에 필요한 PSO를 모두 함께 관리해야 하는 문제가 발생했습니다.</li>
           <li>이를 해결하기 위해 Primitive에는 PSO 대신 RenderType(enum)만 두고, 프레임 직전에 타입별로 분류하도록 구성했습니다.</li>
-          <li>Draw 단계에서는 Renderer가 그룹 단위로 PSO를 한 번만 전환해, 상태 전환과 드로우콜을 최소화했습니다.</li>
+          <li>Draw 단계에서는 Renderer가 그룹 단위로 PSO를 한 번만 전환해, 상태 전환과 드로우콜을 최소화하고 있습니다.</li>
         </ul>
       </td>
     </tr>
@@ -764,14 +764,12 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
       <td>
         <b>🎯 도입 배경</b><br/>
         <ul style="margin-top:6px; margin-bottom:14px;">
-          <li>Renderer가 패스 구성·순서 제어와 드로우를 모두 담당해, 패스 확장 시 내부 로직 수정이 반복되며 코드가 비대해졌습니다.</li>
+          <li>렌더 패스의 구성과 실행이 Renderer에 함께 묶여 있어, 패스 추가 시마다 순서 제어 로직과 드로우 코드가 동시에 수정되는 문제가 있었습니다.</li>
         </ul>
         <b>🗺️ 구조/핵심 구성</b><br/>
         <img width="303" height="555" alt="image" src="https://github.com/user-attachments/assets/f356963e-7b12-48ed-84ce-052a41675900" /><br/>
         <ul style="margin-top:6px; margin-bottom:0px;">
-          <li>패스 구성·순서 결정·프레임 데이터 생성을 URenderManager로 분리했습니다.</li>
-          <li>URenderManager가 프록시를 RenderType 기준으로 분류해 URenderer에 전달합니다.</li>
-          <li>URenderer는 드로우만 담당해, 패스 추가·재배치를 Manager 단일 지점에서 처리할 수 있도록 개선했습니다.</li>
+          <li>URenderer는 드로우만 담당해, 패스 추가·재배치를 Manager 단일 지점에서 처리하고 있습니다.</li>
         </ul>
       </td>
     </tr>
@@ -787,21 +785,19 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
       <td>
         <b>🎯 도입 배경</b><br/>
         <ul style="margin-top:6px; margin-bottom:14px;">
-          <li>PBR 적용을 위해 HDR 파이프라인을 사용했습니다.</li>
-          <li>MSAA를 직접 적용·리졸브하며 DX11 렌더링 기술을 이해하고 응용했습니다.</li>
-          <li>HDR 결과를 LDR로 변환하기 위해 톤매핑을 적용했습니다.</li>
+          <li>물리 기반 조명 결과를 정확히 표현하기 위해 넓은 명암 범위를 처리할 수 있는 HDR 파이프라인을 도입했습니다.</li>
+          <li>고해상도 품질을 확보하기 위해 MSAA를 직접 적용하고 Resolve 과정까지 구현하며 DX11 렌더링 흐름을 이해하고 응용했습니다.</li>
+          <li>HDR 렌더링 결과를 화면에 출력하기 위해 톤매핑을 적용해 LDR 색공간으로 변환했습니다.</li>
         </ul>
         <b>🗺️ 구조/핵심 구성</b><br/>
-        <div style="margin-top:6px; margin-bottom:6px;">[파이프라인 이미지]</div>
+        <img width="696" height="184" alt="image" src="https://github.com/user-attachments/assets/1003603c-9e79-4aa9-b577-6011ecca43e6" /><br/>
         <ul style="margin-top:6px; margin-bottom:14px;">
           <li>제 엔진 렌더링 파이프라인은 다음과 같은 흐름으로 동작합니다.</li>
         </ul>
         <b>🔍 구현 포인트</b><br/>
         <ul style="margin-top:6px; margin-bottom:0px;">
           <li>MSAA 적용으로 인해 리졸브 단계가 필요했습니다.</li>
-          <li>MSAA 텍스처는 셰이더에서 직접 샘플링할 수 없어, x1 텍스처로 리졸브해 처리했습니다.</li>
-          <li>HDR 색 범위가 0~1을 초과하므로, 최종 출력 전 톤매핑으로 색을 보정했습니다.</li>
-          <li>언차티드 2 톤매핑을 분석하며 적용 경험을 쌓았습니다.</li>
+          <li>MSAA가 적용된 텍스처는 셰이더에서 직접 샘플링할 수 없어, x1 텍스처로 리졸브해 처리하고 있습니다.</li>
         </ul>
       </td>
     </tr>
@@ -817,22 +813,23 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
       <td>
         <b>🎯 도입 배경</b><br/>
         <ul style="margin-top:6px; margin-bottom:14px;">
-          <li>렌더링 장면을 보다 현실적으로 표현하기 위한 기법들을 적용해보기 위해 도입했습니다.</li>
+          <li>렌더링 장면을 보다 현실적으로 표현하기 위한 기법들을 적용해보기 위함입니다.</li>
         </ul>
         <b>🗺️ 구조/핵심 구성</b><br/>
-        <div style="margin-top:6px; margin-bottom:14px;">[이미지]</div>
+        <img width="716" height="247" alt="image" src="https://github.com/user-attachments/assets/5a75d337-9a82-461d-a3fc-0db6559f856a" /><br/>
         <b>🔍 구현 포인트 </b><br/>
-        <div style="margin-top:6px; margin-bottom:6px;">[그 그림자 이미지]</div>
+        <img width="716" height="347" alt="image" src="https://github.com/user-attachments/assets/343e5fee-026e-42e7-bdf5-0a411577fe31" /><br/>
+        <img width="711" height="279" alt="image" src="https://github.com/user-attachments/assets/078ccf57-b2d5-4920-95ab-022c08cd31da" /><br/>
         <ul style="margin-top:6px; margin-bottom:14px;">
           <li>픽셀 단위 그림자 계산으로 계단 현상이 심하게 발생했습니다.</li>
           <li>이를 완화하기 위해 PCF 3×3 가우시안 필터를 적용해 그림자를 부드럽게 처리했습니다.</li>
         </ul>
-        <div style="margin-top:6px; margin-bottom:6px;">[안개 복원 이미지]</div>
+        <img width="690" height="91" alt="image" src="https://github.com/user-attachments/assets/9d3fa704-bc11-43f4-a828-4e38949a14fe" /><br/>
         <ul style="margin-top:6px; margin-bottom:0px;">
-          <li>후처리 단계에서는 색 텍스처만 있어 픽셀의 위치 정보를 알 수 없어, view 공간으로 복원해야 했습니다.</li>
+          <li>후처리 단계에서는 색 텍스처만 있어 픽셀의 위치 정보를 알 수 없고 이를 view 공간으로 복원해야 했습니다.</li>
           <li>NDC 상태에서 clip.w를 알 수 없어 clip 공간 변환이 어려웠습니다.</li>
           <li>임시로 w = 1을 적용해 InvProjection을 사용했습니다.</li>
-          <li>동차좌표는 스케일에 불변이므로, 마지막에 /w를 수행하면 배율이 상쇄되어 올바르게 복원됩니다.</li>
+          <li>동차좌표는 스케일에 불변이므로, 마지막에 /w를 수행하면 배율이 상쇄되기 때문입니다.</li>
         </ul>
       </td>
     </tr>
@@ -853,20 +850,19 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
       <td>
         <b>🎯 도입 배경</b><br/>
         <ul style="margin-top:6px; margin-bottom:14px;">
-          <li>애니메이션 단계에서 메시 행렬까지 생성하면, 메시 구조에 종속되어 재사용성이 떨어졌습니다.</li>
-          <li>블렌딩 시 불필요한 연산이 발생하고, 애니메이션 계산 책임이 과도해지는 문제가 있었습니다.</li>
+          <li>애니메이션 재생 결과로부터 로컬 포즈를 계산하는 전담 클래스가 필요했습니다.</li>
         </ul>
         <b>🗺️ 구조/핵심 구성</b><br/>
+        <img width="228" height="225" alt="image" src="https://github.com/user-attachments/assets/09fb4ea9-d468-40e0-83af-d146566676c3" /><br/>
         <ul style="margin-top:6px; margin-bottom:14px;">
-          <li>UAnimInstance는 로컬 포즈 계산만 담당합니다.</li>
-          <li>SkeletalMesh는 바인드 포즈(메시 정보)를 사용해 스키닝 행렬을 생성합니다.</li>
+          <li>UAnimInstance는 애니메이션 재생 결과를 기반으로 로컬 포즈 계산만 담당합니다.</li>
+          <li>SkeletalMesh는 UAnimInstance를 소유하며, 계산된 로컬 포즈를 사용해 메시 스키닝을 수행합니다.</li>
         </ul>
         <b>🔍 구현 포인트</b><br/>
-        <div style="margin-top:6px; margin-bottom:6px;">[이미지]</div>
         <ul style="margin-top:6px; margin-bottom:0px;">
-          <li>로컬 포즈 단위로 블렌딩해, 포즈 계산을 1회로 제한했습니다.</li>
-          <li>UAnimInstance가 메시 정보를 알 필요가 없어 책임이 명확해졌습니다.</li>
-          <li>애니메이션 계산 로직을 메시와 분리해 재사용성을 확보했습니다.</li>
+          <li>초기에는 애니메이션 처리 클래스가 바인드 포즈 정보까지 함께 소유하며 로컬 포즈 계산 이후 바로 모델 포즈 변환까지 수행하고 있었습니다.</li>
+          <li>이 구조에서는 블렌딩 과정에서 로컬 포즈 → 모델 포즈 변환이 중복 발생해 불필요한 연산 비용이 발생했습니다.</li>
+          <li>이에 따라 애니메이션 단계에서는 로컬 포즈 계산만 수행하도록 책임을 분리하고 메시 정보와 스키닝 처리는 SkeletalMesh에서 담당하도록 설계했습니다.</li>
         </ul>
       </td>
     </tr>
@@ -885,6 +881,7 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
           <li>실제 게임처럼 애니메이션 전환이 부드럽게 이루어지도록 블렌딩을 도입했습니다.</li>
         </ul>
         <b>🗺️ 동작 흐름</b><br/>
+        <img width="682" height="235" alt="image" src="https://github.com/user-attachments/assets/776e8995-448d-4117-85ff-d562709747e0" /><br/>
         <ul style="margin-top:6px; margin-bottom:14px;">
           <li>블렌딩 요청 시, 현재 애니메이션과 대상 애니메이션의 로컬 포즈를 각각 계산합니다.</li>
           <li>경과 시간에 따라 블렌딩 가중치를 산출합니다.</li>
@@ -893,8 +890,8 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
         </ul>
         <b>🔍 구현 포인트</b><br/>
         <ul style="margin-top:6px; margin-bottom:0px;">
-          <li>정수 프레임 샘플링은 FPS나 애니메이션 길이에 따라 떨림이 발생할 수 있었습니다.</li>
-          <li>이를 해결하기 위해 키 프레임 보간 기반 샘플링을 적용했습니다.</li>
+          <li>정수 프레임 샘플링은 애니메이션 길이에 따라 떨림이 발생할 수 있었습니다.</li>
+          <li>그래서 정수 기반 샘플링에서 키 프레임 보간 기반 샘플링을 적용했습니다.</li>
         </ul>
       </td>
     </tr>
@@ -910,7 +907,6 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
       <td>
         <b>🎯 도입 배경</b><br/>
         <ul style="margin-top:6px; margin-bottom:14px;">
-          <li>애니메이션 계산량이 많아 CPU 병목이 발생했습니다.</li>
           <li>카메라에서 먼 오브젝트까지 동일한 빈도로 계산할 필요는 없다고 판단했습니다.</li>
         </ul>
         <b>🗺️ 구현 포인트 </b><br/>
@@ -920,9 +916,10 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
           <li>일반 Tick과 분리해, 애니메이션 계산만 선택적으로 줄이도록 구성했습니다.</li>
         </ul>
         <b>🔍 검증</b><br/>
-        <div style="margin-top:6px; margin-bottom:6px;">[이미지]</div>
+        <img width="686" height="75" alt="image" src="https://github.com/user-attachments/assets/c9c7a671-ad0a-4caa-bcbb-d93efeebf46b" /><br/>
+<img width="686" height="75" alt="image" src="https://github.com/user-attachments/assets/ceb3f159-f6a0-4881-bb23-0d93d427c43f" /><br/>
         <ul style="margin-top:6px; margin-bottom:0px;">
-          <li>평균 FPS가 18.1 → 36.4로 개선되었습니다.</li>
+          <li>평균 FPS가 18.1 → 36.4로 개선.</li>
         </ul>
       </td>
     </tr>
