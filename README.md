@@ -889,9 +889,10 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
           <li>블렌딩 시간이 종료되면 대상 애니메이션으로 전환을 확정합니다.</li>
         </ul>
         <b>🔍 구현 포인트</b><br/>
+        <img width="682" height="203" alt="image" src="https://github.com/user-attachments/assets/22c20060-fa0a-4df9-a960-9104a25fba7e" /><br/>
         <ul style="margin-top:6px; margin-bottom:0px;">
           <li>정수 프레임 샘플링은 애니메이션 길이에 따라 떨림이 발생할 수 있었습니다.</li>
-          <li>그래서 정수 기반 샘플링에서 키 프레임 보간 기반 샘플링을 적용했습니다.</li>
+          <li>그래서 키 프레임 보간 기반 샘플링을 적용했습니다.</li>
         </ul>
       </td>
     </tr>
@@ -919,7 +920,7 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
         <img width="686" height="75" alt="image" src="https://github.com/user-attachments/assets/c9c7a671-ad0a-4caa-bcbb-d93efeebf46b" /><br/>
 <img width="686" height="75" alt="image" src="https://github.com/user-attachments/assets/ceb3f159-f6a0-4881-bb23-0d93d427c43f" /><br/>
         <ul style="margin-top:6px; margin-bottom:0px;">
-          <li>평균 FPS가 18.1 → 36.4로 개선.</li>
+          <li>동일 렌더링 환경에서 평균 FPS를 18.1 → 36.4로 개선했습니다.</li>
         </ul>
       </td>
     </tr>
@@ -941,7 +942,8 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
         <ul style="margin-top:6px; margin-bottom:14px;">
           <li>외부 툴에서 제작된 메시·본·애니메이션 데이터를 메모리에 적재하기 위해 도입했습니다.</li>
         </ul>
-        <b>🗺️ 구조/핵심 구성</b><br/>
+        <b>🗺️ 동작 흐름</b><br/>
+        <img width="687" height="69" alt="image" src="https://github.com/user-attachments/assets/fc8a5b6d-4f4d-4111-8e2c-570828111500" /><br/>
         <ul style="margin-top:6px; margin-bottom:14px;">
           <li>Assimp를 사용해 .fbx 파일을 파싱합니다.</li>
           <li>파싱된 데이터를 엔진 내부에서 사용하는 사용자 정의 구조체로 변환해 저장합니다.</li>
@@ -971,7 +973,7 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
           <li>중복 데이터를 제거하고 자원 사용을 최적화하기 위해 공유 관리 구조를 도입했습니다.</li>
         </ul>
         <b>🗺️ 구조/핵심 구성</b><br/>
-        <div style="margin-top:6px; margin-bottom:6px;">[이미지]</div>
+        <img width="691" height="138" alt="image" src="https://github.com/user-attachments/assets/6d2f0611-7fe3-4707-91f8-dd59ee7d3629" />
         <ul style="margin-top:6px; margin-bottom:14px;">
           <li>로드된 메시·애니메이션 자원을 에셋 관리 클래스에 등록해 중앙에서 관리합니다.</li>
           <li>자원 조회를 위해 unordered_map 컨테이너를 사용했습니다.</li>
@@ -1003,13 +1005,14 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
         <ul style="margin-top:6px; margin-bottom:14px;">
           <li>상용 엔진과 유사한 레이아웃을 구성해, 엔진 사용성과 작업 효율을 높이기 위해 도입했습니다.</li>
         </ul>
-        <b>🗺️ 구조/핵심 구성</b><br/>
-        <div style="margin-top:6px; margin-bottom:6px;">[이미지]</div>
+        <b>🗺️ 구현 화면</b><br/>
+        <img width="692" height="392" alt="image" src="https://github.com/user-attachments/assets/f56a5901-e404-4621-a29e-8802db1cd3dd" /><br/>
         <ul style="margin-top:6px; margin-bottom:14px;">
           <li>ImGui Docking 기능을 사용해 에디터 창을 자유롭게 배치할 수 있도록 구성했습니다.</li>
           <li>SceneView, Inspector 등 각 에디터 패널을 독립적인 Dock 윈도우로 구성했습니다.</li>
         </ul>
         <b>🔍 구현 포인트 </b><br/>
+        <img width="633" height="135" alt="image" src="https://github.com/user-attachments/assets/94189729-01f6-4c1a-8129-16796cc4ef83" /><br/>
         <ul style="margin-top:6px; margin-bottom:0px;">
           <li>에디터 UI는 렌더링 파이프라인의 마지막 단계(PostProcess 이후)에 실행됩니다.</li>
           <li>SceneView에 출력할 화면 텍스처를 사용하기 위해, 최종 렌더 결과 이후에 그리도록 설계했습니다.</li>
@@ -1028,13 +1031,13 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
       <td>
         <b>🎯 도입 배경</b><br/>
         <ul style="margin-top:6px; margin-bottom:14px;">
-          <li>폴링 방식 대신, 선택 이벤트 기반으로 UI를 갱신해 불필요한 연산을 줄이고자 했습니다.</li>
+          <li>런타임 환경에서 월드에 배치된 오브젝트의 상태를 즉시 확인하고 조작할 수 있는 도구가 필요했습니다.</li>
         </ul>
         <b>🗺️ 구조/핵심 구성</b><br/>
-        <div style="margin-top:6px; margin-bottom:6px;">[이미지]</div>
+        <img width="695" height="571" alt="image" src="https://github.com/user-attachments/assets/16bb6559-9804-4e26-9b8c-f03722e371f8" /><br/>
         <ul style="margin-top:6px; margin-bottom:14px;">
-          <li>WorldOutliner, ActorOutliner, InspectorWindow를 독립적인 편집 패널로 구성했습니다.</li>
-          <li>액터 또는 컴포넌트 선택 시, 관련 UI 패널이 이벤트를 통해 동기화됩니다.</li>
+           <li>EditorWindow 클래스를 기반으로 공통적인 에디터 기능(창 크기, 생명 주기, 렌더링 여부)을 일괄 제공하도록 설계했습니다.</li>
+           <li>각 편집 패널은 EditorWindow를 상속받아,엔진에서 노출되는 정보를 시각화하거나 조작하는 기능을 구현했습니다.</li>
         </ul>
         <b>🔍 구현 포인트 </b><br/>
         <ul style="margin-top:6px; margin-bottom:0px;">
@@ -1063,7 +1066,7 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
           <li>코드 구간별 실행 시간을 측정해 병목 지점을 파악하기 위해 도입했습니다.</li>
         </ul>
         <b>🗺️ 구조/핵심 구성</b><br/>
-        <div style="margin-top:6px; margin-bottom:6px;">[이미지]</div>
+        <img width="424" height="201" alt="image" src="https://github.com/user-attachments/assets/bdaf2ad8-0e4a-4444-9aed-06a5ba3d99c5" /><br/>
         <ul style="margin-top:6px; margin-bottom:14px;">
           <li>문자열 기반 마킹으로 측정 구간을 정의합니다.</li>
           <li>수집된 시간 데이터를 파싱해 파일로 저장합니다.</li>
@@ -1090,15 +1093,18 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
           <li>프로그램 종료 후 로그가 아닌, 런타임 중에도 프레임 타임을 실시간으로 확인하고자 도입했습니다.</li>
         </ul>
         <b>🗺️ 구조/핵심 구성</b><br/>
-        <div style="margin-top:6px; margin-bottom:6px;">[코드 사용하는 모습]</div>
+        <img width="268" height="183" alt="image" src="https://github.com/user-attachments/assets/d1ae6b69-5c74-478e-bff6-ab874c55f26c" /><br/>
         <ul style="margin-top:6px; margin-bottom:14px;">
           <li>begin/end 구간을 마킹해 CPU·GPU 프레임 시간을 측정합니다.</li>
+        </ul>
+        <img width="766" height="228" alt="image" src="https://github.com/user-attachments/assets/eaf7c09c-e67e-4e54-b7ee-c80f6c0fadc4" /><br/>
+        <ul style="margin-top:6px; margin-bottom:14px;">
           <li>측정된 구간의 시간 차이를 계산해 런타임 UI로 노출합니다.</li>
         </ul>
         <b>🔍 구현 포인트</b><br/>
         <ul style="margin-top:6px; margin-bottom:0px;">
           <li>GPU 타임 측정을 위해 ID3D11 타임스탬프 쿼리를 사용했습니다.</li>
-          <li>GPU는 비동기적으로 동작하므로, 명령 직후가 아닌 2~3프레임 뒤에 결과를 회수하도록 설계했습니다.</li>
+          <li>GPU는 비동기적으로 동작하므로, 명령 직후가 아닌 2~3프레임 뒤에 결과를 회수하고 있습니다.</li>
         </ul>
       </td>
     </tr>
