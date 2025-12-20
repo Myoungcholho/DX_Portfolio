@@ -424,22 +424,24 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
         <b>🎯 설계 의도</b><br/>
         <ul style="margin-top:6px; margin-bottom:14px;">
           <li>수직 동기화(Present 대기)로 인해 렌더링과 게임 로직이 같은 사이클에 묶이는 문제를 해결하고자 했습니다.</li>
-          <li>렌더링 스톨이 게임 로직 실행을 지연시키지 않도록 스레드 분리를 설계했습니다.</li>
         </ul>
         <b>🗺️ 구조 구성</b><br/>
         <img width="520" alt="flow" src="https://github.com/user-attachments/assets/e685b1d4-5d78-4f23-bb8f-4670ab0ab85e" /><br/>
         <ul style="margin-top:6px; margin-bottom:14px;">
           <li>GameThread는 렌더링에 필요한 데이터를 스냅샷 형태로 생성합니다.</li>
-          <li>생성된 스냅샷은 MailBox에 발행됩니다.</li>
-          <li>RenderThread는 MailBox에서 가장 최신 스냅샷 하나만 가져와 소비합니다.</li>
-          <li>Double Buffer 구조로 스냅샷 생성과 소비를 분리했습니다.</li>
+          <li>생성된 스냅샷은 MailBox에 데이터를 기록합니다. </li>
+          <li>RenderThread는 MailBox에서 가장 최신 스냅샷 하나만 가져와 소비하고 있습니다.</li>
         </ul>
-        <b>🔍 검증 </b><br/>
         <img width="520" alt="evidence" src="https://github.com/user-attachments/assets/b4259807-6562-4f9b-b5a3-a67ad2aedfa5" /><br/>
         <ul style="margin-top:6px; margin-bottom:0px;">
-          <li>기존 구조에서는 렌더링 스톨로 인해 게임 로직 호출 빈도도 함께 낮아졌습니다.</li>
-          <li>스레드 분리 이후에는 렌더링과 무관하게 게임 로직 업데이트가 안정적으로 수행됩니다.</li>
-          <li>게임 로직의 실행 빈도와 시간 안정성이 눈에 띄게 개선되었습니다.</li>
+          <li>스레드 분리 이후에는 렌더링과 무관하게 게임 로직 업데이트를 수행하는 것을 확인했습니다.</li>
+        </ul>
+        <b>🔍 구현 포인트 </b><br/>
+        <ul style="margin-top:6px; margin-bottom:0px;">
+  <li>GameThread는 높은 빈도로 상태를 갱신하고, RenderThread는 Present로 인해 소비 속도가 제한됩니다.</li>
+  <li>큐 기반 전달은 생산 속도 대비 소비 지연으로 오래된 데이터가 누적되는 문제가 있다고 판단했습니다.</li>
+  <li>실시간 렌더링에서는 과거 상태보다 가장 최신 상태의 정확한 표현이 중요하다고 결론 내렸습니다.</li>
+  <li>이에 따라 과거 데이터를 폐기하고 최신 스냅샷만 소비하는 Double Buffer 구조를 설계했습니다.</li>
         </ul>
       </td>
     </tr>
@@ -456,19 +458,17 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
         <b>🎯 도입 배경 </b><br/>
         <ul style="margin-top:6px; margin-bottom:14px;">
           <li>함수 포인터 방식은 사용성이 떨어져, 게임 모듈에서 쓰기 쉬운 이벤트 시스템이 필요했습니다.</li>
-          <li>이에 따라 델리게이트(이벤트) 시스템을 직접 구현했습니다.</li>
         </ul>
         <b>🗺️ 구조/핵심 구성</b><br/>
-        <img width="237" height="38" alt="image" src="https://github.com/user-attachments/assets/5dab9a3f-fac3-448f-983c-7444157a6d3f" />
+        <img width="575" height="57" alt="image" src="https://github.com/user-attachments/assets/5dab9a3f-fac3-448f-983c-7444157a6d3f" />
         <img width="575" height="57" alt="image" src="https://github.com/user-attachments/assets/8bb6369d-a2e4-40e3-9b69-1efb60b05495" /><br/>
         <ul style="margin-top:6px; margin-bottom:14px;">
           <li>엔진에서는 델리게이트를 바인딩한 뒤, Broadcast로 이벤트를 전파해 사용합니다.</li>
         </ul>
-        <b>🧠 구현 포인 </b><br/>
+        <b>🔍 구현 포인트 </b><br/>
         <ul style="margin-top:6px; margin-bottom:0px;">
           <li><code>std::function</code>(람다 캡처) 방식과 <code>Stub + void*</code>(type erasure) 방식을 비교했습니다.</li>
-          <li>현재 프로젝트 단계에서는 구현 속도와 디버깅 편의성이 더 중요하다고 판단했습니다.</li>
-          <li>이에 따라 람다 기반 방식을 우선 적용했습니다.</li>
+          <li>현재 프로젝트 단계에서는 구현 속도와 디버깅 편의성이 더 중요하다고 판단해 람다 기반 방식을 적용했습니다.</li>
         </ul>
       </td>
     </tr>
@@ -490,17 +490,17 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
           <li>스레드 간 안전하게 변경 사항을 전달할 구조가 필요하다고 판단했습니다.</li>
         </ul>
         <b>🗺️ 구조/핵심 구성</b><br/>
-        <img width="949" height="234" alt="image" src="https://github.com/user-attachments/assets/ac4dd3be-f6df-4c09-9d1f-3c0949a9e595" /><br/>
+        <img width="572" height="234" alt="image" src="https://github.com/user-attachments/assets/ac4dd3be-f6df-4c09-9d1f-3c0949a9e595" /><br/>
         <ul style="margin-top:6px; margin-bottom:14px;">
           <li>에디터는 N 프레임에 변경값을 명령(Command) 형태로 큐에 등록합니다.</li>
           <li>GameThread는 N+1 프레임에 큐를 소비해 Actor에 반영합니다.</li>
           <li>Editor ↔ GameThread 간 직접 접근을 차단하고, 단방향 전달 구조로 설계했습니다.</li>
         </ul>
-        <b>🧠 설계 고민 </b><br/>
+        <b>🔍 구현 포인트 </b><br/>
         <ul style="margin-top:6px; margin-bottom:0px;">
           <li>초기에는 에디터 값 변경마다 Lock 기반 동기화를 고려했습니다.</li>
           <li>하지만 변경 빈도가 높아 GameThread 스톨 위험이 크다고 판단했습니다.</li>
-          <li>이에 따라 변경값을 누적한 뒤, 게임 로직 시작 시점에 일괄 적용하는 방식으로 전환했습니다.</li>
+          <li>이에 따라 변경값을 누적한 뒤, 게임 로직 시작 시점에 일괄 적용하는 방식으로 적용했습니다.</li>
         </ul>
       </td>
     </tr>
@@ -530,13 +530,10 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
           <li>Quaternion은 런타임 및 애니메이션 보간의 안정성을 위해 사용합니다.</li>
         </ul>
         <b>🔍 구현 포인트</b><br/>
-        <img width="781" height="159" alt="image" src="https://github.com/user-attachments/assets/2ab08265-ad51-4901-a207-4f3dc42ff6a8" /><br/>
+        <img width="533" height="159" alt="image" src="https://github.com/user-attachments/assets/2ab08265-ad51-4901-a207-4f3dc42ff6a8" /><br/>
         <ul style="margin-top:6px; margin-bottom:14px;">
-          <li>에디터 편집 시에는 Euler → Quaternion 단방향 갱신만 수행해 불필요한 재계산을 피했습니다.</li>
-        </ul>
-        <img width="540" height="119" alt="image" src="https://github.com/user-attachments/assets/ea4fe2ca-1387-49fb-8388-ba18cac79431" /><br/>
-        <ul style="margin-top:6px; margin-bottom:0px;">
-          <li>Quaternion → Euler 변환 시에는 −360 / 0 / +360 조합의 27개 후보 중, 이전 값과 가장 가까운 Euler를 선택해 회전 튐을 방지했습니다.</li>
+          <li>에디터 편집 시에는 Euler → Quaternion 단방향 갱신만 수행해 불필요한 재계산을 피하고 있습니다.</li>
+          <li>불가피하게 Quaternion → Euler 변환 시에는 −360 / 0 / +360 조합의 27개 후보 중, 이전 값과 가장 가까운 Euler를 선택해 회전 튐을 방지했습니다.</li>
         </ul>
       </td>
     </tr>
@@ -580,7 +577,7 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
       <td>
         <b>🎯 도입 배경</b><br/>
         <ul style="margin-top:6px; margin-bottom:14px;">
-          <li>초기에는 모델마다 공통 기능을 반복 구현해야 했습니다.</li>
+          <li>초기에는 모델마다 공통 기능을 반복 구현해야해 개발에 많은 시간이 소요되었습니다.</li>
           <li>이를 해결하기 위해 역할 기반 컴포넌트 계층 구조를 설계했습니다.</li>
         </ul>
         <b>🗺️ 구조/핵심 구성</b><br/>
@@ -591,11 +588,11 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
           <li>PrimitiveComponent는 정점·인덱스·머티리얼 등 렌더링 데이터를 관리합니다.</li>
         </ul>
         <b>🔍 구현 포인트</b><br/>
-        <div style="margin-top:6px; margin-bottom:6px;">Transform은 포인터가 아닌 value 타입으로 관리했습니다.</div>
+        <div style="margin-top:6px; margin-bottom:6px;">Transform은 포인터가 아닌 value 타입으로 관리하고 있습니다.</div>
         <img width="488" height="183" alt="image" src="https://github.com/user-attachments/assets/2d8e7baf-afa6-4e68-8cf5-3d45282e247d" /><br/>
         <ul style="margin-top:6px; margin-bottom:0px;">
           <li>초기에는 포인터 방식을 검토했으나, 성능과 소유권 특성을 고려해 Transform을 value 타입으로 관리하기로 결정했습니다.</li>
-          <li>객체가 Transform을 값으로 소유하면, 액터 접근 시 함께 캐시에 적재되어 메모리 접근 효율이 좋아집니다.</li>
+          <li>가장 큰 이유는 객체가 Transform을 값으로 소유하면, 액터 접근 시 함께 캐시에 적재되어 메모리 접근 효율이 좋아지기 때문입니다.</li>
         </ul>
       </td>
     </tr>
@@ -611,13 +608,14 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
       <td>
         <b>🎯 도입 배경</b><br/>
         <ul style="margin-top:6px; margin-bottom:14px;">
-          <li>여러 컴포넌트를 하나의 생명 주기와 공간 단위로 묶어, 월드에서 일관되게 관리하기 위한 추상 계층이 필요했기 때문입니다.</li>
+          <li>여러 컴포넌트를 하나의 생명 주기와 공간 단위로 묶어, 월드에서 일관되게 관리하기 위한 추상 계층이 필요했습니다.</li>
         </ul>
         <b>🔍 구현 포인트</b><br/>
-        <div style="margin-top:6px; margin-bottom:6px;">액터가 삭제될 때</div>
+        <div style="margin-top:6px; margin-bottom:6px;">액터 삭제 흐름입니다.</div>
         <img width="792" height="65" alt="image" src="https://github.com/user-attachments/assets/efb40374-7cc2-4d94-aa58-5de83ec4a4b5" /><br/>
         <ul style="margin-top:6px; margin-bottom:0px;">
           <li>Tick 도중 액터를 즉시 삭제할 경우 댕글링 포인터로 인한 크래시와 미정의 동작이 발생할 수 있어, 삭제 시점을 특히 신중히 설계했습니다.</li>
+          <li>Actor 내부에 삭제 마킹용 플래그를 두고 삭제 대상으로 표시된 Actor는 프레임 종료 시점에 일괄 정리하도록 설계했습니다.</li>
         </ul>
       </td>
     </tr>
@@ -655,8 +653,8 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
         <b>🔍 구현 포인트</b><br/>
         <ul style="margin-top:6px; margin-bottom:0px;">
           <li>초기에는 Static / Skeletal 두 컴포넌트만으로 충분하다고 판단했습니다.</li>
-          <li>그러나 스키닝은 필요하지만 애니메이션을 사용하지 않는 케이스가 존재함을 확인했습니다.</li>
-          <li>이에 따라 본·스킨 데이터와 같은 스키닝 공통 책임을 Skinned 추상 계층으로 분리했습니다.</li>
+          <li>스키닝은 필요하지만 애니메이션 재생이 요구되지 않는 케이스가 존재하며, Unreal Engine의 PoseableMeshComponent와 유사한 구조로 확장 가능하도록 설계를 고려했습니다. </li>
+          <li>따라 본·스킨 데이터와 같은 스키닝 공통 책임을 Skinned 추상 계층으로 분리했습니다.</li>
           <li>Skeletal은 UAnimInstance 기반 애니메이션 구동 책임만 담당하도록 설계했습니다.</li>
         </ul>
       </td>
@@ -685,8 +683,8 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
         <b>🔍 구현 포인트</b><br/>
         <ul style="margin-top:6px; margin-bottom:0px;">
           <li>초기에는 bUseController를 Controller가 관리했습니다.</li>
-          <li>그러나 Pawn마다 회전 반영 기준(Yaw/Pitch 등)이 달라, Controller 소유 방식은 확장성이 떨어졌습니다.</li>
-          <li>이에 따라 회전 반영 정책(bUseController)을 Pawn이 소유하도록 변경했습니다.</li>
+          <li>그러나 Pawn마다 회전 반영 기준(Yaw/Pitch 등)이 달라, Controller 소유 방식은 확장성이 떨어진다고 판단했습니다.</li>
+          <li>따라서 회전 반영 정책(bUseController)을 Pawn이 소유하도록 변경했습니다.</li>
         </ul>
       </td>
     </tr>
@@ -704,7 +702,6 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
         <ul style="margin-top:6px; margin-bottom:14px;">
           <li>GameMode 역시 Actor이므로, 게임 시작 시점에 스폰할 Actor를 런타임에 선택하고 싶었습니다.</li>
           <li>그러나 템플릿 기반 생성은 타입이 컴파일 타임에 고정되어 런타임 선택에 제약이 있었습니다.</li>
-          <li>이에 따라 리플렉션 없이 런타임 타입 선택이 가능한 스폰 팩토리를 설계했습니다.</li>
         </ul>
         <b>🗺️ 구조/핵심 구성</b><br/>
         <img width="704" height="99" alt="image" src="https://github.com/user-attachments/assets/c96fa3f9-dcf2-4fc3-aa52-2cdd4e057f08" /><br/>
@@ -714,12 +711,12 @@ DX11 기반 자체 엔진 개발을 시작했습니다.
         </ul>
         <img width="699" height="113" alt="image" src="https://github.com/user-attachments/assets/f74f895b-8e62-4fbe-bfb5-57a79ed3ac12" /><br/>
         <ul style="margin-top:6px; margin-bottom:14px;">
-          <li>GameMode는 Pawn과 Controller의 구체 타입을 알 필요 없이, 클래스 이름만으로 데이터 기반 객체 생성을 수행합니다.</li>
+          <li>GameMode는 Pawn과 Controller의 구체 타입을 알 필요 없이, 클래스 이름만으로 데이터 기반 객체 생성을 수행하고 있습니다.</li>
         </ul>
         <b>🔍 구현 포인트 </b><br/>
         <ul style="margin-top:6px; margin-bottom:0px;">
-          <li>Actor를 if/switch로 생성하면 수가 늘수록 분기 비용이 선형으로 증가합니다.</li>
-          <li>이를 ClassID → 생성 함수 매핑 테이블로 대체해, 해시 기반의 상수 시간에 가까운 조회로 개선했습니다.</li>
+          <li>구현한 Actor를 if/switch로 분기 조건을 검사하면서 생성하면 수가 늘수록 분기 비용이 선형으로 증가하는 문제가 있습니다.</li>
+          <li>이에 따라 Key-Value 형태의 컨테이너를 사용해, 조회 및 접근을 평균 O(1) 시간 복잡도로 수행하도록 설계했습니다. </li>
         </ul>
       </td>
     </tr>
